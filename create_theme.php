@@ -45,7 +45,7 @@ $defaultThemeContent = <<<HTML
     <title>Newsletter Theme</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/newsletter.css">
+    <link rel="stylesheet" href="assets/css/style.css">
     <style>
         .hero {
             background: #1a1d29;
@@ -81,7 +81,7 @@ $defaultThemeContent = <<<HTML
         $updatesHtml
     </main>
     <footer class="footer">
-        <p>&copy; 2025 Lumi Host. All Rights Reserved.</p>
+        <p>&copy; 2025 Leaf and Luggage. All Rights Reserved.</p>
     </footer>
 </body>
 </html>
@@ -93,7 +93,7 @@ HTML;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Theme</title>
-    <link rel="stylesheet" href="assets/css/newsletter.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
     <header>
@@ -101,6 +101,7 @@ HTML;
         <nav>
             <ul>
                 <li><a href="index.php">Dashboard</a></li>
+                <li><a href="admin.php">Admin Area</a></li>
                 <li><a href="create_theme.php">Create Theme</a></li>
                 <li><a href="send_newsletter.php">Send Newsletter</a></li>
                 <li><a href="manage_newsletters.php">Manage Newsletters</a></li>

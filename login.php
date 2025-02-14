@@ -15,6 +15,7 @@ if (isLoggedIn()) {
     exit();
 }
 
+$config = require 'includes/config.php';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
