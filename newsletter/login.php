@@ -2,6 +2,10 @@
 session_start();
 require_once 'includes/auth.php';
 require_once 'includes/db.php';
+require 'vendor/autoload.php'; // Include the Composer autoload file
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -14,14 +18,10 @@ if (isLoggedIn()) {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    if (isset($_POST['username']) && isset($_POST['password'])) {
+        $username = $_POST['username'];
+        $password = $_POST['password'];
 
-    // Check if db connection is established
-    if ($db->connect_error) {
-        $error = 'Database connection failed: ' . $db->connect_error;
-    } else {
-        // Prepare and execute the query to fetch user details
         $stmt = $db->prepare("SELECT id, password, role FROM users WHERE username = ?");
         if ($stmt === false) {
             $error = 'Prepare failed: ' . htmlspecialchars($db->error);
@@ -32,26 +32,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_result($id, $hashed_password, $role);
             $stmt->fetch();
 
-            // Check if user exists
-            if ($stmt->num_rows > 0) {
-                // Verify the password
-                if (password_verify($password, $hashed_password)) {
-                    // Set session variables
-                    $_SESSION['user_id'] = $id;
-                    $_SESSION['username'] = $username;
-                    $_SESSION['role'] = $role;
-
-                    // Debugging: Log session variables
-                    error_log('Session variables set: user_id=' . $_SESSION['user_id'] . ', username=' . $_SESSION['username'] . ', role=' . $_SESSION['role']);
-
-                    // Redirect to the dashboard
-                    header('Location: index.php');
-                    exit();
-                } else {
-                    $error = 'Invalid username or password';
-                }
+            if ($stmt->num_rows > 0 && password_verify($password, $hashed_password)) {
+                $_SESSION['user_id'] = $id;
+                $_SESSION['username'] = $username;
+                $_SESSION['role'] = $role;
+                header('Location: index.php');
+                exit();
             } else {
                 $error = 'Invalid username or password';
+            }
+            $stmt->close();
+        }
+    } elseif (isset($_POST['email'])) {
+        $email = $_POST['email'];
+        $stmt = $db->prepare("SELECT id, username FROM users WHERE email = ?");
+        if ($stmt === false) {
+            $error = 'Prepare failed: ' . htmlspecialchars($db->error);
+        } else {
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $stmt->store_result();
+            $stmt->bind_result($id, $username);
+            $stmt->fetch();
+
+            if ($stmt->num_rows > 0) {
+                $token = bin2hex(random_bytes(16));
+                $stmt = $db->prepare("INSERT INTO password_resets (user_id, token) VALUES (?, ?)");
+                if ($stmt === false) {
+                    $error = 'Prepare failed: ' . htmlspecialchars($db->error);
+                } else {
+                    $stmt->bind_param("is", $id, $token);
+                    $stmt->execute();
+                    $stmt->close();
+
+                    $resetLink = "http://yourdomain.com/reset_password.php?token=$token";
+                    $mail = new PHPMailer(true);
+                    try {
+                        $mail->isSMTP();
+                        $mail->Host = $config['smtp_host'];
+                        $mail->SMTPAuth = true;
+                        $mail->Username = $config['smtp_user'];
+                        $mail->Password = $config['smtp_pass'];
+                        $mail->SMTPSecure = $config['smtp_secure'];
+                        $mail->Port = $config['smtp_port'];
+
+                        $mail->setFrom($config['smtp_user'], 'Newsletter');
+                        $mail->addAddress($email);
+                        $mail->Subject = 'Password Reset Request';
+                        $mail->Body = "Click the following link to reset your password: $resetLink";
+                        $mail->send();
+                        $error = 'Password reset link sent to your email';
+                    } catch (Exception $e) {
+                        $error = 'Mailer Error: ' . $mail->ErrorInfo;
+                    }
+                }
+            } else {
+                $error = 'No user found with that email address';
             }
             $stmt->close();
         }
@@ -78,6 +114,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
             <button type="submit">Login</button>
+        </form>
+        <h2>Forgot Password?</h2>
+        <form method="post">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            <button type="submit">Reset Password</button>
         </form>
     </main>
 </body>

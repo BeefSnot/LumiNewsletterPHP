@@ -17,9 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $smtp_port = $_POST['smtp_port'];
     $smtp_secure = $_POST['smtp_secure'];
 
-    // Debugging: Log the database connection details (excluding password)
-    error_log("Connecting to database at $db_host with user $db_user");
-
     $db = new mysqli($db_host, $db_user, $db_pass, $db_name);
 
     if ($db->connect_error) {
@@ -72,7 +69,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             content TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )",
-        "INSERT INTO users (username, email, password, role) VALUES ('$admin_user', '$admin_email', '$admin_pass', 'admin')"
+        "CREATE TABLE IF NOT EXISTS settings (
+            name VARCHAR(50) PRIMARY KEY,
+            value TEXT NOT NULL
+        )",
+        "INSERT INTO users (username, email, password, role) VALUES ('$admin_user', '$admin_email', '$admin_pass', 'admin')",
+        "INSERT INTO settings (name, value) VALUES ('title', 'Newsletter Dashboard'), ('background', '../images/forest.png')"
     ];
 
     foreach ($queries as $query) {

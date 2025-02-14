@@ -1,498 +1,111 @@
 /* General Body Styling */
 html, body {
-  height: 100%;  /* ensures body spans the full viewport height */
+  height: 100%;
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background: none;
+  background: #f4f4f4;
 }
 
 body::before {
   content: '';
-  position: fixed;  /* image stays fixed and covers entire viewport */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background: url('../images/forest.png') no-repeat center center;
-  background-size: cover; /* Adjusts image to fit */
-  opacity: 0.5; /* Controls transparency */
-  z-index: -1; /* Ensures it stays behind everything */
-  pointer-events: none; /* Prevents interaction with the image */
+  background-size: cover;
+  opacity: 0.5;
+  z-index: -1;
+  pointer-events: none;
 }
 
-/* Navbar Styling */
-.navbar {
-  background-color: #f2dedd;
-  border-bottom: 2px solid #5da095;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 20px;
-}
-
-.navbar-logo {
-  display: flex;
-  align-items: center;
-  color: #3b544a;
-}
-
-.navbar-icon {
-  height: 100px;
-  width: auto;
-  margin-right: 10px;
-}
-
-.navbar-text {
-  font-family: 'Abril Fatface', serif;
-  font-size: 2rem;
-  line-height: 1.2;
-}
-
-.menu {
-  list-style: none;
-  display: flex;
-  margin: 0;
-  padding: 0;
-}
-
-.menu li {
-  margin-left: 5px;  /* space between menu items */
-}
-
-.menu a {
-  text-decoration: none;
-  color: #3b544a;
-  padding: 8px 12px;
-  font-size: 1.2rem;
-}
-
-.menu a:hover {
-  background-color: #5da095;
-  border-radius: 4px;
-  border: 2px solid #e1c149;
-}
-
-/* Dropdown Menu Styles */
-.dropdown {
-  position: relative;
-}
-
-.dropbtn {
-  text-decoration: none;
-  color: #3b544a;
-  padding: 8px 12px;
-}
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #f2dedd;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-  z-index: 1;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  transition: all 0.3s ease; /* Smooth transitions */
-}
-
-.dropdown-content.visible {
-  display: block;
-  max-height: 200px; /* Set a limit or animation */
-  opacity: 1;
-}
-
-.dropdown-content a {
-  text-decoration: none;
-  display: block;
-  color: #3b544a;
-  padding: 10px;
-  border-bottom: 1px solid #f4f4e3;
-}
-
-.dropdown-content a:hover {
-  background-color: #5da095;
-  border: 2px solid #e1c149;
-}
-
-.dropdown:hover .dropdown-content {
-  display: block;
-}
-
-/* General reset for the banner */
-.welcome-banner {
+/* Container */
+.container {
   width: 100%;
-  text-align: center;
-  margin: 0;
-  padding: 0;
-}
-
-/* Style the banner image */
-.welcome-banner img {
-  display: block;  /* removes extra space caused by inline images */
-  width: 100%; /* Makes it responsive */
-  max-height: 350px; /* Set a maximum height for consistency */
-  object-fit: cover; /* Ensures the image scales and doesn't distort */
-  border-bottom: 3px solid #5da095;
-}
-
-/* Main Content Wrapper */
-.content-wrapper {
-  align-items: flex-start; /* ensures all sections align at the top */
-  display: flex; /* Use flexbox for horizontal layout */
-  justify-content: space-between;
-  gap: 20px; /* Space between left & right sections */
-  padding: 10px 20px;
-}
-
-/* Ensure left and right sections are properly styled without breaking other rules */
-.left-section,
-.right-section {
-  flex: 1; /* ensures both sections take up equal width */
-  display: flex;  /* Add display: flex for the column layout */
-  flex-direction: column;  /* Stack the sections vertically */
-  box-sizing: border-box;  /* Include padding and borders in the width */
-  padding: 0;  /* Remove internal padding to avoid compounding */
-  margin: 0; /* reset any margins */
-  min-width: 0;  /* Prevent content overflow from distorting layout */
-  gap: 20px;  /* space between sections */
-}
-
-.left-section section,
-.right-section section {
-  margin: 0;
-  padding: 20px;  /* add padding to each section */
-}
-
-/* Editorial Section Adjustments */
-.editorial-section {
-  background-color: #e8d3c7;
-  border: 1px solid #5da095;
-  border-radius: 8px;
-  padding: 20px
-}
-
-.editorial-section h2 {
-  text-align: center; /* Center-align the heading */
-}
-
-/* Editorial Image */
-.editorial-image-container img {
-  max-width: 100%; /* Restricts width to container's width */
-  height: auto; /* maintain aspect ratio */
-  border-radius: 8px; /* Optional rounded corners */
-}
-
-/* Left Second Section */
-.second-section {
-  background-color: #e8d3c7;
-  border: 1px solid #5da095;
-  border-radius: 8px;
-  padding: 20px
-}
-
-/* Compare Section Adjustments */
-.right-section {
-  background-color: #e8d3c7;
-  padding: 10px; /* rediced padding to balance with left */
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #5da095;  /* single border */
-  border-radius: 8px;  /* rounded corners */
-  box-shadow: none;  /* no shadow */
-  margin: 0;  /* avoid margin conflicts */
-  box-sizing: border-box;  /* consistent sizing */
-}
-
-/* Content Styling */
-.why-eco-friendly {
-  background-color: #e8d3c7;
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: #ffffff;
   padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+.header {
   text-align: center;
+  padding: 20px 0;
 }
 
-.why-eco-friendly h2 {
-  font-size: 2rem;
-  color: #3b544a; /* Dark green */
-  font-family: 'Abril Fatface', serif; /* Use the same font as the navbar text */
+.header img {
+  width: 100%;
+  height: auto;
 }
 
-.eco-impact-container {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  margin: 30px auto;
+/* Content */
+.content {
+  text-align: center;
+  color: #333333;
 }
 
-.eco-impact-container div {
-  background:  #e9e2d5;
+.content h1 {
+  color: #1ed2af;
+  font-size: 24px;
+}
+
+.content p {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.content a {
+  color: #1ed2af;
+  text-decoration: none;
+}
+
+.content a:hover {
+  text-decoration: underline;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
   padding: 20px;
-  border: 1px solid #5da095;
-  border-radius: 8px;
-  width: 48%;
-  text-align: left;
+  font-size: 14px;
+  color: #777777;
 }
 
-.impact-statement p {
-  font-family: 'Abril Fatface', serif;
-  font-size: 1.5rem;
-  color: #3b544a; /* Dark green */
-}
-
-/* Editorial Section Heading Styling */
-.editorial-section h2,
-.why-eco-friendly h2 {
-  font-family: 'Abril Fatface', serif;
-  color: #3b544a; /* Match the deep green theme */
-  font-size: 2.4rem; /* Keep consistent with other headings */
-  margin-bottom: 15px;
-}
-
-/* General Content Font Size */
-.editorial-section p,
-.why-eco-friendly p {
-  font-size: 1.2rem; /* Increase the font size slightly */
-  line-height: 1.8; /* Improve readability with proper line spacing */
-  color: #333; /* Adjust text color for better contrast if necessary */
-}
-
-/* B2T BUTTON */
 /* Back to Top Button */
 #back-to-top {
   position: fixed;
   bottom: 20px;
   right: 20px;
   padding: 10px 15px;
-  background-color: #556b2f; /* Match your theme */
+  background-color: #556b2f;
   color: white;
   border: none;
   border-radius: 5px;
   font-size: 1rem;
   cursor: pointer;
-  display: none; 
+  display: none;
 }
 
 #back-to-top:hover {
-  background-color: #3b544a; /* Darker shade for hover */
+  background-color: #3b544a;
   color: #b4dd1e !important;
 }
-/* END B2T BUTTON */
-
-/* FOOTER */
-/* Footer Base Styles */
-.site-footer {
-  background-image: url('/assets/images/TheBanner_Template.png');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-color: #c55f39; 
-  color: #e9e2d5; 
-  padding: 30px 20px;
-  font-family: Arial, sans-serif;
-  border-top: 3px solid #5da095;
-}
-
-/* Logo and Tagline */
-.logo-tagline {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.footer-logo {
-  height: 60px;
-  width: auto;
-}
-
-.tagline {
-  font-size: 1.2rem;
-  color: #e9e2d5; 
-  margin-top: 10px;
-}
-
-/* Navigation Links */
-.footer-links ul {
-  list-style: none;
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  padding: 0;
-}
-
-.footer-links a {
-  text-decoration: none;
-  color: #e9e2d5; 
-  font-size: 1rem;
-}
-
-.footer-links a:hover {
-  color: #e1c149; /* Hover color */
-}
-
-/* Newsletter Signup */
-.newsletter {
-  text-align: center;
-  margin: 20px 0;
-}
-
-.newsletter p {
-  font-size: 1rem;
-  margin-bottom: 10px;
-}
-
-.newsletter input {
-  padding: 10px;
-  border: 1px solid #5da095;
-  border-radius: 5px;
-  width: 60%;
-  max-width: 300px;
-  background-color: #e9e2d5; /* Light neutral */
-  color: #3b544a; /* Text color */
-}
-
-.newsletter button {
-  padding: 10px 15px;
-  background-color: #5da095; /* Button green */
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.newsletter button:hover {
-  background-color: #375045; /* Darker green hover */
-}
-
-/* Social Media Icons */
-.social-media {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.social-icon {
-  text-decoration: none;
-  font-size: 1.2rem;
-  color: #e9e2d5;
-}
-
-.social-icon:hover {
-  color: #e1c149; /* Hover effect */
-}
-
-/* Copyright Section */
-.copyright {
-  text-align: center;
-  margin-top: 30px;
-  font-size: 0.9rem;
-  color: #e9e2d5; 
-}
-/* END FOOTER */
-
-/* LEED */
-/* link */
-.leed-link {
-  color: #5da095;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.leed-link:hover {
-  color: #3b544a;
-  text-decoration: underline;
-}
-
-/* button */
-.leed-button {
-  display: inline-block;
-  padding: 10px 20px;
-  background-color: #5da095;
-  color: #fff;
-  text-decoration: none;
-  font-size: 1.2rem;
-  border-radius: 5px;
-  margin-top: 20px;
-}
-
-.leed-button:hover {
-  background-color: #3b544a;
-  color: #e9e2d5;
-}
-/* END LEED */
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
-  .navbar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .navbar-logo {
-    margin-bottom: 10px;
-  }
-
-  .menu {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .menu li {
-    margin-left: 0;
-    margin-bottom: 10px;
-  }
-
-  .welcome-banner img {
-    max-height: 200px;
-  }
-
-  .content-wrapper {
-    flex-direction: column;
+  .container {
     padding: 10px;
   }
 
-  .left-section,
-  .right-section {
-    width: 100%;
-    margin: 0;
-    padding: 10px 0;
-  }
-}
-
-/* Tablet Responsiveness */
-@media (max-width: 1024px) {
-  .navbar {
-    flex-direction: column;
-    align-items: flex-start;
+  .content h1 {
+    font-size: 20px;
   }
 
-  .navbar-logo {
-    margin-bottom: 10px;
-  }
-
-  .menu {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .menu li {
-    margin-left: 0;
-    margin-bottom: 10px;
-  }
-
-  .welcome-banner img {
-    max-height: 250px;
-  }
-
-  .content-wrapper {
-    flex-direction: column;
-    padding: 10px;
-  }
-
-  .left-section,
-  .right-section {
-    width: 100%;
-    margin: 0;
-    padding: 10px 0;
+  .content p {
+    font-size: 14px;
   }
 }

@@ -15,6 +15,8 @@ if (!isLoggedIn()) {
     exit();
 }
 
+$config = require 'includes/config.php';
+
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -95,14 +97,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->Host = 'mail.lumihost.net';
+            $mail->Host = $config['smtp_host'];
             $mail->SMTPAuth = true;
-            $mail->Username = 'newsletter@lumihost.net';
-            $mail->Password = 'rcfY6UFxEa2KhXcxb2LW';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 587;
+            $mail->Username = $config['smtp_user'];
+            $mail->Password = $config['smtp_pass'];
+            $mail->SMTPSecure = $config['smtp_secure'];
+            $mail->Port = $config['smtp_port'];
 
-            $mail->setFrom('newsletter@lumihost.net', 'Lumi Host Newsletter');
+            $mail->setFrom($config['smtp_user'], 'Newsletter');
             $mail->Subject = $subject;
             $mail->Body = $body;
             $mail->isHTML(true);
