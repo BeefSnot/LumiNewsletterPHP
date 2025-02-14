@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumi Host Newsletter</title>
+</head>
+<body>
+    <p>&nbsp;</p>
+    <div class="container" style="width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+        <div class="header" style="text-align: center;">
+            <img style="width: 100%; height: auto;" src="https://lumihost.net/assets/img/logonew.svg" alt="Lumi Host Banner" />
+        </div>
+        <div class="content" style="text-align: center; color: #333333;">
+            <h1 style="color: #1ed2af; font-size: 24px;">Illuminate Your Digital World!</h1>
+            <div id="updates">
+                <!-- Latest updates will be loaded here -->
+            </div>
+            <p style="font-size: 16px; line-height: 1.5;">If you have any questions or concerns, please contact us at <a href="mailto:info@lumihost.net" style="color: #1ed2af; text-decoration: none;">info@lumihost.net</a></p>
+            <p style="font-size: 16px; line-height: 1.5;">Thank You!<br>Lumi Host Team</p>
+            <p style="font-size: 16px; line-height: 1.5;">To unsubscribe from our newsletter, please visit the <a href="https://lumihost.net/newsletter/subscribe.php" style="color: #1ed2af; text-decoration: none;">Lumi Host Subscription Manager</a></p>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('fetch_latest_updates.php')
+                .then(response => response.json())
+                .then(data => {
+                    const updatesContainer = document.getElementById('updates');
+                    data.forEach(update => {
+                        const updateElement = document.createElement('div');
+                        updateElement.innerHTML = `
+                            <h2 style="color: #1ed2af; font-size: 20px;">${update.title}</h2>
+                            <p style="font-size: 16px; line-height: 1.5;">${update.content}</p>
+                            <p style="font-size: 14px; color: #777777;"><small>${new Date(update.created_at).toLocaleDateString()}</small></p>
+                        `;
+                        updatesContainer.appendChild(updateElement);
+                    });
+                })
+                .catch(error => console.error('Error fetching updates:', error));
+        });
+    </script>
+</body>
+</html>
