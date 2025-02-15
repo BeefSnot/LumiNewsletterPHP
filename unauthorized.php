@@ -14,5 +14,6 @@
         <p>You do not have permission to access this page.</p>
         <a href="index.php">Go back to Dashboard</a>
     </main>
+    <?php include 'includes/footer.php'; ?>
 </body>
 </html>

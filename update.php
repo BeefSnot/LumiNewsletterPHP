@@ -76,5 +76,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit">Check for Updates</button>
         </form>
     </main>
+    <?php include 'includes/footer.php'; ?>
 </body>
 </html>

@@ -85,5 +85,6 @@ while ($row = $themesResult->fetch_assoc()) {
             }
         }
     </script>
+    <?php include 'includes/footer.php'; ?>
 </body>
 </html>

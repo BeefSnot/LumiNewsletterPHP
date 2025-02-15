@@ -126,5 +126,6 @@ while ($row = $groupsResult->fetch_assoc()) {
             </ul>
         </div>
     </main>
+    <?php include 'includes/footer.php'; ?>
 </body>
 </html>

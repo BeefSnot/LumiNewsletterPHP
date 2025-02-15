@@ -47,5 +47,6 @@ while ($row = $settingsResult->fetch_assoc()) {
         <h2>Welcome to the Newsletter Dashboard</h2>
         <p>Use the navigation to manage your newsletters and themes.</p>
     </main>
+    <?php include 'includes/footer.php'; ?>
 </body>
 </html>

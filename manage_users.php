@@ -90,5 +90,6 @@ if ($result === false) {
             </tbody>
         </table>
     </main>
+    <?php include 'includes/footer.php'; ?>
 </body>
 </html>

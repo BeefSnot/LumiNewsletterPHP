@@ -75,5 +75,6 @@ while ($row = $settingsResult->fetch_assoc()) {
             <button type="submit">Update Settings</button>
         </form>
     </main>
+    <?php include 'includes/footer.php'; ?>
 </body>
 </html>

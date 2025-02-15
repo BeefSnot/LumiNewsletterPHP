@@ -122,5 +122,6 @@ HTML;
             <button type="submit">Create Theme</button>
         </form>
     </main>
+    <?php include 'includes/footer.php'; ?>
 </body>
 </html>

@@ -122,5 +122,6 @@ while ($row = $groupsResult->fetch_assoc()) {
             <button type="submit" class="btn btn-primary mt-4">Submit</button>
         </form>
     </main>
+    <?php include 'includes/footer.php'; ?>
 </body>
 </html>
