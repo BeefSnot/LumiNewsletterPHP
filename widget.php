@@ -231,7 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
             </form>
         </div>
         <div class="lumi-footer">
-            Powered by <a href="https://yoursite.com/newsletter" target="_blank">LumiNewsletter</a>
+            Powered by <a href="https://lumihost.net" target="_blank">LumiNewsletter</a>
         </div>
     </div>
 </body>
