@@ -8,7 +8,7 @@ if (!isLoggedIn() || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-define('UPDATE_JSON_URL', 'https://lumihost.net/updates/latest_update.json'); // Or your own update URL
+define('UPDATE_JSON_URL', 'https://lumihost.net/updates/latest_update.json');
 
 $currentVersion = require 'version.php';
 $message = '';
@@ -18,14 +18,23 @@ $latestVersion = '';
 $changelog = '';
 $updateUrl = '';
 
-$latestUpdateInfo = @file_get_contents(UPDATE_JSON_URL);
-if ($latestUpdateInfo !== false) {
+// Add cache busting parameter and enable error output
+$latestUpdateInfo = @file_get_contents(UPDATE_JSON_URL . '?nocache=' . time());
+if ($latestUpdateInfo === false) {
+    $message = 'Failed to fetch update information. Error: ' . error_get_last()['message'];
+    $messageType = 'error';
+} else {
     $latestUpdateInfo = json_decode($latestUpdateInfo, true);
-    $latestVersion = $latestUpdateInfo['version'] ?? '';
-    $changelog = $latestUpdateInfo['changelog'] ?? '';
-    $updateUrl = $latestUpdateInfo['update_url'] ?? '';
-    if ($latestVersion && version_compare($latestVersion, $currentVersion, '>')) {
-        $updateAvailable = true;
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        $message = 'Failed to parse update JSON. Error: ' . json_last_error_msg();
+        $messageType = 'error';
+    } else {
+        $latestVersion = $latestUpdateInfo['version'] ?? '';
+        $changelog = $latestUpdateInfo['changelog'] ?? '';
+        $updateUrl = $latestUpdateInfo['update_url'] ?? '';
+        if ($latestVersion && version_compare($latestVersion, $currentVersion, '>')) {
+            $updateAvailable = true;
+        }
     }
 }
 
@@ -95,7 +104,6 @@ function recursiveCopy($source, $dest) {
         'config.php',
         'includes/config.php',
         '.htaccess',
-        'version.php',
         'db.php',
         'includes/db.php'
     ];
