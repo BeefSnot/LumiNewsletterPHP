@@ -92,36 +92,63 @@ HTML;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Theme</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <title>Page Title | LumiNewsletter</title>
+    <link rel="stylesheet" href="assets/css/newsletter-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <h1>Create Theme</h1>
-        <nav>
-            <ul>
-                <li><a href="index.php">Dashboard</a></li>
-                <li><a href="admin.php">Admin Area</a></li>
-                <li><a href="create_theme.php">Create Theme</a></li>
-                <li><a href="send_newsletter.php">Send Newsletter</a></li>
-                <li><a href="manage_newsletters.php">Manage Newsletters</a></li>
-                <li><a href="logout.php">Logout</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <h2>Create a New Theme</h2>
-        <?php if (isset($message)): ?>
-            <p><?php echo $message; ?></p>
-        <?php endif; ?>
-        <form method="post">
-            <label for="theme_name">Theme Name:</label>
-            <input type="text" id="theme_name" name="theme_name" required>
-            <label for="theme_content">Theme Content (HTML):</label>
-            <textarea id="theme_content" name="theme_content" required><?php echo htmlspecialchars($defaultThemeContent); ?></textarea>
-            <button type="submit">Create Theme</button>
-        </form>
-    </main>
-    <?php include 'includes/footer.php'; ?>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-paper-plane"></i>
+                    <h2>LumiNews</h2>
+                </div>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.php" class="nav-item"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="admin.php" class="nav-item"><i class="fas fa-user-shield"></i> Admin Area</a></li>
+                    <li><a href="create_theme.php" class="nav-item"><i class="fas fa-paint-brush"></i> Create Theme</a></li>
+                    <li><a href="send_newsletter.php" class="nav-item"><i class="fas fa-paper-plane"></i> Send Newsletter</a></li>
+                    <li><a href="manage_newsletters.php" class="nav-item"><i class="fas fa-tasks"></i> Manage Newsletters</a></li>
+                    <li><a href="logout.php" class="nav-item"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>Version <?php echo htmlspecialchars($currentVersion); ?></p>
+            </div>
+        </aside>
+
+        <main class="content">
+            <header class="top-header">
+                <div class="header-left">
+                    <h1>Page Title</h1>
+                </div>
+            </header>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2>Section Title</h2>
+                </div>
+                <div class="card-body">
+                    <h2>Create a New Theme</h2>
+                    <?php if (isset($message)): ?>
+                        <p><?php echo $message; ?></p>
+                    <?php endif; ?>
+                    <form method="post">
+                        <label for="theme_name">Theme Name:</label>
+                        <input type="text" id="theme_name" name="theme_name" required>
+                        <label for="theme_content">Theme Content (HTML):</label>
+                        <textarea id="theme_content" name="theme_content" required><?php echo htmlspecialchars($defaultThemeContent); ?></textarea>
+                        <button type="submit">Create Theme</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+    <footer class="app-footer">
+        <p>&copy; <?php echo date('Y'); ?> LumiNewsletter - Professional Newsletter Management</p>
+    </footer>
 </body>
 </html>

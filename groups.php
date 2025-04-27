@@ -55,64 +55,81 @@ while ($row = $groupsResult->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Groups</title>
+    <title>Page Title | LumiNewsletter</title>
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="dark-theme">
-    <header class="hero page">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a class="navbar-brand" href="#">
-                    <img class="img-fluid" src="../assets/img/logonew.png" alt="Lumi Host">
-                </a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ml-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="../index.php">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../admin.html">Admin Page</a>
-                        </li>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-paper-plane"></i>
+                    <h2>LumiNews</h2>
                 </div>
             </div>
-        </nav>
-    </header>
-    <main class="container mt-5">
-        <div class="section-title text-center">
-            <h6 class="text-uppercase text-muted">Manage Groups</h6>
-            <h4 class="font-weight-bold">Create or Delete Groups<span class="main">.</span></h4>
-        </div>
-        <div class="status-details text-center dark-background p-4 rounded">
-            <?php if (isset($message)): ?>
-                <p><?php echo $message; ?></p>
-            <?php endif; ?>
-            <form method="post">
-                <label for="group_name">Group Name:</label>
-                <input type="text" id="group_name" name="group_name" required>
-                <button type="submit" class="btn btn-primary mt-4">Create Group</button>
-            </form>
-        </div>
-        <div class="section-title text-center mt-5">
-            <h6 class="text-uppercase text-muted">Existing Groups</h6>
-            <h4 class="font-weight-bold">Delete Groups<span class="main">.</span></h4>
-        </div>
-        <div class="status-details text-center dark-background p-4 rounded">
-            <ul>
-                <?php foreach ($groups as $group): ?>
-                    <li>
-                        <?php echo $group['name']; ?>
-                        <form method="post" style="display:inline;">
-                            <input type="hidden" name="delete_group_id" value="<?php echo $group['id']; ?>">
-                            <button type="submit" class="btn btn-danger">Delete</button>
+            <nav class="main-nav">
+                <ul>
+                    <!-- Navigation items with icons -->
+                    <li><a href="index.php" class="nav-item"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <!-- More nav items... -->
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>Version <?php echo htmlspecialchars($currentVersion); ?></p>
+            </div>
+        </aside>
+
+        <main class="content">
+            <header class="top-header">
+                <div class="header-left">
+                    <h1>Page Title</h1>
+                </div>
+            </header>
+            
+            <!-- Main content in cards -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Section Title</h2>
+                </div>
+                <div class="card-body">
+                    <div class="section-title text-center">
+                        <h6 class="text-uppercase text-muted">Manage Groups</h6>
+                        <h4 class="font-weight-bold">Create or Delete Groups<span class="main">.</span></h4>
+                    </div>
+                    <div class="status-details text-center dark-background p-4 rounded">
+                        <?php if (isset($message)): ?>
+                            <p><?php echo $message; ?></p>
+                        <?php endif; ?>
+                        <form method="post">
+                            <label for="group_name">Group Name:</label>
+                            <input type="text" id="group_name" name="group_name" required>
+                            <button type="submit" class="btn btn-primary mt-4">Create Group</button>
                         </form>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-    </main>
-    <?php include 'includes/footer.php'; ?>
+                    </div>
+                    <div class="section-title text-center mt-5">
+                        <h6 class="text-uppercase text-muted">Existing Groups</h6>
+                        <h4 class="font-weight-bold">Delete Groups<span class="main">.</span></h4>
+                    </div>
+                    <div class="status-details text-center dark-background p-4 rounded">
+                        <ul>
+                            <?php foreach ($groups as $group): ?>
+                                <li>
+                                    <?php echo $group['name']; ?>
+                                    <form method="post" style="display:inline;">
+                                        <input type="hidden" name="delete_group_id" value="<?php echo $group['id']; ?>">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <footer class="app-footer">
+        <p>&copy; <?php echo date('Y'); ?> LumiNewsletter - Professional Newsletter Management</p>
+    </footer>
 </body>
 </html>

@@ -83,106 +83,114 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMTP Settings</title>
+    <title>SMTP Settings | LumiNewsletter</title>
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
-    <style>
-        .message {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-        }
-        .success {
-            background-color: #dff0d8;
-            color: #3c763d;
-        }
-        .error {
-            background-color: #f2dede;
-            color: #a94442;
-        }
-        .settings-form {
-            background-color: #f9f9f9;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .test-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <h1>SMTP Settings</h1>
-        <nav>
-            <ul>
-                <li><a href="index.php">Dashboard</a></li>
-                <li><a href="admin.php">Admin Area</a></li>
-                <li><a href="create_theme.php">Create Theme</a></li>
-                <li><a href="send_newsletter.php">Send Newsletter</a></li>
-                <li><a href="manage_newsletters.php">Manage Newsletters</a></li>
-                <li><a href="manage_subscriptions.php">Manage Subscriptions</a></li>
-                <li><a href="manage_users.php">Manage Users</a></li>
-                <li><a href="manage_smtp.php">SMTP Settings</a></li>
-                <li><a href="logout.php">Logout</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <h2>Manage SMTP Settings</h2>
-        
-        <?php if ($message): ?>
-            <div class="message <?php echo $status; ?>"><?php echo htmlspecialchars($message); ?></div>
-        <?php endif; ?>
-        
-        <div class="settings-form">
-            <form method="post">
-                <div class="form-group">
-                    <label for="smtp_host">SMTP Host:</label>
-                    <input type="text" id="smtp_host" name="smtp_host" value="<?php echo htmlspecialchars($config['smtp_host'] ?? ''); ?>" required>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-paper-plane"></i>
+                    <h2>LumiNews</h2>
                 </div>
-                
-                <div class="form-group">
-                    <label for="smtp_user">SMTP Username:</label>
-                    <input type="text" id="smtp_user" name="smtp_user" value="<?php echo htmlspecialchars($config['smtp_user'] ?? ''); ?>" required>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.php" class="nav-item"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="admin.php" class="nav-item"><i class="fas fa-cog"></i> Admin Settings</a></li>
+                    <li><a href="create_theme.php" class="nav-item"><i class="fas fa-palette"></i> Create Theme</a></li>
+                    <li><a href="send_newsletter.php" class="nav-item"><i class="fas fa-paper-plane"></i> Send Newsletter</a></li>
+                    <li><a href="manage_newsletters.php" class="nav-item"><i class="fas fa-envelope"></i> Manage Newsletters</a></li>
+                    <li><a href="manage_subscriptions.php" class="nav-item"><i class="fas fa-users"></i> Subscribers</a></li>
+                    <li><a href="manage_users.php" class="nav-item"><i class="fas fa-user-shield"></i> Users</a></li>
+                    <li><a href="manage_smtp.php" class="nav-item active"><i class="fas fa-server"></i> SMTP Settings</a></li>
+                    <li><a href="logout.php" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>Version <?php echo htmlspecialchars($currentVersion ?? '1.0.0'); ?></p>
+            </div>
+        </aside>
+
+        <main class="content">
+            <header class="top-header">
+                <div class="header-left">
+                    <h1>SMTP Settings</h1>
                 </div>
-                
-                <div class="form-group">
-                    <label for="smtp_pass">SMTP Password (leave blank to keep current):</label>
-                    <input type="password" id="smtp_pass" name="smtp_pass" placeholder="Leave blank to keep current">
+            </header>
+
+            <?php if ($message): ?>
+                <div class="notification <?php echo $status; ?>">
+                    <i class="fas fa-<?php echo $status == 'error' ? 'exclamation-circle' : 'check-circle'; ?>"></i> 
+                    <?php echo htmlspecialchars($message); ?>
                 </div>
-                
-                <div class="form-group">
-                    <label for="smtp_port">SMTP Port:</label>
-                    <input type="number" id="smtp_port" name="smtp_port" value="<?php echo htmlspecialchars($config['smtp_port'] ?? 587); ?>" required>
+            <?php endif; ?>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-cog"></i> Email Server Configuration</h2>
                 </div>
-                
-                <div class="form-group">
-                    <label for="smtp_secure">SMTP Security:</label>
-                    <select id="smtp_secure" name="smtp_secure" required>
-                        <option value="tls" <?php echo ($config['smtp_secure'] ?? '') === 'tls' ? 'selected' : ''; ?>>TLS</option>
-                        <option value="ssl" <?php echo ($config['smtp_secure'] ?? '') === 'ssl' ? 'selected' : ''; ?>>SSL</option>
-                        <option value="" <?php echo ($config['smtp_secure'] ?? '') === '' ? 'selected' : ''; ?>>None</option>
-                    </select>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="form-group">
+                            <label for="smtp_host">SMTP Host:</label>
+                            <input type="text" id="smtp_host" name="smtp_host" value="<?php echo htmlspecialchars($config['smtp_host'] ?? ''); ?>" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="smtp_user">SMTP Username:</label>
+                            <input type="text" id="smtp_user" name="smtp_user" value="<?php echo htmlspecialchars($config['smtp_user'] ?? ''); ?>" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="smtp_pass">SMTP Password (leave blank to keep current):</label>
+                            <input type="password" id="smtp_pass" name="smtp_pass" placeholder="Leave blank to keep current">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="smtp_port">SMTP Port:</label>
+                            <input type="number" id="smtp_port" name="smtp_port" value="<?php echo htmlspecialchars($config['smtp_port'] ?? 587); ?>" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="smtp_secure">SMTP Security:</label>
+                            <select id="smtp_secure" name="smtp_secure" required>
+                                <option value="tls" <?php echo ($config['smtp_secure'] ?? '') === 'tls' ? 'selected' : ''; ?>>TLS</option>
+                                <option value="ssl" <?php echo ($config['smtp_secure'] ?? '') === 'ssl' ? 'selected' : ''; ?>>SSL</option>
+                                <option value="" <?php echo ($config['smtp_secure'] ?? '') === '' ? 'selected' : ''; ?>>None</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" name="save_settings" class="btn btn-primary">Save SMTP Settings</button>
+                        </div>
+                    </form>
                 </div>
-                
-                <button type="submit" name="save_settings">Save SMTP Settings</button>
-                
-                <div class="test-section">
-                    <h3>Test SMTP Connection</h3>
-                    <div class="form-group">
-                        <label for="test_email">Test Email Address:</label>
-                        <input type="email" id="test_email" name="test_email" required>
-                    </div>
-                    <button type="submit" name="test_connection">Send Test Email</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-paper-plane"></i> Test Email Configuration</h2>
                 </div>
-            </form>
-        </div>
-    </main>
-    <?php include 'includes/footer.php'; ?>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="form-group">
+                            <label for="test_email">Test Email Address:</label>
+                            <input type="email" id="test_email" name="test_email" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" name="test_connection" class="btn btn-primary">Send Test Email</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <footer class="app-footer">
+        <p>&copy; <?php echo date('Y'); ?> LumiNewsletter - Professional Newsletter Management</p>
+    </footer>
 </body>
 </html>

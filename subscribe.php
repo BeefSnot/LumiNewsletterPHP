@@ -92,38 +92,105 @@ while ($row = $groupsResult->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subscribe/Unsubscribe</title>
+    <title>Subscribe | LumiNewsletter</title>
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: var(--gray-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .subscribe-container {
+            max-width: 600px;
+            width: 100%;
+            padding: 2rem;
+        }
+        .card {
+            margin-bottom: 0;
+        }
+        .card-header {
+            text-align: center;
+            padding: 2rem 1.5rem;
+        }
+        .card-header h1 {
+            font-size: 2rem;
+            margin: 0;
+        }
+        .logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-right: 0.5rem;
+        }
+        .message {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: var(--radius);
+            background-color: rgba(52, 168, 83, 0.1);
+            color: var(--accent);
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <main>
-        <h2>Subscribe/Unsubscribe</h2>
-        <?php if (isset($message)): ?>
-            <p><?php echo $message; ?></p>
-        <?php endif; ?>
-        <form method="post">
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+    <div class="subscribe-container">
+        <div class="card">
+            <div class="card-header">
+                <div class="logo">
+                    <i class="fas fa-paper-plane"></i>
+                    <h1>LumiNewsletter</h1>
+                </div>
+                <h2>Subscribe/Unsubscribe</h2>
             </div>
-            <div class="form-group">
-                <label for="groups">Groups:</label>
-                <select class="form-control" id="groups" name="groups[]" multiple required>
-                    <?php foreach ($groups as $group): ?>
-                        <option value="<?php echo $group['id']; ?>"><?php echo $group['name']; ?></option>
-                    <?php endforeach; ?>
-                </select>
+            <div class="card-body">
+                <?php if (isset($message)): ?>
+                    <div class="message"><?php echo $message; ?></div>
+                <?php endif; ?>
+                
+                <form method="post">
+                    <div class="form-group">
+                        <label for="email"><i class="fas fa-envelope"></i> Email:</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="groups"><i class="fas fa-users"></i> Groups:</label>
+                        <select class="form-control" id="groups" name="groups[]" multiple required>
+                            <?php foreach ($groups as $group): ?>
+                                <option value="<?php echo $group['id']; ?>"><?php echo $group['name']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <small>Hold Ctrl (or Cmd on Mac) to select multiple groups</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="action"><i class="fas fa-tasks"></i> Action:</label>
+                        <select class="form-control" id="action" name="action" required>
+                            <option value="subscribe">Subscribe</option>
+                            <option value="unsubscribe">Unsubscribe</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Submit
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="action">Action:</label>
-                <select class="form-control" id="action" name="action" required>
-                    <option value="subscribe">Subscribe</option>
-                    <option value="unsubscribe">Unsubscribe</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary mt-4">Submit</button>
-        </form>
-    </main>
-    <?php include 'includes/footer.php'; ?>
+        </div>
+    </div>
+    
+    <footer class="app-footer">
+        <p>&copy; <?php echo date('Y'); ?> LumiNewsletter</p>
+    </footer>
 </body>
 </html>

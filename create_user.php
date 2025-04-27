@@ -52,43 +52,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create User</title>
+    <title>Create User | LumiNewsletter</title>
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <h1>Create User</h1>
-        <nav>
-            <ul>
-                <li><a href="index.php">Dashboard</a></li>
-                <li><a href="create_user.php">Create User</a></li>
-                <li><a href="manage_users.php">Manage Users</a></li>
-                <li><a href="send_newsletter.php">Send Newsletter</a></li>
-                <li><a href="manage_newsletters.php">Manage Newsletters</a></li>
-                <li><a href="logout.php">Logout</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <h2>Create a New User</h2>
-        <?php if (isset($message)): ?>
-            <p><?php echo $message; ?></p>
-        <?php endif; ?>
-        <form method="post">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-            <label for="role">Role:</label>
-            <select id="role" name="role">
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-            </select>
-            <button type="submit">Create User</button>
-        </form>
-    </main>
-    <?php include 'includes/footer.php'; ?>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-paper-plane"></i>
+                    <h2>LumiNews</h2>
+                </div>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.php" class="nav-item"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="create_user.php" class="nav-item"><i class="fas fa-user-plus"></i> Create User</a></li>
+                    <li><a href="manage_users.php" class="nav-item"><i class="fas fa-users-cog"></i> Manage Users</a></li>
+                    <li><a href="send_newsletter.php" class="nav-item"><i class="fas fa-envelope"></i> Send Newsletter</a></li>
+                    <li><a href="manage_newsletters.php" class="nav-item"><i class="fas fa-newspaper"></i> Manage Newsletters</a></li>
+                    <li><a href="logout.php" class="nav-item"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>Version <?php echo htmlspecialchars($currentVersion); ?></p>
+            </div>
+        </aside>
+
+        <main class="content">
+            <header class="top-header">
+                <div class="header-left">
+                    <h1>Create User</h1>
+                </div>
+            </header>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2>Create a New User</h2>
+                </div>
+                <div class="card-body">
+                    <?php if (isset($message)): ?>
+                        <p><?php echo $message; ?></p>
+                    <?php endif; ?>
+                    <form method="post">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" required>
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required>
+                        <label for="role">Role:</label>
+                        <select id="role" name="role">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <button type="submit">Create User</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+    <footer class="app-footer">
+        <p>&copy; <?php echo date('Y'); ?> LumiNewsletter - Professional Newsletter Management</p>
+    </footer>
 </body>
 </html>

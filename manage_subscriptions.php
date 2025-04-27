@@ -58,102 +58,112 @@ while ($row = $groupsResult->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Subscriptions</title>
+    <title>Manage Subscriptions | LumiNewsletter</title>
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            padding: 8px 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .filter-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 4px;
-        }
-        .actions form {
-            display: inline;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <h1>Manage Subscriptions</h1>
-        <nav>
-            <ul>
-                <li><a href="index.php">Dashboard</a></li>
-                <li><a href="admin.php">Admin Area</a></li>
-                <li><a href="create_theme.php">Create Theme</a></li>
-                <li><a href="send_newsletter.php">Send Newsletter</a></li>
-                <li><a href="manage_newsletters.php">Manage Newsletters</a></li>
-                <li><a href="manage_subscriptions.php">Manage Subscriptions</a></li>
-                <li><a href="manage_users.php">Manage Users</a></li>
-                <li><a href="manage_smtp.php">SMTP Settings</a></li>
-                <li><a href="logout.php">Logout</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <h2>Manage Newsletter Subscriptions</h2>
-        
-        <?php if ($message): ?>
-            <div class="message"><?php echo htmlspecialchars($message); ?></div>
-        <?php endif; ?>
-        
-        <div class="filter-section">
-            <h3>Filter Subscriptions</h3>
-            <form method="get">
-                <label for="group">By Group:</label>
-                <select id="group" name="group" onchange="this.form.submit()">
-                    <option value="0">All Groups</option>
-                    <?php foreach ($groups as $group): ?>
-                        <option value="<?php echo $group['id']; ?>" <?php echo ($selectedGroup == $group['id']) ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($group['name']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </form>
-        </div>
-        
-        <?php if (count($subscriptions) === 0): ?>
-            <p>No subscriptions found.</p>
-        <?php else: ?>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Email</th>
-                        <th>Group</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($subscriptions as $subscription): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($subscription['id']); ?></td>
-                            <td><?php echo htmlspecialchars($subscription['email']); ?></td>
-                            <td><?php echo htmlspecialchars($subscription['group_name']); ?></td>
-                            <td class="actions">
-                                <form method="post" onsubmit="return confirm('Are you sure you want to delete this subscription?');">
-                                    <input type="hidden" name="id" value="<?php echo $subscription['id']; ?>">
-                                    <button type="submit" name="delete">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php endif; ?>
-    </main>
-    <?php include 'includes/footer.php'; ?>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-paper-plane"></i>
+                    <h2>LumiNews</h2>
+                </div>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.php" class="nav-item"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="admin.php" class="nav-item"><i class="fas fa-cog"></i> Admin Settings</a></li>
+                    <li><a href="create_theme.php" class="nav-item"><i class="fas fa-palette"></i> Create Theme</a></li>
+                    <li><a href="send_newsletter.php" class="nav-item"><i class="fas fa-paper-plane"></i> Send Newsletter</a></li>
+                    <li><a href="manage_newsletters.php" class="nav-item"><i class="fas fa-envelope"></i> Manage Newsletters</a></li>
+                    <li><a href="manage_subscriptions.php" class="nav-item active"><i class="fas fa-users"></i> Subscribers</a></li>
+                    <li><a href="manage_users.php" class="nav-item"><i class="fas fa-user-shield"></i> Users</a></li>
+                    <li><a href="manage_smtp.php" class="nav-item"><i class="fas fa-server"></i> SMTP Settings</a></li>
+                    <li><a href="logout.php" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>Version <?php echo htmlspecialchars($currentVersion ?? '1.0.0'); ?></p>
+            </div>
+        </aside>
+
+        <main class="content">
+            <header class="top-header">
+                <div class="header-left">
+                    <h1>Manage Subscriptions</h1>
+                </div>
+            </header>
+
+            <?php if ($message): ?>
+                <div class="notification success">
+                    <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($message); ?>
+                </div>
+            <?php endif; ?>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-filter"></i> Filter Subscriptions</h2>
+                </div>
+                <div class="card-body">
+                    <form method="get">
+                        <div class="form-group">
+                            <label for="group">By Group:</label>
+                            <select id="group" name="group" onchange="this.form.submit()">
+                                <option value="0">All Groups</option>
+                                <?php foreach ($groups as $group): ?>
+                                    <option value="<?php echo $group['id']; ?>" <?php echo ($selectedGroup == $group['id']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($group['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-list"></i> Subscription List</h2>
+                </div>
+                <div class="card-body">
+                    <?php if (count($subscriptions) === 0): ?>
+                        <p>No subscriptions found.</p>
+                    <?php else: ?>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Email</th>
+                                    <th>Group</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($subscriptions as $subscription): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($subscription['id']); ?></td>
+                                        <td><?php echo htmlspecialchars($subscription['email']); ?></td>
+                                        <td><?php echo htmlspecialchars($subscription['group_name']); ?></td>
+                                        <td class="actions">
+                                            <form method="post" onsubmit="return confirm('Are you sure you want to delete this subscription?');">
+                                                <input type="hidden" name="id" value="<?php echo $subscription['id']; ?>">
+                                                <button type="submit" name="delete" class="btn btn-sm">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <footer class="app-footer">
+        <p>&copy; <?php echo date('Y'); ?> LumiNewsletter - Professional Newsletter Management</p>
+    </footer>
 </body>
 </html>
