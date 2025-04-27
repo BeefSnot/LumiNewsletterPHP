@@ -11,6 +11,9 @@ if (!isLoggedIn()) {
     exit();
 }
 
+// Get current user role
+$isAdmin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+
 $message = '';
 $messageType = '';
 
@@ -279,18 +282,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <nav class="main-nav">
                 <ul>
                     <li><a href="index.php" class="nav-item"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <?php if ($isAdmin): ?>
                     <li><a href="admin.php" class="nav-item"><i class="fas fa-cog"></i> Admin Settings</a></li>
+                    <?php endif; ?>
                     <li><a href="create_theme.php" class="nav-item active"><i class="fas fa-palette"></i> Create Theme</a></li>
                     <li><a href="send_newsletter.php" class="nav-item"><i class="fas fa-paper-plane"></i> Send Newsletter</a></li>
                     <li><a href="manage_newsletters.php" class="nav-item"><i class="fas fa-envelope"></i> Manage Newsletters</a></li>
+                    <?php if ($isAdmin): ?>
                     <li><a href="manage_subscriptions.php" class="nav-item"><i class="fas fa-users"></i> Subscribers</a></li>
                     <li><a href="manage_users.php" class="nav-item"><i class="fas fa-user-shield"></i> Users</a></li>
                     <li><a href="manage_smtp.php" class="nav-item"><i class="fas fa-server"></i> SMTP Settings</a></li>
+                    <li><a href="embed_docs.php" class="nav-item"><i class="fas fa-code"></i> Embed Widget</a></li>
+                    <?php endif; ?>
                     <li><a href="logout.php" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 </ul>
             </nav>
             <div class="sidebar-footer">
-                <p>Version <?php echo htmlspecialchars($currentVersion); ?></p>
+                <p>LumiNewsletter Version <?php echo htmlspecialchars($currentVersion); ?></p>
             </div>
         </aside>
 
