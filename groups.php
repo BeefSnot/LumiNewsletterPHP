@@ -74,21 +74,8 @@ while ($row = $groupsResult->fetch_assoc()) {
                             <a class="nav-link" href="../index.php">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="../about.html">About</a>
+                            <a class="nav-link" href="../admin.html">Admin Page</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../apply.html">Apply</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../staff.php">Staff Center</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../radio/index.php">Radio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../status/index.php">Status</a>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </nav>
