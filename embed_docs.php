@@ -28,7 +28,8 @@ $siteUrl = rtrim($siteUrl, '/');
 
 // Set widget URLs
 $widgetUrl = $siteUrl . '/widget.php';
-$scriptUrl = $siteUrl . '/assets/js/lumi-widget.min.js';
+// Update the scriptUrl to point to the PHP version
+$scriptUrl = $siteUrl . '/assets/js/lumi-widget.js.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
