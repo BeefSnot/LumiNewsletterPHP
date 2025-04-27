@@ -3,6 +3,11 @@ require_once 'includes/init.php';
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Add these use statements
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;  
+use PHPMailer\PHPMailer\Exception;
+
 require_once 'includes/db.php';
 
 $config = require 'includes/config.php';
