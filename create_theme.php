@@ -269,10 +269,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: none;
         }
     </style>
+    <link rel="stylesheet" href="assets/css/mobile-responsive.css">
 </head>
 <body>
+    <!-- Mobile navigation toggle button -->
+    <button class="mobile-nav-toggle" id="mobileNavToggle">
+        <i class="fas fa-bars" id="menuIcon"></i>
+    </button>
+    
+    <!-- Backdrop for mobile menu -->
+    <div class="backdrop" id="backdrop"></div>
+    
     <div class="app-container">
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
                     <i class="fas fa-paper-plane"></i>
@@ -543,6 +552,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 alert('Error switching view. See console for details.');
             }
         }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileNavToggle = document.getElementById('mobileNavToggle');
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('backdrop');
+            const menuIcon = document.getElementById('menuIcon');
+            
+            function toggleMenu() {
+                sidebar.classList.toggle('active');
+                backdrop.classList.toggle('active');
+                
+                if (sidebar.classList.contains('active')) {
+                    menuIcon.classList.remove('fa-bars');
+                    menuIcon.classList.add('fa-times');
+                } else {
+                    menuIcon.classList.remove('fa-times');
+                    menuIcon.classList.add('fa-bars');
+                }
+            }
+            
+            mobileNavToggle.addEventListener('click', toggleMenu);
+            backdrop.addEventListener('click', toggleMenu);
+            
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    if (window.innerWidth <= 991 && sidebar.classList.contains('active')) {
+                        toggleMenu();
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>

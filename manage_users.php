@@ -8,6 +8,9 @@ if (!isLoggedIn() || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+// Fix for undefined $currentVersion variable
+$currentVersion = require 'version.php';
+
 $message = '';
 
 // Handle user deletion
@@ -107,6 +110,7 @@ while ($row = $result->fetch_assoc()) {
     <title>Manage Users | LumiNewsletter</title>
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/mobile-responsive.css">
     <script>
         function editUser(id, username, email, role) {
             document.getElementById('form-title').innerText = 'Edit User';
@@ -129,8 +133,14 @@ while ($row = $result->fetch_assoc()) {
     </script>
 </head>
 <body>
+    <button class="mobile-nav-toggle" id="mobileNavToggle">
+        <i class="fas fa-bars" id="menuIcon"></i>
+    </button>
+    
+    <div class="backdrop" id="backdrop"></div>
+    
     <div class="app-container">
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
                     <i class="fas fa-paper-plane"></i>
@@ -147,11 +157,12 @@ while ($row = $result->fetch_assoc()) {
                     <li><a href="manage_subscriptions.php" class="nav-item"><i class="fas fa-users"></i> Subscribers</a></li>
                     <li><a href="manage_users.php" class="nav-item active"><i class="fas fa-user-shield"></i> Users</a></li>
                     <li><a href="manage_smtp.php" class="nav-item"><i class="fas fa-server"></i> SMTP Settings</a></li>
+                    <li><a href="embed_docs.php" class="nav-item"><i class="fas fa-code"></i> Embed Widget</a></li>
                     <li><a href="logout.php" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 </ul>
             </nav>
             <div class="sidebar-footer">
-                <p>Version <?php echo htmlspecialchars($currentVersion ?? '1.0.0'); ?></p>
+                <p>LumiNewsletter Version <?php echo htmlspecialchars($currentVersion); ?></p>
             </div>
         </aside>
 
@@ -264,5 +275,39 @@ while ($row = $result->fetch_assoc()) {
     <footer class="app-footer">
         <p>&copy; <?php echo date('Y'); ?> LumiNewsletter - Professional Newsletter Management</p>
     </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileNavToggle = document.getElementById('mobileNavToggle');
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('backdrop');
+            const menuIcon = document.getElementById('menuIcon');
+            
+            function toggleMenu() {
+                sidebar.classList.toggle('active');
+                backdrop.classList.toggle('active');
+                
+                if (sidebar.classList.contains('active')) {
+                    menuIcon.classList.remove('fa-bars');
+                    menuIcon.classList.add('fa-times');
+                } else {
+                    menuIcon.classList.remove('fa-times');
+                    menuIcon.classList.add('fa-bars');
+                }
+            }
+            
+            mobileNavToggle.addEventListener('click', toggleMenu);
+            backdrop.addEventListener('click', toggleMenu);
+            
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    if (window.innerWidth <= 991 && sidebar.classList.contains('active')) {
+                        toggleMenu();
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

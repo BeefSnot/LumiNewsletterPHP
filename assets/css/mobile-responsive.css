@@ -1,0 +1,129 @@
+/* Mobile Responsiveness Enhancements */
+
+/* Mobile Navigation Toggle */
+.mobile-nav-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: var(--primary-dark);
+    color: white;
+    border: none;
+    font-size: 24px;
+    width: 45px;
+    height: 45px;
+    border-radius: 4px;
+    z-index: 1000;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    /* Show mobile toggle button */
+    .mobile-nav-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* App container adjustments */
+    .app-container {
+        flex-direction: column;
+    }
+    
+    /* Sidebar adjustments */
+    .sidebar {
+        width: 100%;
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100%;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 999;
+    }
+    
+    /* Show sidebar when active */
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
+    /* Content area adjustments */
+    .content {
+        padding-top: 70px; /* Space for the toggle button */
+    }
+    
+    /* Adjust card layout */
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Form adjustments */
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    /* Table responsiveness */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    /* Header adjustments */
+    .top-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .header-right {
+        margin-top: 15px;
+        width: 100%;
+    }
+    
+    .header-right .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Further adjustments for very small screens */
+    .card-body {
+        padding: 15px 10px;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    h2 {
+        font-size: 1.3rem;
+    }
+    
+    /* Adjust notification positioning */
+    .notification {
+        padding: 10px;
+    }
+}
+
+/* Make backdrop for mobile menu */
+.backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 998;
+}
+
+.backdrop.active {
+    display: block;
+}
