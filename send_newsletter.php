@@ -53,10 +53,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $themeStmt->fetch();
             $themeStmt->close();
 
-            // Include the theme content in the newsletter body if not already included
-            if (strpos($body, $themeContent) === false) {
-                $body = $themeContent . $body;
-            }
+            // REMOVE OR COMMENT OUT THESE LINES:
+            // if (strpos($body, $themeContent) === false) {
+            //     $body = $themeContent . $body;
+            // }
         }
 
         // Insert the newsletter into the database
@@ -167,9 +167,16 @@ while ($row = $themesResult->fetch_assoc()) {
         });
 
         function loadThemeContent(themeId) {
+            // Clear editor if "No Theme" is selected
+            if (!themeId) {
+                tinymce.get('body').setContent('');
+                return;
+            }
+            
             const themes = <?php echo json_encode($themes); ?>;
             const selectedTheme = themes.find(theme => theme.id == themeId);
             if (selectedTheme) {
+                // This will replace any existing content with just the theme
                 tinymce.get('body').setContent(selectedTheme.content);
             }
         }
