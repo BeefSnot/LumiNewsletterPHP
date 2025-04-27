@@ -16,6 +16,9 @@ if (!isLoggedIn()) {
     exit();
 }
 
+// Fix for undefined $currentVersion variable
+$currentVersion = require 'version.php';
+
 $config = require 'includes/config.php';
 
 $message = '';
@@ -56,11 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $themeStmt->bind_result($themeContent);
             $themeStmt->fetch();
             $themeStmt->close();
-
-            // REMOVE OR COMMENT OUT THESE LINES:
-            // if (strpos($body, $themeContent) === false) {
-            //     $body = $themeContent . $body;
-            // }
         }
 
         // Insert the newsletter into the database
@@ -149,7 +147,7 @@ while ($row = $themesResult->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page Title | LumiNewsletter</title>
+    <title>Send Newsletter | LumiNewsletter</title>
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.tiny.cloud/1/8sjavbgsmciibkna0zhc3wcngf5se0nri4vanzzapds2ylul/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
@@ -216,9 +214,15 @@ while ($row = $themesResult->fetch_assoc()) {
             </div>
             <nav class="main-nav">
                 <ul>
-                    <!-- Navigation items with icons -->
                     <li><a href="index.php" class="nav-item"><i class="fas fa-home"></i> Dashboard</a></li>
-                    <!-- More nav items... -->
+                    <li><a href="admin.php" class="nav-item"><i class="fas fa-cog"></i> Admin Settings</a></li>
+                    <li><a href="create_theme.php" class="nav-item"><i class="fas fa-palette"></i> Create Theme</a></li>
+                    <li><a href="send_newsletter.php" class="nav-item active"><i class="fas fa-paper-plane"></i> Send Newsletter</a></li>
+                    <li><a href="manage_newsletters.php" class="nav-item"><i class="fas fa-envelope"></i> Manage Newsletters</a></li>
+                    <li><a href="manage_subscriptions.php" class="nav-item"><i class="fas fa-users"></i> Subscribers</a></li>
+                    <li><a href="manage_users.php" class="nav-item"><i class="fas fa-user-shield"></i> Users</a></li>
+                    <li><a href="manage_smtp.php" class="nav-item"><i class="fas fa-server"></i> SMTP Settings</a></li>
+                    <li><a href="logout.php" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 </ul>
             </nav>
             <div class="sidebar-footer">
@@ -229,47 +233,64 @@ while ($row = $themesResult->fetch_assoc()) {
         <main class="content">
             <header class="top-header">
                 <div class="header-left">
-                    <h1>Page Title</h1>
+                    <h1>Send Newsletter</h1>
                 </div>
             </header>
             
-            <!-- Main content in cards -->
             <div class="card">
                 <div class="card-header">
-                    <h2>Send a New Newsletter</h2>
+                    <h2><i class="fas fa-paper-plane"></i> Send a New Newsletter</h2>
                 </div>
                 <div class="card-body">
                     <?php if ($message): ?>
-                        <p><?php echo $message; ?></p>
+                        <div class="notification <?php echo strpos($message, 'successfully') !== false ? 'success' : 'error'; ?>">
+                            <i class="fas fa-<?php echo strpos($message, 'successfully') !== false ? 'check-circle' : 'exclamation-circle'; ?>"></i>
+                            <?php echo $message; ?>
+                        </div>
                     <?php endif; ?>
+                    
                     <form method="post" onsubmit="validateAndSubmit(event);">
-                        <label for="subject">Subject:</label>
-                        <input type="text" id="subject" name="subject" required>
+                        <div class="form-group">
+                            <label for="subject">Subject:</label>
+                            <input type="text" id="subject" name="subject" required>
+                        </div>
                         
-                        <label for="body">Body:</label>
-                        <textarea id="body" name="body"></textarea>
+                        <div class="form-group">
+                            <label for="theme">Theme:</label>
+                            <select id="theme" name="theme" onchange="loadThemeContent(this.value)">
+                                <option value="">No Theme</option>
+                                <?php foreach ($themes as $theme): ?>
+                                    <option value="<?php echo $theme['id']; ?>"><?php echo htmlspecialchars($theme['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                         
-                        <label for="theme">Theme:</label>
-                        <select id="theme" name="theme" onchange="loadThemeContent(this.value)">
-                            <option value="">No Theme</option>
-                            <?php foreach ($themes as $theme): ?>
-                                <option value="<?php echo $theme['id']; ?>"><?php echo $theme['name']; ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                        <div class="form-group">
+                            <label for="group">Recipient Group:</label>
+                            <select id="group" name="group" required>
+                                <option value="">-- Select Group --</option>
+                                <?php foreach ($groups as $group): ?>
+                                    <option value="<?php echo $group['id']; ?>"><?php echo htmlspecialchars($group['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                         
-                        <label for="group">Group:</label>
-                        <select id="group" name="group" required>
-                            <?php foreach ($groups as $group): ?>
-                                <option value="<?php echo $group['id']; ?>"><?php echo $group['name']; ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                        <div class="form-group">
+                            <label for="body">Newsletter Content:</label>
+                            <textarea id="body" name="body"></textarea>
+                        </div>
                         
-                        <button type="submit">Send</button>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Send Newsletter
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
         </main>
     </div>
+    
     <footer class="app-footer">
         <p>&copy; <?php echo date('Y'); ?> LumiNewsletter - Professional Newsletter Management</p>
     </footer>
