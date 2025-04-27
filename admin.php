@@ -81,6 +81,14 @@ if ($latestUpdateInfo !== false) {
                 <a href="update.php">Update now</a>
             </div>
         <?php endif; ?>
+
+        <!-- Check for Updates Section  -->
+        <form action="update.php" method="get" style="margin-bottom: 20px;">
+            <button type="submit" style="padding: 10px 20px; background: #1592e8; color: #fff; border: none; border-radius: 4px; cursor: pointer;">
+                Check for updates
+            </button>
+        </form>
+
         <h2>Admin Settings</h2>
         <?php if ($message): ?>
             <p><?php echo $message; ?></p>
