@@ -41,7 +41,7 @@ while ($row = $themesResult->fetch_assoc()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Themes</title>
-    <link rel="stylesheet" href="assets/css/newsletter.css">
+    <link rel="stylesheet" href="assets/css/newsletter-style.css">
 </head>
 <body>
     <header>

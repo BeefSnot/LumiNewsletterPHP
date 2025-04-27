@@ -21,7 +21,7 @@ while ($row = $settingsResult->fetch_assoc()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($settings['title'] ?? 'Newsletter Dashboard'); ?></title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/newsletter-style.css">
     <style>
         body::before {
             background: url('<?php echo htmlspecialchars($settings['background'] ?? '../images/forest.png'); ?>') no-repeat center center;

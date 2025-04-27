@@ -56,53 +56,128 @@ if ($latestUpdateInfo !== false) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale="1.0">
-    <title>Admin Area</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Area | LumiNewsletter</title>
+    <link rel="stylesheet" href="assets/css/newsletter-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <h1>Admin Area</h1>
-        <nav>
-            <ul>
-                <li><a href="index.php">Dashboard</a></li>
-                <li><a href="admin.php">Admin Area</a></li>
-                <li><a href="create_theme.php">Create Theme</a></li>
-                <li><a href="send_newsletter.php">Send Newsletter</a></li>
-                <li><a href="manage_newsletters.php">Manage Newsletters</a></li>
-                <li><a href="logout.php">Logout</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <?php if ($updateAvailable): ?>
-            <div style="background: #fffae6; border: 1px solid #ffe58f; color: #ad8b00; padding: 10px; margin-bottom: 20px;">
-                <strong>Update available!</strong> Version <?php echo htmlspecialchars($latestVersion); ?> is available.
-                <a href="update.php">Update now</a>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-paper-plane"></i>
+                    <h2>LumiNews</h2>
+                </div>
             </div>
-        <?php endif; ?>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.php" class="nav-item"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="admin.php" class="nav-item active"><i class="fas fa-cog"></i> Admin Settings</a></li>
+                    <li><a href="create_theme.php" class="nav-item"><i class="fas fa-palette"></i> Create Theme</a></li>
+                    <li><a href="send_newsletter.php" class="nav-item"><i class="fas fa-paper-plane"></i> Send Newsletter</a></li>
+                    <li><a href="manage_newsletters.php" class="nav-item"><i class="fas fa-envelope"></i> Manage Newsletters</a></li>
+                    <li><a href="manage_subscriptions.php" class="nav-item"><i class="fas fa-users"></i> Subscribers</a></li>
+                    <li><a href="manage_users.php" class="nav-item"><i class="fas fa-user-shield"></i> Users</a></li>
+                    <li><a href="manage_smtp.php" class="nav-item"><i class="fas fa-server"></i> SMTP Settings</a></li>
+                    <li><a href="logout.php" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>Version <?php echo htmlspecialchars($currentVersion); ?></p>
+            </div>
+        </aside>
 
-        <!-- Check for Updates Section  -->
-        <form action="update.php" method="get" style="margin-bottom: 20px;">
-            <button type="submit" style="padding: 10px 20px; background: #1592e8; color: #fff; border: none; border-radius: 4px; cursor: pointer;">
-                Check for updates
-            </button>
-        </form>
+        <main class="content">
+            <header class="top-header">
+                <div class="header-left">
+                    <h1>Admin Settings</h1>
+                </div>
+                <div class="header-right">
+                    <?php if ($updateAvailable): ?>
+                        <div class="update-notification">
+                            <i class="fas fa-download"></i> Update available: v<?php echo htmlspecialchars($latestVersion); ?>
+                            <a href="update.php" class="btn btn-sm btn-accent">Update now</a>
+                        </div>
+                    <?php endif; ?>
+                    <form action="update.php" method="get">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sync-alt"></i> Check for Updates
+                        </button>
+                    </form>
+                </div>
+            </header>
 
-        <h2>Admin Settings</h2>
-        <?php if ($message): ?>
-            <p><?php echo $message; ?></p>
-        <?php endif; ?>
-        <form method="post">
-            <label for="title">Title:</label>
-            <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($settings['title'] ?? ''); ?>" required>
-            
-            <label for="background">Background URL:</label>
-            <input type="text" id="background" name="background" value="<?php echo htmlspecialchars($settings['background'] ?? ''); ?>" required>
-            
-            <button type="submit">Update Settings</button>
-        </form>
-    </main>
-    <?php include 'includes/footer.php'; ?>
+            <?php if ($message): ?>
+                <div class="notification success">
+                    <i class="fas fa-check-circle"></i> <?php echo $message; ?>
+                </div>
+            <?php endif; ?>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>General Settings</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="form-group">
+                            <label for="title">Newsletter Title:</label>
+                            <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($settings['title'] ?? ''); ?>" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="background">Background URL:</label>
+                            <input type="text" id="background" name="background" value="<?php echo htmlspecialchars($settings['background'] ?? ''); ?>" required>
+                            <?php if (!empty($settings['background'])): ?>
+                                <div class="preview">
+                                    <img src="<?php echo htmlspecialchars($settings['background']); ?>" alt="Background preview" class="thumbnail">
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Settings</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-users"></i> Subscribers</h2>
+                    </div>
+                    <div class="card-body">
+                        <p>Manage your newsletter subscribers and their group memberships.</p>
+                        <a href="manage_subscriptions.php" class="btn btn-primary">Manage Subscribers</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-user-shield"></i> Users</h2>
+                    </div>
+                    <div class="card-body">
+                        <p>Manage admin users and their permissions.</p>
+                        <a href="manage_users.php" class="btn btn-primary">Manage Users</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-server"></i> SMTP Settings</h2>
+                    </div>
+                    <div class="card-body">
+                        <p>Configure your email server settings for newsletter delivery.</p>
+                        <a href="manage_smtp.php" class="btn btn-primary">Configure SMTP</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="app-footer">
+        <p>&copy; <?php echo date('Y'); ?> LumiNewsletter - Professional Newsletter Management</p>
+    </footer>
 </body>
 </html>

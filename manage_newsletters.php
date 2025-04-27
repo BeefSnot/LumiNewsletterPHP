@@ -43,7 +43,7 @@ error_log('Fetched newsletters: ' . print_r($newsletters, true));
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Newsletters</title>
-    <link rel="stylesheet" href="assets/css/newsletter.css">
+    <link rel="stylesheet" href="assets/css/newsletter-style.css">
 </head>
 <body>
     <header>

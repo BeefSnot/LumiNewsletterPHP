@@ -146,7 +146,7 @@ function recursiveDelete($dir) {
 <head>
     <meta charset="UTF-8">
     <title>Update Software</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/newsletter-style.css">
 </head>
 <body>
     <header>
