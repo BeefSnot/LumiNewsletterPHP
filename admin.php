@@ -26,6 +26,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->close();
     }
+    
+    // Handle the site URL setting
+    if (isset($_POST['site_url'])) {
+        $site_url = rtrim($_POST['site_url'], '/'); // Remove trailing slash if present
+        
+        // Check if the setting already exists
+        $checkStmt = $db->prepare("SELECT COUNT(*) FROM settings WHERE name = 'site_url'");
+        $checkStmt->execute();
+        $checkStmt->bind_result($count);
+        $checkStmt->fetch();
+        $checkStmt->close();
+        
+        if ($count > 0) {
+            $stmt = $db->prepare("UPDATE settings SET value = ? WHERE name = 'site_url'");
+        } else {
+            $stmt = $db->prepare("INSERT INTO settings (name, value) VALUES ('site_url', ?)");
+        }
+        
+        $stmt->bind_param('s', $site_url);
+        $stmt->execute();
+        $stmt->close();
+    }
 
     $message = 'Settings updated successfully';
 }
@@ -135,6 +157,12 @@ if ($latestUpdateInfo !== false) {
                             <?php endif; ?>
                         </div>
                         
+                        <div class="form-group">
+                            <label for="site_url">Website URL (for embeddable widgets):</label>
+                            <input type="url" id="site_url" name="site_url" value="<?php echo htmlspecialchars($settings['site_url'] ?? ''); ?>" placeholder="https://example.com" required>
+                            <small>Enter your website's full URL where LumiNewsletter is installed (without trailing slash)</small>
+                        </div>
+
                         <div class="form-actions">
                             <button type="submit" class="btn btn-primary">Save Settings</button>
                         </div>
