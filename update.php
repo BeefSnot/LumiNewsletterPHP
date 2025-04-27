@@ -8,48 +8,53 @@ if (!isLoggedIn() || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+$currentVersion = require 'version.php';
 $message = '';
+$updateAvailable = false;
+$latestVersion = '';
+$changelog = '';
+$updateUrl = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Fetch the latest update URL
-    $latestUpdateInfo = file_get_contents('https://yourdomain.com/updates/latest_update.json');
-    if ($latestUpdateInfo === false) {
-        $message = 'Failed to fetch the latest update information.';
+$latestUpdateInfo = @file_get_contents('https://lumihost.net/updates/latest_update.json');
+if ($latestUpdateInfo !== false) {
+    $latestUpdateInfo = json_decode($latestUpdateInfo, true);
+    $latestVersion = $latestUpdateInfo['version'] ?? '';
+    $changelog = $latestUpdateInfo['changelog'] ?? '';
+    $updateUrl = $latestUpdateInfo['update_url'] ?? '';
+    if ($latestVersion && version_compare($latestVersion, $currentVersion, '>')) {
+        $updateAvailable = true;
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $updateAvailable) {
+    // Download the update package
+    $updatePackage = @file_get_contents($updateUrl);
+    if ($updatePackage === false) {
+        $message = 'Failed to download the update package.';
     } else {
-        $latestUpdateInfo = json_decode($latestUpdateInfo, true);
-        $updateUrl = $latestUpdateInfo['update_url'];
+        // Save the update package to a temporary file
+        $tempFile = tempnam(sys_get_temp_dir(), 'update_') . '.zip';
+        file_put_contents($tempFile, $updatePackage);
 
-        // Download the update package
-        $updatePackage = file_get_contents($updateUrl);
-        if ($updatePackage === false) {
-            $message = 'Failed to download the update package.';
+        // Extract the update package
+        $zip = new ZipArchive;
+        if ($zip->open($tempFile) === TRUE) {
+            $zip->extractTo(__DIR__);
+            $zip->close();
+            $message = 'Update applied successfully. Please refresh the page.';
+            // Optionally update version.php here
+            file_put_contents(__DIR__ . '/version.php', "<?php\nreturn '" . $latestVersion . "';\n");
         } else {
-            // Save the update package to a temporary file
-            $tempFile = tempnam(sys_get_temp_dir(), 'update_') . '.zip';
-            file_put_contents($tempFile, $updatePackage);
-
-            // Extract the update package
-            $zip = new ZipArchive;
-            if ($zip->open($tempFile) === TRUE) {
-                $zip->extractTo(__DIR__);
-                $zip->close();
-                $message = 'Update applied successfully.';
-            } else {
-                $message = 'Failed to extract the update package.';
-            }
-
-            // Clean up the temporary file
-            unlink($tempFile);
+            $message = 'Failed to extract the update package.';
         }
+        unlink($tempFile);
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Software</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -68,13 +73,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </nav>
     </header>
     <main>
-        <h2>Update Software</h2>
-        <?php if ($message): ?>
-            <p><?php echo $message; ?></p>
+        <h2>Software Update</h2>
+        <p>Current version: <strong><?php echo htmlspecialchars($currentVersion); ?></strong></p>
+        <?php if ($updateAvailable): ?>
+            <p style="color:green;">Update available: <strong><?php echo htmlspecialchars($latestVersion); ?></strong></p>
+            <p><?php echo nl2br(htmlspecialchars($changelog)); ?></p>
+            <form method="post">
+                <button type="submit">Download & Install Update</button>
+            </form>
+        <?php else: ?>
+            <p>No updates available.</p>
         <?php endif; ?>
-        <form method="post">
-            <button type="submit">Check for Updates</button>
-        </form>
+        <?php if ($message): ?>
+            <p><?php echo htmlspecialchars($message); ?></p>
+        <?php endif; ?>
     </main>
     <?php include 'includes/footer.php'; ?>
 </body>

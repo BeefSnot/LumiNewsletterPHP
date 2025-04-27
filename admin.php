@@ -36,13 +36,25 @@ $settings = [];
 while ($row = $settingsResult->fetch_assoc()) {
     $settings[$row['name']] = $row['value'];
 }
+
+$currentVersion = require 'version.php';
+$latestUpdateInfo = @file_get_contents('https://lumihost.net/updates/latest_update.json');
+$updateAvailable = false;
+$latestVersion = '';
+if ($latestUpdateInfo !== false) {
+    $latestUpdateInfo = json_decode($latestUpdateInfo, true);
+    $latestVersion = $latestUpdateInfo['version'] ?? '';
+    if ($latestVersion && version_compare($latestVersion, $currentVersion, '>')) {
+        $updateAvailable = true;
+    }
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale="1.0">
     <title>Admin Area</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -61,6 +73,12 @@ while ($row = $settingsResult->fetch_assoc()) {
         </nav>
     </header>
     <main>
+        <?php if ($updateAvailable): ?>
+            <div style="background: #fffae6; border: 1px solid #ffe58f; color: #ad8b00; padding: 10px; margin-bottom: 20px;">
+                <strong>Update available!</strong> Version <?php echo htmlspecialchars($latestVersion); ?> is available.
+                <a href="update.php">Update now</a>
+            </div>
+        <?php endif; ?>
         <h2>Admin Settings</h2>
         <?php if ($message): ?>
             <p><?php echo $message; ?></p>
