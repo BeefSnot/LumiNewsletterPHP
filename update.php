@@ -8,7 +8,7 @@ if (!isLoggedIn() || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-define('UPDATE_JSON_URL', 'https://lumihost.net/updates/latest_update.json'); // <--- Hardcoded
+define('UPDATE_JSON_URL', 'https://lumihost.net/updates/latest_update.json'); // Or your own update URL
 
 $currentVersion = require 'version.php';
 $message = '';
@@ -32,18 +32,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $updateAvailable) {
     $updatePackage = @file_get_contents($updateUrl);
     if ($updatePackage === false) {
         $message = 'Failed to download the update package.';
+        error_log($message);
     } else {
         $tempFile = tempnam(sys_get_temp_dir(), 'update_') . '.zip';
         file_put_contents($tempFile, $updatePackage);
 
         $zip = new ZipArchive;
-        if ($zip->open($tempFile) === TRUE) {
+        $extractResult = $zip->open($tempFile);
+        if ($extractResult === TRUE) {
             $zip->extractTo(__DIR__);
             $zip->close();
             $message = 'Update applied successfully. Please refresh the page.';
             file_put_contents(__DIR__ . '/version.php', "<?php\nreturn '" . $latestVersion . "';\n");
         } else {
-            $message = 'Failed to extract the update package.';
+            $message = 'Failed to extract the update package. ZipArchive error code: ' . $extractResult;
+            error_log($message);
         }
         unlink($tempFile);
     }
