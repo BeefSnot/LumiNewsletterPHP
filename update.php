@@ -86,14 +86,42 @@ function recursiveCopy($source, $dest) {
     $dir = opendir($source);
     @mkdir($dest, 0755, true);
     
+    // Files that should never be overwritten
+    $protectedFiles = [
+        'config.php',
+        'includes/config.php',
+        '.htaccess',
+        'version.php',
+        'db.php',
+        'includes/db.php'
+    ];
+    
     while (($file = readdir($dir)) !== false) {
         if ($file != '.' && $file != '..') {
             $sourcePath = $source . '/' . $file;
             $destPath = $dest . '/' . $file;
             
+            // Skip protected files
+            $relativePath = str_replace(__DIR__ . '/', '', $destPath);
+            if (in_array($relativePath, $protectedFiles)) {
+                echo "<p>Skipped protected file: $relativePath</p>";
+                continue;
+            }
+            
             if (is_dir($sourcePath)) {
                 recursiveCopy($sourcePath, $destPath);
             } else {
+                // Check if destination file exists and make backup if needed
+                if (file_exists($destPath) && !in_array(pathinfo($destPath, PATHINFO_EXTENSION), ['jpg', 'png', 'gif', 'svg', 'ico'])) {
+                    // Create backups folder if it doesn't exist
+                    if (!file_exists($dest . '/update_backups')) {
+                        mkdir($dest . '/update_backups', 0755, true);
+                    }
+                    // Make a backup
+                    copy($destPath, $dest . '/update_backups/' . basename($destPath) . '.bak');
+                }
+                
+                // Now copy the file
                 copy($sourcePath, $destPath);
             }
         }
