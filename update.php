@@ -8,6 +8,8 @@ if (!isLoggedIn() || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+define('UPDATE_JSON_URL', 'https://lumihost.net/updates/latest_update.json'); // <--- Hardcoded
+
 $currentVersion = require 'version.php';
 $message = '';
 $updateAvailable = false;
@@ -15,7 +17,7 @@ $latestVersion = '';
 $changelog = '';
 $updateUrl = '';
 
-$latestUpdateInfo = @file_get_contents('https://lumihost.net/updates/latest_update.json');
+$latestUpdateInfo = @file_get_contents(UPDATE_JSON_URL);
 if ($latestUpdateInfo !== false) {
     $latestUpdateInfo = json_decode($latestUpdateInfo, true);
     $latestVersion = $latestUpdateInfo['version'] ?? '';
@@ -27,22 +29,18 @@ if ($latestUpdateInfo !== false) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $updateAvailable) {
-    // Download the update package
     $updatePackage = @file_get_contents($updateUrl);
     if ($updatePackage === false) {
         $message = 'Failed to download the update package.';
     } else {
-        // Save the update package to a temporary file
         $tempFile = tempnam(sys_get_temp_dir(), 'update_') . '.zip';
         file_put_contents($tempFile, $updatePackage);
 
-        // Extract the update package
         $zip = new ZipArchive;
         if ($zip->open($tempFile) === TRUE) {
             $zip->extractTo(__DIR__);
             $zip->close();
             $message = 'Update applied successfully. Please refresh the page.';
-            // Optionally update version.php here
             file_put_contents(__DIR__ . '/version.php', "<?php\nreturn '" . $latestVersion . "';\n");
         } else {
             $message = 'Failed to extract the update package.';

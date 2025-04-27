@@ -37,8 +37,10 @@ while ($row = $settingsResult->fetch_assoc()) {
     $settings[$row['name']] = $row['value'];
 }
 
+define('UPDATE_JSON_URL', 'https://lumihost.net/updates/latest_update.json'); // <--- Hardcoded
+
 $currentVersion = require 'version.php';
-$latestUpdateInfo = @file_get_contents('https://lumihost.net/updates/latest_update.json');
+$latestUpdateInfo = @file_get_contents(UPDATE_JSON_URL);
 $updateAvailable = false;
 $latestVersion = '';
 if ($latestUpdateInfo !== false) {
