@@ -81,11 +81,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <!-- GrapesJS styles and scripts -->
-    <link rel="stylesheet" href="https://unpkg.com/grapesjs/dist/css/grapes.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/grapesjs-preset-newsletter/dist/grapesjs-preset-newsletter.css">
-    <script src="https://unpkg.com/grapesjs"></script>
-    <script src="https://unpkg.com/grapesjs-preset-newsletter"></script>
+    <!-- GrapesJS styles and scripts - Using specific versions for stability -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/grapesjs@0.18.4/dist/css/grapes.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/grapesjs@0.18.4/dist/grapes.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/grapesjs-preset-newsletter@0.2.20/dist/grapesjs-preset-newsletter.min.js"></script>
     
     <style>
         #editor-container {
@@ -93,10 +92,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             position: relative;
             border-radius: 8px;
             overflow: hidden;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            background-color: white;
         }
         
         #gjs {
             height: 100%;
+            width: 100%; /* Add explicit width */
+            display: block; /* Ensure it's displayed as a block */
+            border-radius: 8px;
+        }
+        
+        #theme_content {
+            height: 700px;
+            width: 100%;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid #ddd;
             border-radius: 8px;
         }
         
@@ -207,12 +222,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: var(--gray);
         }
         
-        #theme_content {
-            height: 400px;
-            font-family: monospace;
-            font-size: 14px;
-        }
-        
         .notification {
             padding: 1rem;
             margin-bottom: 1.5rem;
@@ -234,6 +243,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .notification i {
             margin-right: 0.5rem;
             font-size: 1.25rem;
+        }
+        
+        /* Fix for GrapesJS editor display issues */
+        .gjs-editor-cont {
+            position: relative !important;
+            overflow: visible !important;
+        }
+        
+        .gjs-cv-canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        /* Error message display */
+        #editor-error {
+            padding: 20px;
+            background-color: rgba(234, 67, 53, 0.1);
+            color: var(--error);
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            display: none;
         }
     </style>
 </head>
@@ -277,6 +307,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php echo htmlspecialchars($message); ?>
                 </div>
             <?php endif; ?>
+            
+            <div id="editor-error">
+                <strong>Error:</strong> The editor failed to load. Please check your browser console for more details.
+            </div>
             
             <div class="card">
                 <div class="card-header">
@@ -340,134 +374,166 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         let templates = <?php echo json_encode($templates); ?>;
         
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize GrapesJS
+            try {
+                // Render template previews
+                templates.forEach((template, index) => {
+                    const previewEl = document.getElementById(`preview-frame-${index}`);
+                    if (previewEl) {
+                        previewEl.innerHTML = template.content;
+                    }
+                });
+                
+                // Initialize GrapesJS with better error handling
+                initializeEditor();
+                
+                // Set up form submission
+                document.getElementById('theme-form').addEventListener('submit', function(e) {
+                    if (currentMode === 'visual' && editor) {
+                        document.getElementById('theme_content').value = editor.getHtml() + '<style>' + editor.getCss() + '</style>';
+                    }
+                });
+                
+                // Select first template by default
+                if (templates.length > 0) {
+                    selectTemplate(document.querySelector('.template-card'), 0);
+                }
+            } catch (error) {
+                console.error('Error initializing editor:', error);
+                document.getElementById('editor-error').style.display = 'block';
+                document.getElementById('editor-error').innerHTML += '<br>Error details: ' + error.message;
+            }
+        });
+        
+        function initializeEditor() {
+            // Make sure GrapesJS is loaded
+            if (typeof grapesjs === 'undefined') {
+                throw new Error('GrapesJS library not loaded. Check your internet connection or try a different browser.');
+            }
+            
+            // Initialize the editor
             editor = grapesjs.init({
                 container: '#gjs',
+                components: templates.length > 0 ? templates[0].content : '',
+                height: '100%',
+                width: 'auto',
+                storageManager: false,
                 plugins: ['gjs-preset-newsletter'],
                 pluginsOpts: {
                     'gjs-preset-newsletter': {
                         modalTitleImport: 'Import your code',
-                        // Template import description
                         modalLabelImport: 'Paste your HTML or CSS code here',
-                        // Modal import button text
                         modalBtnImport: 'Import',
-                        // Import description inside import modal
                         modalLabelExport: 'Get HTML & CSS',
-                        // Export button text
                         modalBtnExport: 'Export',
-                        // Title for the export modal
                         modalTitleExport: 'Export template',
-                        // Clean all previous blocks if true
-                        overwriteImport: true,
-                        // Add custom block
-                        cellStyle: {
-                            'font-size': '12px',
-                            'font-weight': 300,
-                            'vertical-align': 'top',
-                            color: 'rgb(111, 119, 125)',
-                            margin: 0,
-                            padding: 0,
-                        }
+                        overwriteImport: true
                     }
                 },
-                storageManager: false,
+                deviceManager: {
+                    devices: [
+                        {
+                            name: 'Desktop',
+                            width: '100%'
+                        }
+                    ]
+                },
+                panels: {
+                    defaults: [
+                        {
+                            id: 'panel-devices',
+                            el: '.panel__devices',
+                            buttons: [],
+                        },
+                        {
+                            id: 'panel-switcher',
+                            el: '.panel__switcher',
+                            buttons: [],
+                        }
+                    ]
+                },
                 assetManager: {
                     assets: [
-                        // Default images
                         'https://via.placeholder.com/350x250/78c5d6/fff',
                         'https://via.placeholder.com/350x250/459ba8/fff',
                         'https://via.placeholder.com/350x250/79c267/fff',
                         'https://via.placeholder.com/350x250/c5d647/fff',
                         'https://via.placeholder.com/350x250/f28c33/fff'
                     ],
-                    upload: false,
-                    uploadText: 'Drop files here or click to upload'
-                },
-                height: '100%',
-                fromElement: false,
-                pageManager: false,
-                panels: {
-                    defaults: [{
-                        id: 'layers',
-                        el: '.panel__right',
-                        resizable: {
-                            maxDim: 350,
-                            minDim: 200,
-                            tc: 0,
-                            cl: 1,
-                            cr: 0,
-                            bc: 0,
-                            keyWidth: 'flex-basis',
-                        },
-                    }]
+                    upload: false
                 }
             });
             
-            // Render template previews
-            templates.forEach((template, index) => {
-                const previewEl = document.getElementById(`preview-frame-${index}`);
-                previewEl.innerHTML = template.content;
+            // Show success message once editor is loaded
+            editor.on('load', () => {
+                console.log('Editor loaded successfully');
             });
             
-            // Set up form submission
-            document.getElementById('theme-form').addEventListener('submit', function(e) {
-                if (currentMode === 'visual') {
-                    document.getElementById('theme_content').value = editor.getHtml() + '<style>' + editor.getCss() + '</style>';
-                }
+            // Show error message if editor fails to load
+            editor.on('error', (err) => {
+                console.error('Editor error:', err);
+                document.getElementById('editor-error').style.display = 'block';
+                document.getElementById('editor-error').innerHTML += '<br>Editor error: ' + err;
             });
-            
-            // Select first template by default
-            if (templates.length > 0) {
-                selectTemplate(document.querySelector('.template-card'), 0);
-            }
-        });
+        }
         
         function selectTemplate(element, index) {
-            // Remove active class from all templates
-            document.querySelectorAll('.template-card').forEach(card => {
-                card.classList.remove('active');
-            });
-            
-            // Add active class to selected template
-            element.classList.add('active');
-            
-            // Load template into editor
-            const templateContent = templates[index].content;
-            
-            if (currentMode === 'visual') {
-                editor.setComponents(templateContent);
-            } else {
-                document.getElementById('theme_content').value = templateContent;
+            try {
+                // Remove active class from all templates
+                document.querySelectorAll('.template-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                
+                // Add active class to selected template
+                element.classList.add('active');
+                
+                // Load template into editor
+                const templateContent = templates[index].content;
+                
+                if (currentMode === 'visual' && editor) {
+                    editor.setComponents(templateContent);
+                } else {
+                    document.getElementById('theme_content').value = templateContent;
+                }
+            } catch (error) {
+                console.error('Error selecting template:', error);
+                alert('Error selecting template. See console for details.');
             }
         }
         
         function switchView(mode) {
-            // Get current content
-            let content = '';
-            if (currentMode === 'visual') {
-                content = editor.getHtml() + '<style>' + editor.getCss() + '</style>';
-            } else {
-                content = document.getElementById('theme_content').value;
+            try {
+                // Get current content
+                let content = '';
+                if (currentMode === 'visual' && editor) {
+                    content = editor.getHtml() + '<style>' + editor.getCss() + '</style>';
+                } else {
+                    content = document.getElementById('theme_content').value;
+                }
+                
+                // Update buttons
+                document.querySelectorAll('.view-mode').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`.view-mode[data-mode="${mode}"]`).classList.add('active');
+                
+                // Switch view
+                if (mode === 'visual') {
+                    document.getElementById('gjs').style.display = 'block';
+                    document.getElementById('theme_content').style.display = 'none';
+                    if (editor) {
+                        editor.setComponents(content);
+                    }
+                } else {
+                    document.getElementById('gjs').style.display = 'none';
+                    document.getElementById('theme_content').style.display = 'block';
+                    document.getElementById('theme_content').value = content;
+                }
+                
+                currentMode = mode;
+            } catch (error) {
+                console.error('Error switching view:', error);
+                alert('Error switching view. See console for details.');
             }
-            
-            // Update buttons
-            document.querySelectorAll('.view-mode').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`.view-mode[data-mode="${mode}"]`).classList.add('active');
-            
-            // Switch view
-            if (mode === 'visual') {
-                document.getElementById('gjs').style.display = 'block';
-                document.getElementById('theme_content').style.display = 'none';
-                editor.setComponents(content);
-            } else {
-                document.getElementById('gjs').style.display = 'none';
-                document.getElementById('theme_content').style.display = 'block';
-                document.getElementById('theme_content').value = content;
-            }
-            
-            currentMode = mode;
         }
     </script>
 </body>
