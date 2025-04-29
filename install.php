@@ -70,6 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 sender_id INT NOT NULL,
                 theme_id INT,
                 sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                is_ab_test TINYINT(1) DEFAULT 0,
+                ab_test_id INT NULL,
+                variant CHAR(1) NULL,
                 FOREIGN KEY (sender_id) REFERENCES users(id),
                 FOREIGN KEY (theme_id) REFERENCES themes(id)
             )",
@@ -104,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )",
-            // Add these new tables for analytics
+            // Analytics tables
             "CREATE TABLE IF NOT EXISTS email_opens (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 newsletter_id INT NOT NULL,
@@ -143,8 +146,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 device_type VARCHAR(50),
                 browser VARCHAR(50),
                 os VARCHAR(50),
-                CONSTRAINT fk_open_id FOREIGN KEY (open_id) REFERENCES email_opens(id) ON DELETE CASCADE
+                FOREIGN KEY (open_id) REFERENCES email_opens(id) ON DELETE CASCADE
             )",
+            // A/B Testing tables
+            "CREATE TABLE IF NOT EXISTS ab_tests (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                group_id INT NOT NULL,
+                subject_a VARCHAR(255) NOT NULL,
+                subject_b VARCHAR(255) NOT NULL,
+                content_a TEXT NOT NULL,
+                content_b TEXT NOT NULL,
+                split_percentage INT NOT NULL DEFAULT 50,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                sent_at TIMESTAMP NULL,
+                FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+            )",
+            // Subscriber management tables
+            "CREATE TABLE IF NOT EXISTS subscriber_scores (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                email VARCHAR(255) NOT NULL,
+                engagement_score FLOAT DEFAULT 0,
+                last_open_date TIMESTAMP NULL,
+                last_click_date TIMESTAMP NULL, 
+                total_opens INT DEFAULT 0,
+                total_clicks INT DEFAULT 0,
+                last_calculated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY (email)
+            )",
+            "CREATE TABLE IF NOT EXISTS subscriber_tags (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                email VARCHAR(255) NOT NULL,
+                tag VARCHAR(100) NOT NULL,
+                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY (email, tag)
+            )",
+            "CREATE TABLE IF NOT EXISTS subscriber_segments (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                description TEXT,
+                criteria TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )",
+            // Add foreign key for ab_tests in newsletters table
+            "ALTER TABLE newsletters ADD CONSTRAINT fk_ab_test_id FOREIGN KEY (ab_test_id) REFERENCES ab_tests(id) ON DELETE SET NULL",
+            // Default data
             "INSERT INTO users (username, email, password, role) VALUES ('$admin_user', '$admin_email', '$admin_pass', 'admin')",
             "INSERT INTO settings (name, value) VALUES ('title', 'Newsletter Dashboard'), ('background', 'assets/images/background.png')"
         ];
@@ -495,7 +542,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
         
         .notification.success {
             background-color: rgba(52, 168, 83, 0.1);
-            color: var(--accent);
+            color: var (--accent);
             border-left: 4px solid var(--accent);
         }
         

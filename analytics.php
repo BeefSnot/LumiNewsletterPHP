@@ -11,64 +11,76 @@ if (!isLoggedIn() || $_SESSION['role'] !== 'admin') {
 // Fix for undefined $currentVersion variable
 $currentVersion = require 'version.php';
 
-// Get newsletter ID from query parameters
-$newsletter_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+// Add this near the top of the file
+$error = '';
+try {
+    // Get newsletter ID from query parameters
+    $newsletter_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// Get list of newsletters for dropdown
-$newslettersQuery = $db->query("SELECT id, subject, sent_at FROM newsletters ORDER BY sent_at DESC");
-$newsletters = [];
-while ($row = $newslettersQuery->fetch_assoc()) {
-    $newsletters[] = $row;
-}
-
-// Get analytics for selected newsletter
-$opens = $clicks = [];
-$totalOpens = $totalClicks = 0;
-$uniqueOpens = $uniqueClicks = 0;
-
-if ($newsletter_id > 0) {
-    // Get total and unique opens
-    $opensQuery = $db->query("SELECT COUNT(*) as total FROM email_opens WHERE newsletter_id = $newsletter_id");
-    $totalOpens = $opensQuery->fetch_assoc()['total'];
-    
-    $uniqueOpensQuery = $db->query("SELECT COUNT(DISTINCT email) as unique_opens FROM email_opens WHERE newsletter_id = $newsletter_id");
-    $uniqueOpens = $uniqueOpensQuery->fetch_assoc()['unique_opens'];
-    
-    // Get total and unique clicks
-    $clicksQuery = $db->query("SELECT COUNT(*) as total FROM link_clicks WHERE newsletter_id = $newsletter_id");
-    $totalClicks = $clicksQuery->fetch_assoc()['total'];
-    
-    $uniqueClicksQuery = $db->query("SELECT COUNT(DISTINCT email) as unique_clicks FROM link_clicks WHERE newsletter_id = $newsletter_id");
-    $uniqueClicks = $uniqueClicksQuery->fetch_assoc()['unique_clicks'];
-    
-    // Get popular links
-    $popularLinksQuery = $db->query("SELECT original_url, COUNT(*) as clicks 
-                                     FROM link_clicks 
-                                     WHERE newsletter_id = $newsletter_id 
-                                     GROUP BY original_url 
-                                     ORDER BY clicks DESC 
-                                     LIMIT 5");
-    $popularLinks = [];
-    while ($row = $popularLinksQuery->fetch_assoc()) {
-        $popularLinks[] = $row;
+    // Get list of newsletters for dropdown
+    $newslettersQuery = $db->query("SELECT id, subject, sent_at FROM newsletters ORDER BY sent_at DESC");
+    $newsletters = [];
+    while ($row = $newslettersQuery->fetch_assoc()) {
+        $newsletters[] = $row;
     }
-    
-    // Get geo data for map visualization
-    $geoQuery = $db->query("
-        SELECT g.country, g.city, g.latitude, g.longitude, COUNT(*) as count
-        FROM email_geo_data g
-        LEFT JOIN email_opens o ON g.open_id = o.id
-        LEFT JOIN link_clicks c ON g.click_id = c.id
-        WHERE (o.newsletter_id = $newsletter_id OR c.newsletter_id = $newsletter_id)
-        AND g.latitude IS NOT NULL AND g.longitude IS NOT NULL
-        GROUP BY g.latitude, g.longitude
-        HAVING COUNT(*) > 0
-    ");
-    
-    $geoData = [];
-    while ($row = $geoQuery->fetch_assoc()) {
-        $geoData[] = $row;
+
+    // Get analytics for selected newsletter
+    $opens = $clicks = [];
+    $totalOpens = $totalClicks = 0;
+    $uniqueOpens = $uniqueClicks = 0;
+
+    if ($newsletter_id > 0) {
+        // Get total and unique opens
+        $stmt = $db->prepare("SELECT COUNT(*) as total FROM email_opens WHERE newsletter_id = ?");
+        $stmt->bind_param("i", $newsletter_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $totalOpens = $result->fetch_assoc()['total'];
+        $stmt->close();
+        
+        $uniqueOpensQuery = $db->query("SELECT COUNT(DISTINCT email) as unique_opens FROM email_opens WHERE newsletter_id = $newsletter_id");
+        $uniqueOpens = $uniqueOpensQuery->fetch_assoc()['unique_opens'];
+        
+        // Get total and unique clicks
+        $clicksQuery = $db->query("SELECT COUNT(*) as total FROM link_clicks WHERE newsletter_id = $newsletter_id");
+        $totalClicks = $clicksQuery->fetch_assoc()['total'];
+        
+        $uniqueClicksQuery = $db->query("SELECT COUNT(DISTINCT email) as unique_clicks FROM link_clicks WHERE newsletter_id = $newsletter_id");
+        $uniqueClicks = $uniqueClicksQuery->fetch_assoc()['unique_clicks'];
+        
+        // Get popular links
+        $popularLinksQuery = $db->query("SELECT original_url, COUNT(*) as clicks 
+                                         FROM link_clicks 
+                                         WHERE newsletter_id = $newsletter_id 
+                                         GROUP BY original_url 
+                                         ORDER BY clicks DESC 
+                                         LIMIT 5");
+        $popularLinks = [];
+        while ($row = $popularLinksQuery->fetch_assoc()) {
+            $popularLinks[] = $row;
+        }
+        
+        // Get geo data for map visualization
+        $geoQuery = $db->query("
+            SELECT g.country, g.city, g.latitude, g.longitude, COUNT(*) as count
+            FROM email_geo_data g
+            LEFT JOIN email_opens o ON g.open_id = o.id
+            LEFT JOIN link_clicks c ON g.click_id = c.id
+            WHERE (o.newsletter_id = $newsletter_id OR c.newsletter_id = $newsletter_id)
+            AND g.latitude IS NOT NULL AND g.longitude IS NOT NULL
+            GROUP BY g.latitude, g.longitude
+            HAVING COUNT(*) > 0
+        ");
+        
+        $geoData = [];
+        while ($row = $geoQuery->fetch_assoc()) {
+            $geoData[] = $row;
+        }
     }
+} catch (Exception $e) {
+    $error = "Database error: " . $e->getMessage();
+    // Log the error
+    error_log("Analytics error: " . $e->getMessage());
 }
 ?>
 
@@ -289,6 +301,12 @@ if ($newsletter_id > 0) {
                         </select>
                     </form>
                     
+                    <?php if ($error): ?>
+                        <div class="notification error">
+                            <i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?>
+                        </div>
+                    <?php endif; ?>
+                    
                     <?php if ($newsletter_id > 0): ?>
                         <div class="analytics-overview">
                             <div class="metric-card">
@@ -433,7 +451,7 @@ if ($newsletter_id > 0) {
             document.getElementById(tabId + '-tab').classList.add('active');
             
             // Activate clicked button
-            event.target.classList.add('active');
+            document.querySelector(`.tab-btn[onclick*="${tabId}"]`).classList.add('active');
             
             // Special case for map - needs to be refreshed when shown
             if(tabId === 'map') {

@@ -35,4 +35,22 @@ if (!empty($url)) {
     header("Location: index.php");
     exit;
 }
+
+function getGeoData($ip) {
+    // Use free IP geolocation API
+    $response = @file_get_contents("http://ip-api.com/json/{$ip}");
+    if ($response) {
+        $data = json_decode($response, true);
+        if ($data && isset($data['status']) && $data['status'] === 'success') {
+            return [
+                'country' => $data['country'] ?? '',
+                'region' => $data['regionName'] ?? '',
+                'city' => $data['city'] ?? '',
+                'latitude' => $data['lat'] ?? 0,
+                'longitude' => $data['lon'] ?? 0
+            ];
+        }
+    }
+    return false;
+}
 ?>

@@ -129,6 +129,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $updateAvailable) {
                 $message = 'Update applied successfully! LumiNewsletter has been updated to version ' . $latestVersion;
                 $messageType = 'success';
                 file_put_contents(__DIR__ . '/version.php', "<?php\nreturn '" . $latestVersion . "';\n");
+                
+                // Add this line to ensure database schema is always checked during updates
+                applyDatabaseSchemaChanges($db);
             }
         } else {
             $message = 'Failed to extract the update package. ZipArchive error code: ' . $extractResult;
@@ -209,16 +212,18 @@ function applyDatabaseSchemaChanges($db) {
             opened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             user_agent VARCHAR(255),
             ip_address VARCHAR(45),
+            INDEX(newsletter_id),
             FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE CASCADE
         )",
         'link_clicks' => "CREATE TABLE IF NOT EXISTS link_clicks (
             id INT AUTO_INCREMENT PRIMARY KEY,
             newsletter_id INT NOT NULL,
-            email VARCHAR(255) NOT NULL, 
+            email VARCHAR(255) NOT NULL,
             original_url TEXT NOT NULL,
             clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             user_agent VARCHAR(255),
             ip_address VARCHAR(45),
+            INDEX(newsletter_id),
             FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE CASCADE
         )",
         'email_geo_data' => "CREATE TABLE IF NOT EXISTS email_geo_data (
@@ -231,6 +236,8 @@ function applyDatabaseSchemaChanges($db) {
             latitude DECIMAL(10,8),
             longitude DECIMAL(11,8),
             recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX(open_id),
+            INDEX(click_id),
             FOREIGN KEY (open_id) REFERENCES email_opens(id) ON DELETE CASCADE,
             FOREIGN KEY (click_id) REFERENCES link_clicks(id) ON DELETE CASCADE
         )",
@@ -240,6 +247,7 @@ function applyDatabaseSchemaChanges($db) {
             device_type VARCHAR(50),
             browser VARCHAR(50),
             os VARCHAR(50),
+            INDEX(open_id),
             FOREIGN KEY (open_id) REFERENCES email_opens(id) ON DELETE CASCADE
         )",
         // A/B testing tables
