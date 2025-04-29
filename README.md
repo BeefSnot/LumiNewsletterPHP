@@ -1,6 +1,6 @@
 # 📧 LumiNewsletter - Professional Email Marketing Solution
 
-![LumiNewsletter Logo](https://github.com/yourusername/LumiNewsletter/raw/main/assets/img/logo.png)
+![LumiNewsletter Logo](https://github.com/BeefSnot/LumiNewsletterPHP/raw/main/assets/images/lumihost.png)
 
 **Current Version: 1.43** | **Release Date: April 27, 2025**
 
