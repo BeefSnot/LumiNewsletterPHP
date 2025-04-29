@@ -2,7 +2,7 @@
 
 ![LumiNewsletter Logo](https://github.com/BeefSnot/LumiNewsletterPHP/raw/main/assets/images/lumihost.png)
 
-Test site - newsletter.jameshamby.me
+Test site - https://newsletter.jameshamby.me
 
 Test login (only editor, no admin. Working on an actual test site as we speak)
 
