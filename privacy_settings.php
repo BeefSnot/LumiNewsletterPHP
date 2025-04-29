@@ -10,6 +10,49 @@ $currentVersion = require 'version.php';
 $message = '';
 $messageType = '';
 
+// Check if privacy_settings table exists
+$checkTable = $db->query("SHOW TABLES LIKE 'privacy_settings'");
+if ($checkTable->num_rows === 0) {
+    // Create the table if it doesn't exist
+    $db->query("CREATE TABLE IF NOT EXISTS privacy_settings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        setting_key VARCHAR(100) NOT NULL UNIQUE,
+        setting_value TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )");
+    
+    // Add default settings
+    $defaultPrivacySettings = [
+        ['privacy_policy', ''],
+        ['enable_tracking', '1'],
+        ['enable_geo_analytics', '1'],
+        ['require_explicit_consent', '1'],
+        ['data_retention_period', '12'],
+        ['anonymize_ip', '0'],
+        ['cookie_notice', '1'],
+        ['cookie_notice_text', 'We use cookies to improve your experience and analyze website traffic. By clicking "Accept", you agree to our website\'s cookie use as described in our Privacy Policy.'],
+        ['consent_prompt_text', 'I consent to receiving newsletters and agree that my email engagement may be tracked for analytics purposes.']
+    ];
+    
+    $stmt = $db->prepare("INSERT INTO privacy_settings (setting_key, setting_value) VALUES (?, ?)");
+    foreach ($defaultPrivacySettings as $setting) {
+        $stmt->bind_param("ss", $setting[0], $setting[1]);
+        $stmt->execute();
+    }
+    
+    $message = 'Privacy settings table created with default values';
+    $messageType = 'success';
+}
+
+// Check if social_sharing_enabled setting exists
+$result = $db->query("SELECT COUNT(*) as count FROM settings WHERE name = 'social_sharing_enabled'");
+$row = $result->fetch_assoc();
+if ($row['count'] == 0) {
+    // Default to enabled
+    $db->query("INSERT INTO settings (name, value) VALUES ('social_sharing_enabled', '1')");
+}
+
 // Get current settings
 $settingsResult = $db->query("SELECT name, value FROM settings WHERE name IN ('privacy_policy', 'data_retention', 'allow_export', 'allow_deletion')");
 $settings = [];

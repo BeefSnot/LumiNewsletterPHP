@@ -13,6 +13,41 @@ $currentVersion = require 'version.php';
 $message = '';
 $messageType = '';
 
+// Check if social tables exist
+$checkSocial = $db->query("SHOW TABLES LIKE 'social_shares'");
+if ($checkSocial->num_rows === 0) {
+    // Create required tables
+    $db->query("CREATE TABLE IF NOT EXISTS social_shares (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        newsletter_id INT NOT NULL,
+        platform VARCHAR(50) NOT NULL,
+        share_count INT DEFAULT 0,
+        click_count INT DEFAULT 0,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE CASCADE
+    )");
+    
+    $db->query("CREATE TABLE IF NOT EXISTS social_clicks (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        share_id INT NOT NULL,
+        ip_address VARCHAR(45) NULL,
+        referrer VARCHAR(255) NULL,
+        clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (share_id) REFERENCES social_shares(id) ON DELETE CASCADE
+    )");
+    
+    $message = "Social sharing tables have been created";
+    $messageType = "success";
+}
+
+// Check if social sharing is enabled
+$result = $db->query("SELECT value FROM settings WHERE name = 'social_sharing_enabled'");
+$sharingEnabled = true; // Default to true if setting doesn't exist
+
+if ($result && $result->num_rows > 0) {
+    $sharingEnabled = $result->fetch_assoc()['value'] == '1';
+}
+
 // Get overall social stats
 $overallStats = $db->query("
     SELECT 

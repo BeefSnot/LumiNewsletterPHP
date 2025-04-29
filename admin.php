@@ -49,6 +49,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
     }
 
+    // Handle social sharing toggle
+    if (isset($_POST['social_sharing'])) {
+        $socialSharingEnabled = isset($_POST['social_sharing_enabled']) ? '1' : '0';
+        
+        // Check if setting exists
+        $checkStmt = $db->prepare("SELECT COUNT(*) FROM settings WHERE name = 'social_sharing_enabled'");
+        $checkStmt->execute();
+        $checkStmt->bind_result($count);
+        $checkStmt->fetch();
+        $checkStmt->close();
+        
+        if ($count > 0) {
+            $stmt = $db->prepare("UPDATE settings SET value = ? WHERE name = 'social_sharing_enabled'");
+        } else {
+            $stmt = $db->prepare("INSERT INTO settings (name, value) VALUES ('social_sharing_enabled', ?)");
+        }
+        
+        $stmt->bind_param('s', $socialSharingEnabled);
+        $stmt->execute();
+        $stmt->close();
+        
+        $message = 'Social sharing settings updated successfully';
+    }
+
     $message = 'Settings updated successfully';
 }
 
@@ -205,6 +229,42 @@ if ($latestUpdateInfo !== false) {
                     <div class="card-body">
                         <p>Create and manage subscriber groups to organize your audience.</p>
                         <a href="manage_groups.php" class="btn btn-primary">Manage Groups</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-share-alt"></i> Social Integration</h2>
+                    </div>
+                    <div class="card-body">
+                        <p>Configure social media sharing options for newsletters.</p>
+                        <a href="social_sharing.php" class="btn btn-primary">Social Settings</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-share-alt"></i> Social Media Integration</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="social_sharing_enabled" <?php echo ($settings['social_sharing_enabled'] ?? '1') == '1' ? 'checked' : ''; ?>>
+                                    Enable social sharing for newsletters
+                                </label>
+                                <small>When enabled, subscribers can share your newsletters on social media platforms</small>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" name="social_sharing" class="btn btn-primary">Save Social Settings</button>
+                            </div>
+                        </form>
+                        
+                        <div class="mt-3">
+                            <p>Configure detailed social sharing options and view analytics:</p>
+                            <a href="social_sharing.php" class="btn btn-outline">Social Sharing Dashboard</a>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -19,6 +19,9 @@ $latestVersion = '';
 $changelog = '';
 $updateUrl = '';
 
+// Start output buffering to prevent output before headers
+ob_start();
+
 // Add cache busting parameter and enable error output
 $latestUpdateInfo = @file_get_contents(UPDATE_JSON_URL . '?nocache=' . time());
 if ($latestUpdateInfo === false) {
@@ -560,6 +563,26 @@ if ($checkSocialBefore->num_rows === 0) {
     echo "Created social media tables. ";
 }
 echo "<br>";
+
+// Store messages for later display
+$updateMessages = [];
+
+if ($checkAPIBefore->num_rows === 0) {
+    // Create API tables - use the same definitions from requiredTables later in the file
+    // $db->query($requiredTables['api_keys']);
+    // $db->query($requiredTables['api_requests']);
+    $updateMessages[] = "Created API tables.";
+}
+
+if ($checkSocialBefore->num_rows === 0) {
+    // Create social tables - use the same definitions from requiredTables later in the file
+    // $db->query($requiredTables['social_shares']);
+    // $db->query($requiredTables['social_clicks']);
+    $updateMessages[] = "Created social media tables.";
+}
+
+// Clear any output so far to prevent it showing before HTML
+ob_end_clean();
 
 ?>
 <!DOCTYPE html>
