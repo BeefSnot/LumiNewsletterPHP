@@ -34,6 +34,7 @@ $apiBaseUrl = $siteUrl . '/api.php';
     <title>API Documentation | LumiNewsletter</title>
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
     <link rel="stylesheet" href="assets/css/mobile-responsive.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .api-method {
@@ -101,33 +102,16 @@ $apiBaseUrl = $siteUrl . '/api.php';
     </style>
 </head>
 <body>
+    <!-- Mobile navigation toggle button -->
+    <button class="mobile-nav-toggle" id="mobileNavToggle">
+        <i class="fas fa-bars" id="menuIcon"></i>
+    </button>
+    
+    <!-- Backdrop for mobile menu -->
+    <div class="backdrop" id="backdrop"></div>
+    
     <div class="app-container">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <i class="fas fa-paper-plane"></i>
-                    <h2>LumiNews</h2>
-                </div>
-            </div>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="index.php" class="nav-item"><i class="fas fa-home"></i> Dashboard</a></li>
-                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                    <li><a href="admin.php" class="nav-item"><i class="fas fa-cog"></i> Admin Settings</a></li>
-                    <?php endif; ?>
-                    <li><a href="send_newsletter.php" class="nav-item"><i class="fas fa-paper-plane"></i> Send Newsletter</a></li>
-                    <li><a href="manage_newsletters.php" class="nav-item"><i class="fas fa-envelope"></i> Manage Newsletters</a></li>
-                    <li><a href="analytics.php" class="nav-item"><i class="fas fa-chart-bar"></i> Analytics</a></li>
-                    <li><a href="social_sharing.php" class="nav-item"><i class="fas fa-share-alt"></i> Social Sharing</a></li>
-                    <li><a href="api_keys.php" class="nav-item"><i class="fas fa-key"></i> API Keys</a></li>
-                    <li><a href="api_docs.php" class="nav-item active"><i class="fas fa-book"></i> API Docs</a></li>
-                    <li><a href="logout.php" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                </ul>
-            </nav>
-            <div class="sidebar-footer">
-                <p>Version <?php echo htmlspecialchars($currentVersion); ?></p>
-            </div>
-        </aside>
+        <?php include 'includes/sidebar.php'; ?>
 
         <main class="content">
             <header class="top-header">
@@ -604,5 +588,7 @@ print(data)
             </div>
         </main>
     </div>
+    
+    <script src="assets/js/sidebar.js"></script>
 </body>
 </html>

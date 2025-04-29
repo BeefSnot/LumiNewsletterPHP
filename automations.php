@@ -3,6 +3,7 @@ session_start();
 require_once 'includes/auth.php';
 require_once 'includes/db.php';
 
+// Only admins can manage automations
 if (!isLoggedIn() || $_SESSION['role'] !== 'admin') {
     header('Location: login.php');
     exit();
@@ -151,158 +152,11 @@ while ($tagsResult && $row = $tagsResult->fetch_assoc()) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Automation | LumiNewsletter</title>
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/mobile-responsive.css">
-    <style>
-        .workflow-card {
-            background: #fff;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        
-        .workflow-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .workflow-name {
-            font-size: 18px;
-            margin: 0;
-            color: var(--primary);
-            font-weight: 600;
-        }
-        
-        .workflow-meta {
-            font-size: 14px;
-            color: var(--gray);
-        }
-        
-        .workflow-body {
-            padding: 15px 20px;
-        }
-        
-        .workflow-stats {
-            display: flex;
-            margin-bottom: 15px;
-        }
-        
-        .workflow-stat {
-            flex: 1;
-            text-align: center;
-            padding: 10px;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary);
-        }
-        
-        .stat-label {
-            font-size: 14px;
-            color: var(--gray);
-        }
-        
-        .workflow-description {
-            margin-bottom: 15px;
-            color: var(--gray-dark);
-        }
-        
-        .workflow-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        
-        .badge-draft {
-            background-color: #e9ecef;
-            color: #495057;
-        }
-        
-        .badge-active {
-            background-color: #34a853;
-            color: white;
-        }
-        
-        .badge-paused {
-            background-color: #fbbc05;
-            color: white;
-        }
-        
-        .trigger-type {
-            display: inline-block;
-            margin-right: 10px;
-            padding: 4px 8px;
-            background: rgba(66, 133, 244, 0.1);
-            color: var(--primary);
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        
-        .trigger-settings {
-            display: none;
-        }
-        
-        .trigger-settings.active {
-            display: block;
-            margin-top: 15px;
-        }
-        
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .tab-btn {
-            padding: 10px 20px;
-            cursor: pointer;
-            border: none;
-            background: none;
-            font-weight: 500;
-            color: var(--gray);
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-        }
-        
-        .tab-btn:hover {
-            color: var(--primary);
-        }
-        
-        .tab-btn.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/sidebar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Keep the rest of the head content -->
 </head>
 <body>
     <!-- Mobile navigation toggle button -->
@@ -314,35 +168,7 @@ while ($tagsResult && $row = $tagsResult->fetch_assoc()) {
     <div class="backdrop" id="backdrop"></div>
     
     <div class="app-container">
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <i class="fas fa-paper-plane"></i>
-                    <h2>LumiNews</h2>
-                </div>
-            </div>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="index.php" class="nav-item"><i class="fas fa-home"></i> Dashboard</a></li>
-                    <li><a href="admin.php" class="nav-item"><i class="fas fa-cog"></i> Admin Settings</a></li>
-                    <li><a href="create_theme.php" class="nav-item"><i class="fas fa-palette"></i> Create Theme</a></li>
-                    <li><a href="send_newsletter.php" class="nav-item"><i class="fas fa-paper-plane"></i> Send Newsletter</a></li>
-                    <li><a href="manage_newsletters.php" class="nav-item"><i class="fas fa-envelope"></i> Manage Newsletters</a></li>
-                    <li><a href="manage_subscriptions.php" class="nav-item"><i class="fas fa-users"></i> Subscribers</a></li>
-                    <li><a href="manage_users.php" class="nav-item"><i class="fas fa-user-shield"></i> Users</a></li>
-                    <li><a href="manage_smtp.php" class="nav-item"><i class="fas fa-server"></i> SMTP Settings</a></li>
-                    <li><a href="analytics.php" class="nav-item"><i class="fas fa-chart-bar"></i> Analytics</a></li>
-                    <li><a href="ab_testing.php" class="nav-item"><i class="fas fa-flask"></i> A/B Testing</a></li>
-                    <li><a href="segments.php" class="nav-item"><i class="fas fa-tags"></i> Segments</a></li>
-                    <li><a href="automations.php" class="nav-item active"><i class="fas fa-robot"></i> Automation</a></li>
-                    <li><a href="embed_docs.php" class="nav-item"><i class="fas fa-code"></i> Embed Widget</a></li>
-                    <li><a href="logout.php" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                </ul>
-            </nav>
-            <div class="sidebar-footer">
-                <p>Version <?php echo htmlspecialchars($currentVersion); ?></p>
-            </div>
-        </aside>
+        <?php include 'includes/sidebar.php'; ?>
 
         <main class="content">
             <header class="top-header">
@@ -608,6 +434,7 @@ while ($tagsResult && $row = $tagsResult->fetch_assoc()) {
         <p>&copy; <?php echo date('Y'); ?> LumiNewsletter - Professional Newsletter Management</p>
     </footer>
     
+    <script src="assets/js/sidebar.js"></script>
     <script>
         function showTab(tabId, el) {
             // Hide all tabs

@@ -81,39 +81,21 @@ if ($latestUpdateInfo !== false) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Area | LumiNewsletter</title>
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
+    <link rel="stylesheet" href="assets/css/mobile-responsive.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <!-- Mobile navigation toggle button -->
+    <button class="mobile-nav-toggle" id="mobileNavToggle">
+        <i class="fas fa-bars" id="menuIcon"></i>
+    </button>
+    
+    <!-- Backdrop for mobile menu -->
+    <div class="backdrop" id="backdrop"></div>
+    
     <div class="app-container">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <i class="fas fa-paper-plane"></i>
-                    <h2>LumiNews</h2>
-                </div>
-            </div>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="index.php" class="nav-item"><i class="fas fa-home"></i> Dashboard</a></li>
-                    <li><a href="admin.php" class="nav-item active"><i class="fas fa-cog"></i> Admin Settings</a></li>
-                    <li><a href="create_theme.php" class="nav-item"><i class="fas fa-palette"></i> Create Theme</a></li>
-                    <li><a href="send_newsletter.php" class="nav-item"><i class="fas fa-paper-plane"></i> Send Newsletter</a></li>
-                    <li><a href="manage_newsletters.php" class="nav-item"><i class="fas fa-envelope"></i> Manage Newsletters</a></li>
-                    <li><a href="manage_subscriptions.php" class="nav-item"><i class="fas fa-users"></i> Subscribers</a></li>
-                    <li><a href="manage_users.php" class="nav-item"><i class="fas fa-user-shield"></i> Users</a></li>
-                    <li><a href="manage_smtp.php" class="nav-item"><i class="fas fa-server"></i> SMTP Settings</a></li>
-                    <li><a href="embed_docs.php" class="nav-item"><i class="fas fa-code"></i> Embed Widget</a></li>
-                    <li><a href="analytics.php" class="nav-item"><i class="fas fa-chart-bar"></i> Analytics</a></li>
-                    <li><a href="ab_testing.php" class="nav-item"><i class="fas fa-flask"></i> A/B Testing</a></li>
-                    <li><a href="segments.php" class="nav-item"><i class="fas fa-tags"></i> Segments</a></li>
-                    <li><a href="privacy_settings.php" class="nav-item"><i class="fas fa-shield-alt"></i> Privacy</a></li>
-                    <li><a href="logout.php" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                </ul>
-            </nav>
-            <div class="sidebar-footer">
-                <p>Version <?php echo htmlspecialchars($currentVersion); ?></p>
-            </div>
-        </aside>
+        <?php include 'includes/sidebar.php'; ?>
 
         <main class="content">
             <header class="top-header">
@@ -205,6 +187,26 @@ if ($latestUpdateInfo !== false) {
                         <a href="manage_smtp.php" class="btn btn-primary">Configure SMTP</a>
                     </div>
                 </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-shield-alt"></i> Privacy</h2>
+                    </div>
+                    <div class="card-body">
+                        <p>Configure privacy policy and data retention settings.</p>
+                        <a href="privacy_settings.php" class="btn btn-primary">Privacy Settings</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-layer-group"></i> Groups</h2>
+                    </div>
+                    <div class="card-body">
+                        <p>Create and manage subscriber groups to organize your audience.</p>
+                        <a href="manage_groups.php" class="btn btn-primary">Manage Groups</a>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -212,5 +214,7 @@ if ($latestUpdateInfo !== false) {
     <footer class="app-footer">
         <p>&copy; <?php echo date('Y'); ?> LumiNewsletter - Professional Newsletter Management</p>
     </footer>
+    
+    <script src="assets/js/sidebar.js"></script>
 </body>
 </html>

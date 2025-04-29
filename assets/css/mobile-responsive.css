@@ -93,6 +93,25 @@
     .header-right .btn {
         width: 100%;
     }
+    
+    /* Add this to mobile-responsive.css to improve dropdown display on mobile */
+    .menu-group .submenu {
+        padding-left: 0;
+    }
+    
+    .menu-group-header {
+        padding-left: 1.5rem;
+    }
+    
+    .submenu .nav-item {
+        padding-left: 3rem;
+    }
+    
+    .menu-group-header i:first-child {
+        width: 20px;
+        margin-right: 10px;
+        text-align: center;
+    }
 }
 
 @media (max-width: 576px) {

@@ -50,56 +50,12 @@ $scriptUrl = $siteUrl . '/assets/js/lumi-widget.js.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Embed Instructions | LumiNewsletter</title>
+    <title>Embed Widget | LumiNewsletter</title>
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/mobile-responsive.css">
-    <style>
-        code {
-            background-color: #f5f7fa;
-            border-radius: 4px;
-            padding: 2px 6px;
-            font-family: monospace;
-            color: #333;
-        }
-        pre {
-            background-color: #f5f7fa;
-            border-radius: 8px;
-            padding: 15px;
-            font-family: monospace;
-            overflow-x: auto;
-            margin-bottom: 20px;
-            border: 1px solid #e0e0e0;
-        }
-        .copy-button {
-            display: block;
-            margin-top: 5px;
-            padding: 5px 10px;
-            font-size: 14px;
-            background: var(--gray-light);
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-            float: right;
-        }
-        .copy-button:hover {
-            background: #e0e0e0;
-        }
-        .code-container {
-            position: relative;
-            margin-bottom: 25px;
-        }
-        .embed-preview {
-            margin-top: 30px;
-            border: 2px dashed #ccc;
-            padding: 20px;
-            border-radius: 8px;
-        }
-        .embed-preview h3 {
-            margin-bottom: 20px;
-            color: var(--gray);
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/sidebar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Other head content remains the same -->
 </head>
 <body>
     <!-- Mobile navigation toggle button -->
@@ -111,31 +67,7 @@ $scriptUrl = $siteUrl . '/assets/js/lumi-widget.js.php';
     <div class="backdrop" id="backdrop"></div>
     
     <div class="app-container">
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <i class="fas fa-paper-plane"></i>
-                    <h2>LumiNews</h2>
-                </div>
-            </div>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="index.php" class="nav-item"><i class="fas fa-home"></i> Dashboard</a></li>
-                    <li><a href="admin.php" class="nav-item"><i class="fas fa-cog"></i> Admin Settings</a></li>
-                    <li><a href="create_theme.php" class="nav-item"><i class="fas fa-palette"></i> Create Theme</a></li>
-                    <li><a href="send_newsletter.php" class="nav-item"><i class="fas fa-paper-plane"></i> Send Newsletter</a></li>
-                    <li><a href="manage_newsletters.php" class="nav-item"><i class="fas fa-envelope"></i> Manage Newsletters</a></li>
-                    <li><a href="manage_subscriptions.php" class="nav-item"><i class="fas fa-users"></i> Subscribers</a></li>
-                    <li><a href="manage_users.php" class="nav-item"><i class="fas fa-user-shield"></i> Users</a></li>
-                    <li><a href="manage_smtp.php" class="nav-item"><i class="fas fa-server"></i> SMTP Settings</a></li>
-                    <li><a href="embed_docs.php" class="nav-item active"><i class="fas fa-code"></i> Embed Widget</a></li>
-                    <li><a href="logout.php" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                </ul>
-            </nav>
-            <div class="sidebar-footer">
-                <p>LumiNewsletter Version <?php echo htmlspecialchars($currentVersion); ?></p>
-            </div>
-        </aside>
+        <?php include 'includes/sidebar.php'; ?>
 
         <main class="content">
             <header class="top-header">
@@ -246,7 +178,9 @@ echo htmlspecialchars($embedCode);
     <footer class="app-footer">
         <p>&copy; <?php echo date('Y'); ?> LumiNewsletter - Professional Newsletter Management</p>
     </footer>
-
+    
+    <script src="assets/js/sidebar.js"></script>
+    
     <script>
         function copyCode(elementId) {
             const codeElement = document.getElementById(elementId);

@@ -423,3 +423,83 @@ textarea:focus {
         margin-top: 0.75rem;
     }
 }
+
+/* Modal styles - add to end of file */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1050;
+    overflow-y: auto;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-dialog {
+    width: 100%;
+    max-width: 500px;
+    margin: 1.75rem auto;
+    animation: modalFadeIn 0.3s;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--primary);
+}
+
+.modal-body {
+    padding: 1rem;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--gray);
+}
+
+.close-modal:hover {
+    color: var(--error);
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 1rem;
+    }
+}

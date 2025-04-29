@@ -81,6 +81,7 @@ $recentActivity = $db->query("
     <title>Social Media Analytics | LumiNewsletter</title>
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
     <link rel="stylesheet" href="assets/css/mobile-responsive.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -259,32 +260,7 @@ $recentActivity = $db->query("
     <div class="backdrop" id="backdrop"></div>
     
     <div class="app-container">
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <i class="fas fa-paper-plane"></i>
-                    <h2>LumiNews</h2>
-                </div>
-            </div>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="index.php" class="nav-item"><i class="fas fa-home"></i> Dashboard</a></li>
-                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                    <li><a href="admin.php" class="nav-item"><i class="fas fa-cog"></i> Admin Settings</a></li>
-                    <?php endif; ?>
-                    <li><a href="create_theme.php" class="nav-item"><i class="fas fa-palette"></i> Create Theme</a></li>
-                    <li><a href="send_newsletter.php" class="nav-item"><i class="fas fa-paper-plane"></i> Send Newsletter</a></li>
-                    <li><a href="manage_newsletters.php" class="nav-item"><i class="fas fa-envelope"></i> Manage Newsletters</a></li>
-                    <li><a href="analytics.php" class="nav-item"><i class="fas fa-chart-bar"></i> Analytics</a></li>
-                    <li><a href="social_sharing.php" class="nav-item active"><i class="fas fa-share-alt"></i> Social Sharing</a></li>
-                    <li><a href="api_keys.php" class="nav-item"><i class="fas fa-key"></i> API Keys</a></li>
-                    <li><a href="logout.php" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                </ul>
-            </nav>
-            <div class="sidebar-footer">
-                <p>Version <?php echo htmlspecialchars($currentVersion); ?></p>
-            </div>
-        </aside>
+        <?php include 'includes/sidebar.php'; ?>
 
         <main class="content">
             <header class="top-header">
@@ -498,6 +474,8 @@ $recentActivity = $db->query("
     <footer class="app-footer">
         <p>&copy; <?php echo date('Y'); ?> LumiNewsletter - Professional Newsletter Management</p>
     </footer>
+    
+    <script src="assets/js/sidebar.js"></script>
     
     <script>
         // Create the chart
