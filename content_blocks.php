@@ -115,7 +115,7 @@ while ($row = $result->fetch_assoc()) {
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
     <link rel="stylesheet" href="assets/css/mobile-responsive.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="assets/js/tinymce/tinymce.min.js"></script>
+    <script src="assets/js/tinymce/tinymce/js/tinymce/tinymce.min.js"></script>
     <style>
         .block-list {
             margin-top: 20px;
