@@ -14,7 +14,7 @@ $message = '';
 $messageType = '';
 
 // Get available themes
-$themesResult = $db->query("SELECT id, name FROM email_themes ORDER BY name ASC");
+$themesResult = $db->query("SELECT id, name FROM themes ORDER BY name ASC");
 $themes = [];
 while ($themesResult && $row = $themesResult->fetch_assoc()) {
     $themes[] = $row;
