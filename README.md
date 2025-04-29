@@ -2,14 +2,17 @@
 
 ![LumiNewsletter Logo](https://github.com/BeefSnot/LumiNewsletterPHP/raw/main/assets/images/lumihost.png)
 
-Test site - https://newsletter.jameshamby.me
+## Test site - https://newsletter.jameshamby.me
 
 Test login (only editor, no admin. Working on an actual test site as we speak)
 
 Test
 Test1234
 
-**Current Version: 1.52** | **Release Date: April 27, 2025**
+
+**I will be organizing project very soon!**
+
+**Current Version: 1.53** | **Release Date: April 27, 2025**
 
 ## 📋 Table of Contents
 
