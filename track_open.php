@@ -1,5 +1,6 @@
 <?php
 require_once 'includes/db.php';
+require_once 'includes/geo_track.php';
 
 // Get tracking parameters
 $newsletter_id = isset($_GET['nid']) ? (int)$_GET['nid'] : 0;
@@ -16,7 +17,11 @@ if ($newsletter_id > 0 && filter_var($email, FILTER_VALIDATE_EMAIL)) {
                           VALUES (?, ?, ?, ?)");
     $stmt->bind_param("isss", $newsletter_id, $email, $user_agent, $ip_address);
     $stmt->execute();
+    $open_id = $stmt->insert_id;
     $stmt->close();
+    
+    // Record geographic data
+    recordGeoData('open', $open_id);
 }
 
 // Return a transparent 1x1 pixel

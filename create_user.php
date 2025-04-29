@@ -72,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <li><a href="manage_users.php" class="nav-item"><i class="fas fa-users-cog"></i> Manage Users</a></li>
                     <li><a href="send_newsletter.php" class="nav-item"><i class="fas fa-envelope"></i> Send Newsletter</a></li>
                     <li><a href="manage_newsletters.php" class="nav-item"><i class="fas fa-newspaper"></i> Manage Newsletters</a></li>
+                    <li><a href="analytics.php" class="nav-item"><i class="fas fa-chart-bar"></i> Analytics</a></li>
                     <li><a href="logout.php" class="nav-item"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 </ul>
             </nav>

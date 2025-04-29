@@ -52,6 +52,23 @@ if ($newsletter_id > 0) {
     while ($row = $popularLinksQuery->fetch_assoc()) {
         $popularLinks[] = $row;
     }
+    
+    // Get geo data for map visualization
+    $geoQuery = $db->query("
+        SELECT g.country, g.city, g.latitude, g.longitude, COUNT(*) as count
+        FROM email_geo_data g
+        LEFT JOIN email_opens o ON g.open_id = o.id
+        LEFT JOIN link_clicks c ON g.click_id = c.id
+        WHERE (o.newsletter_id = $newsletter_id OR c.newsletter_id = $newsletter_id)
+        AND g.latitude IS NOT NULL AND g.longitude IS NOT NULL
+        GROUP BY g.latitude, g.longitude
+        HAVING COUNT(*) > 0
+    ");
+    
+    $geoData = [];
+    while ($row = $geoQuery->fetch_assoc()) {
+        $geoData[] = $row;
+    }
 }
 ?>
 
@@ -64,12 +81,20 @@ if ($newsletter_id > 0) {
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <style>
         .analytics-overview {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             margin-bottom: 30px;
+        }
+        
+        @media (min-width: 992px) {
+            .analytics-overview {
+                grid-template-columns: repeat(4, 1fr);
+            }
         }
         
         .metric-card {
@@ -156,6 +181,59 @@ if ($newsletter_id > 0) {
             padding: 50px 0;
             color: var(--gray);
         }
+        
+        #map {
+            height: 400px;
+            border-radius: var(--radius);
+            z-index: 1;
+        }
+        
+        .map-container {
+            margin-bottom: 30px;
+        }
+        
+        .analytics-tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            background-color: var(--gray-light);
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn:first-child {
+            border-top-left-radius: var(--radius);
+            border-bottom-left-radius: var(--radius);
+        }
+        
+        .tab-btn:last-child {
+            border-top-right-radius: var(--radius);
+            border-bottom-right-radius: var(--radius);
+        }
+        
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -231,26 +309,48 @@ if ($newsletter_id > 0) {
                             </div>
                         </div>
                         
-                        <div class="chart-container">
-                            <h3>Opens and Clicks Comparison</h3>
-                            <canvas id="performanceChart" width="400" height="200"></canvas>
+                        <div class="analytics-tabs">
+                            <button class="tab-btn active" onclick="showTab('charts')">Charts</button>
+                            <button class="tab-btn" onclick="showTab('map')">Geographic Map</button>
+                            <button class="tab-btn" onclick="showTab('links')">Popular Links</button>
                         </div>
                         
-                        <?php if (!empty($popularLinks)): ?>
-                            <div class="popular-links">
-                                <h3>Most Clicked Links</h3>
-                                <?php foreach ($popularLinks as $link): ?>
-                                    <div class="link-item">
-                                        <div class="link-url" title="<?php echo htmlspecialchars($link['original_url']); ?>">
-                                            <?php echo htmlspecialchars($link['original_url']); ?>
-                                        </div>
-                                        <div class="link-clicks">
-                                            <?php echo $link['clicks']; ?> clicks
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
+                        <div id="charts-tab" class="tab-content active">
+                            <div class="chart-container">
+                                <h3>Opens and Clicks Comparison</h3>
+                                <canvas id="performanceChart" width="400" height="200"></canvas>
                             </div>
-                        <?php endif; ?>
+                        </div>
+                        
+                        <div id="map-tab" class="tab-content">
+                            <div class="map-container">
+                                <h3>Geographic Distribution</h3>
+                                <div id="map"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="links-tab" class="tab-content">
+                            <?php if (!empty($popularLinks)): ?>
+                                <div class="popular-links">
+                                    <h3>Most Clicked Links</h3>
+                                    <?php foreach ($popularLinks as $link): ?>
+                                        <div class="link-item">
+                                            <div class="link-url" title="<?php echo htmlspecialchars($link['original_url']); ?>">
+                                                <?php echo htmlspecialchars($link['original_url']); ?>
+                                            </div>
+                                            <div class="link-clicks">
+                                                <?php echo $link['clicks']; ?> clicks
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="no-data">
+                                    <p>No link clicks recorded for this newsletter.</p>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        
                     <?php else: ?>
                         <div class="no-data">
                             <i class="fas fa-chart-bar" style="font-size: 4rem; color: var(--gray-light); margin-bottom: 20px;"></i>
@@ -299,13 +399,49 @@ if ($newsletter_id > 0) {
                 plugins: {
                     legend: {
                         position: 'top',
-                    },
-                    title: {
-                        display: false
                     }
                 }
             }
         });
+        
+        // Map setup
+        const map = L.map('map').setView([20, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Add map markers
+        const geoData = <?php echo !empty($geoData) ? json_encode($geoData) : '[]'; ?>;
+        geoData.forEach(location => {
+            const marker = L.marker([location.latitude, location.longitude]).addTo(map);
+            marker.bindPopup(`<b>${location.city || 'Unknown'}, ${location.country || 'Unknown'}</b><br>Interactions: ${location.count}`);
+        });
+        
+        // Tab functionality
+        function showTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Deactivate all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabId + '-tab').classList.add('active');
+            
+            // Activate clicked button
+            event.target.classList.add('active');
+            
+            // Special case for map - needs to be refreshed when shown
+            if(tabId === 'map') {
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 100);
+            }
+        }
     </script>
     <?php endif; ?>
 </body>

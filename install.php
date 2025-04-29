@@ -124,6 +124,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 ip_address VARCHAR(45),
                 FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE CASCADE
             )",
+            "CREATE TABLE IF NOT EXISTS email_geo_data (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                open_id INT,
+                click_id INT,
+                country VARCHAR(100),
+                region VARCHAR(100),
+                city VARCHAR(100),
+                latitude DECIMAL(10,8),
+                longitude DECIMAL(11,8),
+                recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (open_id) REFERENCES email_opens(id) ON DELETE CASCADE,
+                FOREIGN KEY (click_id) REFERENCES link_clicks(id) ON DELETE CASCADE
+            )",
+            "CREATE TABLE IF NOT EXISTS email_devices (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                open_id INT,
+                device_type VARCHAR(50),
+                browser VARCHAR(50),
+                os VARCHAR(50),
+                CONSTRAINT fk_open_id FOREIGN KEY (open_id) REFERENCES email_opens(id) ON DELETE CASCADE
+            )",
             "INSERT INTO users (username, email, password, role) VALUES ('$admin_user', '$admin_email', '$admin_pass', 'admin')",
             "INSERT INTO settings (name, value) VALUES ('title', 'Newsletter Dashboard'), ('background', 'assets/images/background.png')"
         ];

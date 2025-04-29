@@ -80,11 +80,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $updateAvailable) {
                 recursiveCopy($extractPath, __DIR__);
             }
             
+            // Check for database update script and run it
+            $dbUpdateSuccess = true;
+            if (file_exists($extractPath . '/db_updates.php')) {
+                try {
+                    include_once $extractPath . '/db_updates.php';
+                    if (function_exists('apply_database_updates')) {
+                        apply_database_updates($db, $currentVersion, $latestVersion);
+                    }
+                } catch (Exception $e) {
+                    $dbUpdateSuccess = false;
+                    $message = 'Database update error: ' . $e->getMessage();
+                    $messageType = 'error';
+                    error_log($message);
+                }
+            } else {
+                // Look for SQL update files with version numbers
+                $sqlUpdateFile = $extractPath . '/updates/update_' . str_replace('.', '_', $currentVersion) . '_to_' . str_replace('.', '_', $latestVersion) . '.sql';
+                if (file_exists($sqlUpdateFile)) {
+                    try {
+                        $sqlQueries = file_get_contents($sqlUpdateFile);
+                        $queries = explode(';', $sqlQueries);
+                        
+                        foreach ($queries as $query) {
+                            $query = trim($query);
+                            if (!empty($query)) {
+                                if (!$db->query($query)) {
+                                    throw new Exception($db->error);
+                                }
+                            }
+                        }
+                    } catch (Exception $e) {
+                        $dbUpdateSuccess = false;
+                        $message = 'SQL update error: ' . $e->getMessage();
+                        $messageType = 'error';
+                        error_log($message);
+                    }
+                } else {
+                    // Fallback: Run database schema check
+                    applyDatabaseSchemaChanges($db);
+                }
+            }
+            
             // Clean up
             recursiveDelete($extractPath);
-            $message = 'Update applied successfully! LumiNewsletter has been updated to version ' . $latestVersion;
-            $messageType = 'success';
-            file_put_contents(__DIR__ . '/version.php', "<?php\nreturn '" . $latestVersion . "';\n");
+            
+            if ($dbUpdateSuccess) {
+                $message = 'Update applied successfully! LumiNewsletter has been updated to version ' . $latestVersion;
+                $messageType = 'success';
+                file_put_contents(__DIR__ . '/version.php', "<?php\nreturn '" . $latestVersion . "';\n");
+            }
         } else {
             $message = 'Failed to extract the update package. ZipArchive error code: ' . $extractResult;
             $messageType = 'error';
@@ -151,6 +196,100 @@ function recursiveDelete($dir) {
     }
     return rmdir($dir);
 }
+
+// New function to check database schema and apply changes
+function applyDatabaseSchemaChanges($db) {
+    // Standard tables that should exist in every LumiNewsletter installation
+    $requiredTables = [
+        // Email analytics tables
+        'email_opens' => "CREATE TABLE IF NOT EXISTS email_opens (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            newsletter_id INT NOT NULL,
+            email VARCHAR(255) NOT NULL,
+            opened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            user_agent VARCHAR(255),
+            ip_address VARCHAR(45),
+            FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE CASCADE
+        )",
+        'link_clicks' => "CREATE TABLE IF NOT EXISTS link_clicks (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            newsletter_id INT NOT NULL,
+            email VARCHAR(255) NOT NULL, 
+            original_url TEXT NOT NULL,
+            clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            user_agent VARCHAR(255),
+            ip_address VARCHAR(45),
+            FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE CASCADE
+        )",
+        'email_geo_data' => "CREATE TABLE IF NOT EXISTS email_geo_data (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            open_id INT,
+            click_id INT,
+            country VARCHAR(100),
+            region VARCHAR(100),
+            city VARCHAR(100),
+            latitude DECIMAL(10,8),
+            longitude DECIMAL(11,8),
+            recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (open_id) REFERENCES email_opens(id) ON DELETE CASCADE,
+            FOREIGN KEY (click_id) REFERENCES link_clicks(id) ON DELETE CASCADE
+        )",
+        'email_devices' => "CREATE TABLE IF NOT EXISTS email_devices (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            open_id INT,
+            device_type VARCHAR(50),
+            browser VARCHAR(50),
+            os VARCHAR(50),
+            FOREIGN KEY (open_id) REFERENCES email_opens(id) ON DELETE CASCADE
+        )",
+        // A/B testing tables
+        'ab_tests' => "CREATE TABLE IF NOT EXISTS ab_tests (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            group_id INT NOT NULL,
+            subject_a VARCHAR(255) NOT NULL,
+            subject_b VARCHAR(255) NOT NULL,
+            content_a TEXT NOT NULL,
+            content_b TEXT NOT NULL,
+            split_percentage INT NOT NULL DEFAULT 50,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            sent_at TIMESTAMP NULL,
+            FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+        )"
+    ];
+    
+    // Check if newsletters table needs the ab_test columns
+    $result = $db->query("SHOW COLUMNS FROM newsletters LIKE 'is_ab_test'");
+    if ($result->num_rows === 0) {
+        $db->query("ALTER TABLE newsletters 
+            ADD COLUMN is_ab_test TINYINT(1) DEFAULT 0,
+            ADD COLUMN ab_test_id INT NULL,
+            ADD COLUMN variant CHAR(1) NULL");
+            
+        // Add foreign key in a separate query since it might fail if the column already exists
+        try {
+            $db->query("ALTER TABLE newsletters 
+                ADD CONSTRAINT fk_ab_test_id FOREIGN KEY (ab_test_id) 
+                REFERENCES ab_tests(id) ON DELETE SET NULL");
+        } catch (Exception $e) {
+            error_log("Could not add foreign key for ab_tests: " . $e->getMessage());
+        }
+    }
+    
+    // Check for each required table and create it if needed
+    foreach ($requiredTables as $table => $createSql) {
+        $result = $db->query("SHOW TABLES LIKE '$table'");
+        if ($result->num_rows === 0) {
+            // Table doesn't exist, create it
+            if (!$db->query($createSql)) {
+                error_log("Failed to create table $table: " . $db->error);
+            }
+        }
+    }
+    
+    return true;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -308,6 +447,7 @@ function recursiveDelete($dir) {
                     <li><a href="manage_users.php" class="nav-item"><i class="fas fa-user-shield"></i> Users</a></li>
                     <li><a href="manage_smtp.php" class="nav-item"><i class="fas fa-server"></i> SMTP Settings</a></li>
                     <li><a href="embed_docs.php" class="nav-item"><i class="fas fa-code"></i> Embed Widget</a></li>
+                    <li><a href="analytics.php" class="nav-item"><i class="fas fa-chart-bar"></i> Analytics</a></li>
                     <li><a href="logout.php" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 </ul>
             </nav>
