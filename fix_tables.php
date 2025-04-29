@@ -90,6 +90,34 @@ $requiredTables = [
         criteria TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )",
+    'automation_workflows' => "CREATE TABLE IF NOT EXISTS automation_workflows (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        trigger_type ENUM('subscription', 'date', 'tag_added', 'segment_join', 'inactivity', 'custom') NOT NULL,
+        trigger_data JSON,
+        status ENUM('active', 'draft', 'paused') DEFAULT 'draft',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )",
+    'automation_steps' => "CREATE TABLE IF NOT EXISTS automation_steps (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        workflow_id INT NOT NULL,
+        step_type ENUM('email', 'delay', 'condition', 'tag', 'split') NOT NULL,
+        step_data JSON,
+        position INT NOT NULL,
+        FOREIGN KEY (workflow_id) REFERENCES automation_workflows(id) ON DELETE CASCADE
+    )",
+    'automation_logs' => "CREATE TABLE IF NOT EXISTS automation_logs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        workflow_id INT NOT NULL,
+        subscriber_email VARCHAR(255) NOT NULL,
+        step_id INT NOT NULL,
+        status ENUM('pending', 'completed', 'failed', 'skipped') NOT NULL,
+        processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (workflow_id) REFERENCES automation_workflows(id) ON DELETE CASCADE,
+        FOREIGN KEY (step_id) REFERENCES automation_steps(id) ON DELETE CASCADE
     )"
 ];
 

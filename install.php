@@ -193,7 +193,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
             "ALTER TABLE newsletters ADD CONSTRAINT fk_ab_test_id FOREIGN KEY (ab_test_id) REFERENCES ab_tests(id) ON DELETE SET NULL",
             // Default data
             "INSERT INTO users (username, email, password, role) VALUES ('$admin_user', '$admin_email', '$admin_pass', 'admin')",
-            "INSERT INTO settings (name, value) VALUES ('title', 'Newsletter Dashboard'), ('background', 'assets/images/background.png')"
+            "INSERT INTO settings (name, value) VALUES ('title', 'Newsletter Dashboard'), ('background', 'assets/images/background.png')",
+            // Automation tables
+            "CREATE TABLE IF NOT EXISTS automation_workflows (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                description TEXT,
+                trigger_type ENUM('subscription', 'date', 'tag_added', 'segment_join', 'inactivity', 'custom') NOT NULL,
+                trigger_data JSON,
+                status ENUM('active', 'draft', 'paused') DEFAULT 'draft',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )",
+            "CREATE TABLE IF NOT EXISTS automation_steps (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                workflow_id INT NOT NULL,
+                step_type ENUM('email', 'delay', 'condition', 'tag', 'split') NOT NULL,
+                step_data JSON,
+                position INT NOT NULL,
+                FOREIGN KEY (workflow_id) REFERENCES automation_workflows(id) ON DELETE CASCADE
+            )",
+            "CREATE TABLE IF NOT EXISTS automation_logs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                workflow_id INT NOT NULL,
+                subscriber_email VARCHAR(255) NOT NULL,
+                step_id INT NOT NULL,
+                status ENUM('pending', 'completed', 'failed', 'skipped') NOT NULL,
+                processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (workflow_id) REFERENCES automation_workflows(id) ON DELETE CASCADE,
+                FOREIGN KEY (step_id) REFERENCES automation_steps(id) ON DELETE CASCADE
+            )"
         ];
 
         foreach ($queries as $query) {
