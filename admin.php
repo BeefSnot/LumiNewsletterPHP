@@ -62,7 +62,7 @@ while ($row = $settingsResult->fetch_assoc()) {
 define('UPDATE_JSON_URL', 'https://lumihost.net/updates/latest_update.json'); // <--- Hardcoded
 
 $currentVersion = require 'version.php';
-$latestUpdateInfo = @file_get_contents(UPDATE_JSON_URL);
+$latestUpdateInfo = @file_get_contents(UPDATE_JSON_URL . '?nocache=' . time());
 $updateAvailable = false;
 $latestVersion = '';
 if ($latestUpdateInfo !== false) {
