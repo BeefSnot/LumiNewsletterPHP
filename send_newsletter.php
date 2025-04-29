@@ -204,7 +204,7 @@ while ($row = $themesResult->fetch_assoc()) {
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/mobile-responsive.css">
-    <script src="https://cdn.tiny.cloud/1/8sjavbgsmciibkna0zhc3wcngf5se0nri4vanzzapds2ylul/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="assets/js/tinymce/tinymce.min.js"></script>
     <script>
         tinymce.init({
             selector: '#body', // Ensure the selector matches the textarea ID

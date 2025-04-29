@@ -13,6 +13,13 @@ $currentVersion = require 'version.php';
 $message = '';
 $messageType = '';
 
+// Get available themes
+$themesResult = $db->query("SELECT id, name FROM email_themes ORDER BY name ASC");
+$themes = [];
+while ($themesResult && $row = $themesResult->fetch_assoc()) {
+    $themes[] = $row;
+}
+
 // Create A/B test
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_test'])) {
     $test_name = $_POST['test_name'] ?? '';
@@ -23,15 +30,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_test'])) {
     $content_b = $_POST['content_b'] ?? '';
     $split_percentage = $_POST['split_percentage'] ?? 50;
     
+    $theme_a = isset($_POST['theme_a']) ? (int)$_POST['theme_a'] : null;
+    $theme_b = isset($_POST['theme_b']) ? (int)$_POST['theme_b'] : null;
+
     // Simple validation
     if (empty($test_name) || empty($group_id) || empty($subject_a) || empty($subject_b) || empty($content_a) || empty($content_b)) {
         $message = 'All fields are required';
         $messageType = 'error';
     } else {
         // Insert A/B test into database
-        $stmt = $db->prepare("INSERT INTO ab_tests (name, group_id, subject_a, subject_b, content_a, content_b, split_percentage, created_at) 
-                             VALUES (?, ?, ?, ?, ?, ?, ?, NOW())");
-        $stmt->bind_param("sissssi", $test_name, $group_id, $subject_a, $subject_b, $content_a, $content_b, $split_percentage);
+        $stmt = $db->prepare("INSERT INTO ab_tests (name, group_id, subject_a, subject_b, content_a, content_b, theme_a_id, theme_b_id, split_percentage, created_at) 
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+        $stmt->bind_param("sississii", $test_name, $group_id, $subject_a, $subject_b, $content_a, $content_b, $theme_a, $theme_b, $split_percentage);
         
         if ($stmt->execute()) {
             $message = 'A/B test created successfully';
@@ -222,7 +232,7 @@ while ($groupsResult && $row = $groupsResult->fetch_assoc()) {
     <title>A/B Testing | LumiNewsletter</title>
     <link rel="stylesheet" href="assets/css/newsletter-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.tiny.cloud/1/8sjavbgsmciibkna0zhc3wcngf5se0nri4vanzzapds2ylul/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="assets/js/tinymce/tinymce.min.js"></script>
     <style>
         .ab-test-card {
             background: #fff;
@@ -496,6 +506,15 @@ while ($groupsResult && $row = $groupsResult->fetch_assoc()) {
                                         <input type="text" id="subject_a" name="subject_a" required>
                                     </div>
                                     <div class="form-group">
+                                        <label for="theme_a">Email Theme A:</label>
+                                        <select id="theme_a" name="theme_a">
+                                            <option value="">Default Theme</option>
+                                            <?php foreach ($themes as $theme): ?>
+                                                <option value="<?php echo $theme['id']; ?>"><?php echo htmlspecialchars($theme['name']); ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
                                         <label for="content_a">Email Content A:</label>
                                         <textarea id="content_a" name="content_a"></textarea>
                                     </div>
@@ -506,6 +525,15 @@ while ($groupsResult && $row = $groupsResult->fetch_assoc()) {
                                     <div class="form-group">
                                         <label for="subject_b">Subject Line B:</label>
                                         <input type="text" id="subject_b" name="subject_b" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="theme_b">Email Theme B:</label>
+                                        <select id="theme_b" name="theme_b">
+                                            <option value="">Default Theme</option>
+                                            <?php foreach ($themes as $theme): ?>
+                                                <option value="<?php echo $theme['id']; ?>"><?php echo htmlspecialchars($theme['name']); ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
                                     </div>
                                     <div class="form-group">
                                         <label for="content_b">Email Content B:</label>

@@ -157,6 +157,14 @@ $requiredTables = [
         ip_address VARCHAR(45),
         consent_record TEXT,
         UNIQUE KEY (email)
+    )",
+    'segment_subscribers' => "CREATE TABLE IF NOT EXISTS segment_subscribers (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        segment_id INT NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY (segment_id, email),
+        FOREIGN KEY (segment_id) REFERENCES subscriber_segments(id) ON DELETE CASCADE
     )"
 ];
 
@@ -192,6 +200,21 @@ if ($result->num_rows === 0) {
     }
 }
 
+// Check for and add theme columns to ab_tests table
+
+// Add this after checking for other columns
+$result = $db->query("SHOW COLUMNS FROM ab_tests LIKE 'theme_a_id'");
+if ($result->num_rows === 0) {
+    echo "<h3>Adding theme columns to ab_tests table</h3>";
+    if ($db->query("ALTER TABLE ab_tests 
+        ADD COLUMN theme_a_id INT NULL,
+        ADD COLUMN theme_b_id INT NULL")) {
+        echo "<span style='color:green'>✓ Successfully added theme columns</span><br>";
+    } else {
+        echo "<span style='color:red'>✗ Failed to add theme columns: " . $db->error . "</span><br>";
+    }
+}
+
 // After creating all tables, add foreign keys
 $foreignKeys = [
     "ALTER TABLE email_opens ADD INDEX (newsletter_id), ADD CONSTRAINT fk_opens_newsletter FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE CASCADE",
@@ -220,29 +243,138 @@ echo "<p><strong>Database schema check completed.</strong></p>";
 echo "<p><a href='analytics.php' class='btn'>Return to Analytics</a></p>";
 ?>
 
-<style>
-body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-}
-h2 {
-    color: #4285f4;
-}
-h3 {
-    margin-top: 20px;
-    border-top: 1px solid #eee;
-    padding-top: 15px;
-}
-.btn {
-    display: inline-block;
-    background-color: #4285f4;
-    color: white;
-    padding: 8px 16px;
-    text-decoration: none;
-    border-radius: 4px;
-    margin-top: 20px;
-}
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Database Tables | LumiNewsletter</title>
+    <link rel="stylesheet" href="assets/css/newsletter-style.css">
+    <link rel="stylesheet" href="assets/css/mobile-responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .table-status {
+            margin-bottom: 20px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            background: white;
+        }
+        .table-status h3 {
+            padding: 15px;
+            margin: 0;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .table-status h3 i {
+            margin-right: 10px;
+        }
+        .status-content {
+            padding: 15px;
+        }
+        .status-item {
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+        .status-item i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        .status-success {
+            background-color: rgba(52, 168, 83, 0.1);
+            color: #34a853;
+        }
+        .status-warning {
+            background-color: rgba(251, 188, 4, 0.1);
+            color: #fbbc04;
+        }
+        .status-error {
+            background-color: rgba(234, 67, 53, 0.1);
+            color: #ea4335;
+        }
+        .status-info {
+            background-color: rgba(66, 133, 244, 0.1);
+            color: #4285f4;
+        }
+        .result-summary {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        .result-summary h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        .action-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-paper-plane"></i>
+                    <h2>LumiNews</h2>
+                </div>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.php" class="nav-item"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="admin.php" class="nav-item"><i class="fas fa-cog"></i> Admin Settings</a></li>
+                    <li><a href="create_theme.php" class="nav-item"><i class="fas fa-palette"></i> Create Theme</a></li>
+                    <li><a href="send_newsletter.php" class="nav-item"><i class="fas fa-paper-plane"></i> Send Newsletter</a></li>
+                    <li><a href="manage_subscriptions.php" class="nav-item"><i class="fas fa-users"></i> Subscribers</a></li>
+                    <li><a href="ab_testing.php" class="nav-item"><i class="fas fa-flask"></i> A/B Testing</a></li>
+                    <li><a href="analytics.php" class="nav-item"><i class="fas fa-chart-bar"></i> Analytics</a></li>
+                    <li><a href="segments.php" class="nav-item"><i class="fas fa-tags"></i> Segments</a></li>
+                    <li><a href="privacy_settings.php" class="nav-item"><i class="fas fa-shield-alt"></i> Privacy</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>Version <?php echo htmlspecialchars($currentVersion); ?></p>
+            </div>
+        </aside>
+
+        <main class="content">
+            <header class="top-header">
+                <div class="header-left">
+                    <h1>Fix Database Tables</h1>
+                </div>
+            </header>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-database"></i> Database Tables Repair Tool</h2>
+                </div>
+                <div class="card-body">
+                    <p>This tool checks and creates any missing tables required for LumiNewsletter to function properly.</p>
+                    
+                    <div class="result-summary">
+                        <h2><i class="fas fa-check-circle"></i> Database Schema Check Completed</h2>
+                        <p>All required tables have been checked and repaired if needed.</p>
+                        
+                        <div class="action-buttons">
+                            <a href="analytics.php" class="btn"><i class="fas fa-chart-bar"></i> Analytics</a>
+                            <a href="index.php" class="btn btn-primary"><i class="fas fa-home"></i> Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

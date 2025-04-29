@@ -40,6 +40,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate email
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Please enter a valid email address.';
+    } else if ($requireExplicitConsent && !$trackingConsent) {
+        // Require consent if explicit consent is enabled
+        $error = 'You must consent to our privacy policy to subscribe.';
     } else {
         // Check if already subscribed to this group
         $stmt = $db->prepare("SELECT COUNT(*) as count FROM group_subscriptions WHERE email = ? AND group_id = ?");
@@ -74,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                  VALUES (?, ?, ?, ?) 
                                  ON DUPLICATE KEY UPDATE 
                                  tracking_consent = ?, ip_address = ?, consent_record = ?, consent_date = CURRENT_TIMESTAMP");
-            $stmt->bind_param("sssss", $email, $trackingConsent, $ip_address, $consentRecord, $trackingConsent, $ip_address, $consentRecord);
+            $stmt->bind_param("sisssss", $email, $trackingConsent, $ip_address, $consentRecord, $trackingConsent, $ip_address, $consentRecord);
             $stmt->execute();
             $stmt->close();
             

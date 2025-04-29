@@ -310,6 +310,22 @@ function applyDatabaseSchemaChanges($db) {
             ip_address VARCHAR(45),
             consent_record TEXT,
             UNIQUE KEY (email)
+        )",
+        'subscriber_segments' => "CREATE TABLE IF NOT EXISTS subscriber_segments (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            description TEXT,
+            criteria TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )",
+        'segment_subscribers' => "CREATE TABLE IF NOT EXISTS segment_subscribers (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            segment_id INT NOT NULL,
+            email VARCHAR(255) NOT NULL,
+            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY (segment_id, email),
+            FOREIGN KEY (segment_id) REFERENCES subscriber_segments(id) ON DELETE CASCADE
         )"
     ];
     
@@ -666,6 +682,16 @@ if ($result && $result->num_rows > 0) {
                     <?php echo htmlspecialchars($message); ?>
                 </div>
             <?php endif; ?>
+            
+            <div class="notification info" style="background-color: rgba(66, 133, 244, 0.1); border-left: 4px solid var(--primary); color: var(--primary);">
+                <i class="fas fa-database"></i>
+                <div>
+                    <strong>Database Setup:</strong> If you experience missing tables or database errors, use our table repair tool.
+                    <a href="fix_tables.php" class="btn btn-sm" style="margin-left: 10px; background-color: var(--primary); color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; display: inline-block; margin-top: 5px;">
+                        <i class="fas fa-wrench"></i> Run Fix Tables
+                    </a>
+                </div>
+            </div>
             
             <div class="card">
                 <div class="card-header">
