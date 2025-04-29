@@ -104,6 +104,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )",
+            // Add these new tables for analytics
+            "CREATE TABLE IF NOT EXISTS email_opens (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                newsletter_id INT NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                opened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                user_agent VARCHAR(255),
+                ip_address VARCHAR(45),
+                FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE CASCADE
+            )",
+            "CREATE TABLE IF NOT EXISTS link_clicks (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                newsletter_id INT NOT NULL,
+                email VARCHAR(255) NOT NULL, 
+                original_url TEXT NOT NULL,
+                clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                user_agent VARCHAR(255),
+                ip_address VARCHAR(45),
+                FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE CASCADE
+            )",
             "INSERT INTO users (username, email, password, role) VALUES ('$admin_user', '$admin_email', '$admin_pass', 'admin')",
             "INSERT INTO settings (name, value) VALUES ('title', 'Newsletter Dashboard'), ('background', 'assets/images/background.png')"
         ];

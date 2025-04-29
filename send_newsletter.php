@@ -26,6 +26,26 @@ $config = require 'includes/config.php';
 
 $message = '';
 
+function addTrackingToEmail($html, $newsletter_id, $recipient_email, $site_url) {
+    // URL encode the email
+    $encoded_email = urlencode($recipient_email);
+    
+    // Add tracking pixel for opens
+    $tracking_pixel = "<img src='$site_url/track_open.php?nid=$newsletter_id&email=$encoded_email' width='1' height='1' alt='' style='display:none;'>";
+    $html .= $tracking_pixel;
+    
+    // Replace links with tracking links
+    $pattern = '/<a\s+(?:[^>]*?\s+)?href=(["\'])(.*?)\1/i';
+    $html = preg_replace_callback($pattern, function($matches) use ($site_url, $newsletter_id, $encoded_email) {
+        $url = $matches[2];
+        $encoded_url = urlencode($url);
+        $tracking_url = "$site_url/track_click.php?nid=$newsletter_id&email=$encoded_email&url=$encoded_url";
+        return "<a href=\"$tracking_url\"";
+    }, $html);
+    
+    return $html;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $subject = $_POST['subject'] ?? '';
     $body = $_POST['body'] ?? '';
@@ -95,6 +115,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $stmt->close();
 
+        // Get site URL from settings for tracking links
+        $settingsResult = $db->query("SELECT value FROM settings WHERE name = 'site_url'");
+        if ($settingsResult && $settingsResult->num_rows > 0) {
+            $site_url = $settingsResult->fetch_assoc()['value'];
+        } else {
+            // Fallback to auto-detected URL
+            $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
+            $host = $_SERVER['HTTP_HOST'];
+            $path = dirname($_SERVER['PHP_SELF']);
+            $site_url = $protocol . $host . rtrim($path, '/');
+        }
+
         // Send the newsletter using PHPMailer
         $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
         try {
@@ -108,11 +140,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $mail->setFrom($config['smtp_user'], 'Newsletter');
             $mail->Subject = $subject;
-            $mail->Body = $body;
             $mail->isHTML(true);
 
             foreach ($recipients as $recipient) {
-                $mail->addAddress($recipient);
+                $mail->addAddress($recipient); // Recipients are already email addresses
+                
+                // Add tracking to the newsletter content
+                $trackableContent = addTrackingToEmail($body, $newsletter_id, $recipient, $site_url);
+                
+                $mail->Body = $trackableContent; // Use the trackable version
                 if (!$mail->send()) {
                     $message .= 'Mailer Error (' . htmlspecialchars($recipient) . ') ' . $mail->ErrorInfo . '<br>';
                     error_log('Mailer Error (' . htmlspecialchars($recipient) . ') ' . $mail->ErrorInfo);
