@@ -222,6 +222,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (workflow_id) REFERENCES automation_workflows(id) ON DELETE CASCADE,
                 FOREIGN KEY (step_id) REFERENCES automation_steps(id) ON DELETE CASCADE
+            )",
+            // Content blocks
+            "CREATE TABLE IF NOT EXISTS content_blocks (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                description TEXT,
+                content LONGTEXT,
+                type ENUM('static', 'dynamic', 'conditional') NOT NULL DEFAULT 'static',
+                conditions TEXT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )",
+            // Personalization tags
+            "CREATE TABLE IF NOT EXISTS personalization_tags (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                tag_name VARCHAR(255) NOT NULL,
+                description TEXT,
+                replacement_type ENUM('field', 'function', 'api') NOT NULL DEFAULT 'field',
+                field_name VARCHAR(255) NULL,
+                example VARCHAR(255) NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )",
+            // Privacy settings table
+            "CREATE TABLE IF NOT EXISTS privacy_settings (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                setting_key VARCHAR(100) NOT NULL UNIQUE,
+                setting_value TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )",
+            // Subscriber consent table
+            "CREATE TABLE IF NOT EXISTS subscriber_consent (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                email VARCHAR(255) NOT NULL,
+                tracking_consent BOOLEAN DEFAULT FALSE,
+                geo_analytics_consent BOOLEAN DEFAULT FALSE,
+                profile_analytics_consent BOOLEAN DEFAULT FALSE,
+                consent_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ip_address VARCHAR(45),
+                consent_record TEXT,
+                UNIQUE KEY (email)
             )"
         ];
 
@@ -304,6 +345,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
         // Create version.php file
         $versionContent = "<?php\nreturn '1.0.0';\n";
         file_put_contents('version.php', $versionContent);
+
+        // Insert default privacy settings
+        $defaultPrivacySettings = [
+            ['privacy_policy', ''],
+            ['enable_tracking', '1'],
+            ['enable_geo_analytics', '1'],
+            ['require_explicit_consent', '1'],
+            ['data_retention_period', '12'],
+            ['anonymize_ip', '0'],
+            ['cookie_notice', '1'],
+            ['cookie_notice_text', 'We use cookies to improve your experience and analyze website traffic. By clicking "Accept", you agree to our website\'s cookie use as described in our Privacy Policy.'],
+            ['consent_prompt_text', 'I consent to receiving newsletters and agree that my email engagement may be tracked for analytics purposes.']
+        ];
+
+        $stmt = $db->prepare("INSERT INTO privacy_settings (setting_key, setting_value) VALUES (?, ?)");
+        foreach ($defaultPrivacySettings as $setting) {
+            $stmt->bind_param("ss", $setting[0], $setting[1]);
+            $stmt->execute();
+        }
 
         // Installation complete! Show success message
         $info_message = "<strong>Installation successful!</strong> Your LumiNewsletter system has been installed successfully.";
@@ -644,7 +704,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
         .thumbnail {
             max-width: 100%;
             height: auto;
-            border-radius: var(--radius);
+            border-radius: var (--radius);
             box-shadow: var(--shadow);
         }
         

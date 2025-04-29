@@ -292,6 +292,24 @@ function applyDatabaseSchemaChanges($db) {
             processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (workflow_id) REFERENCES automation_workflows(id) ON DELETE CASCADE,
             FOREIGN KEY (step_id) REFERENCES automation_steps(id) ON DELETE CASCADE
+        )",
+        'privacy_settings' => "CREATE TABLE IF NOT EXISTS privacy_settings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            setting_key VARCHAR(100) NOT NULL UNIQUE,
+            setting_value TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )",
+        'subscriber_consent' => "CREATE TABLE IF NOT EXISTS subscriber_consent (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            email VARCHAR(255) NOT NULL,
+            tracking_consent BOOLEAN DEFAULT FALSE,
+            geo_analytics_consent BOOLEAN DEFAULT FALSE,
+            profile_analytics_consent BOOLEAN DEFAULT FALSE,
+            consent_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            ip_address VARCHAR(45),
+            consent_record TEXT,
+            UNIQUE KEY (email)
         )"
     ];
     
@@ -376,6 +394,97 @@ if ($checkTable->num_rows === 0) {
         FOREIGN KEY (step_id) REFERENCES automation_steps(id) ON DELETE CASCADE
     )");
     echo "Created automation_logs table.<br>";
+}
+
+// Add this after the automation_logs check
+
+// Check if privacy_settings table exists
+$checkTable = $db->query("SHOW TABLES LIKE 'privacy_settings'");
+if ($checkTable->num_rows === 0) {
+    // Table doesn't exist, create it
+    $db->query("CREATE TABLE privacy_settings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        setting_key VARCHAR(100) NOT NULL UNIQUE,
+        setting_value TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )");
+    echo "Created privacy_settings table.<br>";
+}
+
+// Check if subscriber_consent table exists
+$checkTable = $db->query("SHOW TABLES LIKE 'subscriber_consent'");
+if ($checkTable->num_rows === 0) {
+    // Table doesn't exist, create it
+    $db->query("CREATE TABLE subscriber_consent (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        email VARCHAR(255) NOT NULL,
+        tracking_consent BOOLEAN DEFAULT FALSE,
+        geo_analytics_consent BOOLEAN DEFAULT FALSE,
+        profile_analytics_consent BOOLEAN DEFAULT FALSE,
+        consent_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        ip_address VARCHAR(45),
+        consent_record TEXT,
+        UNIQUE KEY (email)
+    )");
+    echo "Created subscriber_consent table.<br>";
+}
+
+// Check if there are any personalization tags
+$result = $db->query("SELECT COUNT(*) as count FROM personalization_tags");
+$row = $result->fetch_assoc();
+
+// Add default personalization tags if none exist
+if ($row['count'] == 0) {
+    $defaultTags = [
+        ['first_name', 'Subscriber\'s first name', 'field', 'name', 'John'],
+        ['last_name', 'Subscriber\'s last name', 'field', 'name', 'Doe'],
+        ['email', 'Subscriber\'s email address', 'field', 'email', 'subscriber@example.com'],
+        ['subscription_date', 'When the subscriber joined', 'field', 'created_at', 'January 15, 2023'],
+        ['current_date', 'Today\'s date', 'function', 'date', date('F j, Y')],
+        ['unsubscribe_link', 'Link to unsubscribe from the newsletter', 'function', 'unsubscribe_url', 'https://example.com/unsubscribe?email=subscriber@example.com']
+    ];
+    
+    $stmt = $db->prepare("INSERT INTO personalization_tags (tag_name, description, replacement_type, field_name, example) VALUES (?, ?, ?, ?, ?)");
+    
+    foreach ($defaultTags as $tag) {
+        $stmt->bind_param("sssss", $tag[0], $tag[1], $tag[2], $tag[3], $tag[4]);
+        $stmt->execute();
+    }
+    
+    echo "Added default personalization tags.<br>";
+}
+
+// Add this after the personalization tags section
+
+// Check if there are any privacy settings
+$result = $db->query("SELECT COUNT(*) as count FROM privacy_settings");
+if ($result && $result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    
+    // Add default privacy settings if none exist
+    if ($row['count'] == 0) {
+        $defaultPrivacySettings = [
+            ['privacy_policy', ''],
+            ['enable_tracking', '1'],
+            ['enable_geo_analytics', '1'],
+            ['require_explicit_consent', '1'],
+            ['data_retention_period', '12'],
+            ['anonymize_ip', '0'],
+            ['cookie_notice', '1'],
+            ['cookie_notice_text', 'We use cookies to improve your experience and analyze website traffic. By clicking "Accept", you agree to our website\'s cookie use as described in our Privacy Policy.'],
+            ['consent_prompt_text', 'I consent to receiving newsletters and agree that my email engagement may be tracked for analytics purposes.']
+        ];
+        
+        $stmt = $db->prepare("INSERT INTO privacy_settings (setting_key, setting_value) VALUES (?, ?)");
+        
+        foreach ($defaultPrivacySettings as $setting) {
+            $stmt->bind_param("ss", $setting[0], $setting[1]);
+            $stmt->execute();
+        }
+        
+        echo "Added default privacy settings.<br>";
+    }
 }
 
 ?>

@@ -118,6 +118,45 @@ $requiredTables = [
         processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (workflow_id) REFERENCES automation_workflows(id) ON DELETE CASCADE,
         FOREIGN KEY (step_id) REFERENCES automation_steps(id) ON DELETE CASCADE
+    )",
+    'content_blocks' => "CREATE TABLE IF NOT EXISTS content_blocks (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        content LONGTEXT,
+        type ENUM('static', 'dynamic', 'conditional') NOT NULL DEFAULT 'static',
+        conditions TEXT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )",
+    'personalization_tags' => "CREATE TABLE IF NOT EXISTS personalization_tags (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        tag_name VARCHAR(255) NOT NULL,
+        replacement_type ENUM('field', 'function', 'api') NOT NULL DEFAULT 'field',
+        field_name VARCHAR(255) NULL,
+        function_name VARCHAR(255) NULL,
+        api_endpoint TEXT NULL,
+        description TEXT,
+        example VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )",
+    'privacy_settings' => "CREATE TABLE IF NOT EXISTS privacy_settings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        setting_key VARCHAR(100) NOT NULL UNIQUE,
+        setting_value TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )",
+    'subscriber_consent' => "CREATE TABLE IF NOT EXISTS subscriber_consent (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        email VARCHAR(255) NOT NULL,
+        tracking_consent BOOLEAN DEFAULT FALSE,
+        geo_analytics_consent BOOLEAN DEFAULT FALSE,
+        profile_analytics_consent BOOLEAN DEFAULT FALSE,
+        consent_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        ip_address VARCHAR(45),
+        consent_record TEXT,
+        UNIQUE KEY (email)
     )"
 ];
 

@@ -46,6 +46,20 @@ function addTrackingToEmail($html, $newsletter_id, $recipient_email, $site_url) 
     return $html;
 }
 
+// Load content blocks
+$contentBlocksResult = $db->query("SELECT id, name, type FROM content_blocks ORDER BY name ASC");
+$contentBlocks = [];
+while ($block = $contentBlocksResult->fetch_assoc()) {
+    $contentBlocks[] = $block;
+}
+
+// Load personalization tags
+$tagsResult = $db->query("SELECT tag_name, description FROM personalization_tags ORDER BY tag_name ASC");
+$personalizationTags = [];
+while ($tag = $tagsResult->fetch_assoc()) {
+    $personalizationTags[] = $tag;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $subject = $_POST['subject'] ?? '';
     $body = $_POST['body'] ?? '';
@@ -242,6 +256,78 @@ while ($row = $themesResult->fetch_assoc()) {
             event.target.submit();
         }
     </script>
+    <style>
+        .content-blocks-panel {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--radius);
+            margin-bottom: 15px;
+        }
+        
+        .content-blocks-header {
+            padding: 10px 15px;
+            background: #f5f7fa;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: 600;
+        }
+        
+        .content-blocks-list {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .content-block-item {
+            padding: 8px 10px;
+            border-left: 3px solid var(--primary);
+            margin-bottom: 8px;
+            background: #f9f9f9;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .content-block-item:hover {
+            background: #eff3f9;
+        }
+        
+        .content-block-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .block-type-badge {
+            font-size: 0.7rem;
+            padding: 2px 5px;
+            border-radius: 10px;
+            background: var(--gray-light);
+            margin-left: 5px;
+        }
+        
+        .block-type-badge.static { background: #e1f5fe; color: #0288d1; }
+        .block-type-badge.dynamic { background: #f3e5f5; color: #7b1fa2; }
+        .block-type-badge.conditional { background: #e8f5e9; color: #388e3c; }
+        
+        .personalization-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .tag-item {
+            padding: 4px 8px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        
+        .tag-item:hover {
+            background: #e0e0e0;
+        }
+    </style>
 </head>
 <body>
     <!-- Mobile navigation toggle button -->
@@ -330,6 +416,44 @@ while ($row = $themesResult->fetch_assoc()) {
                         </div>
                         
                         <div class="form-group">
+                            <label>Personalization Tags:</label>
+                            <div class="personalization-tags">
+                                <?php if (empty($personalizationTags)): ?>
+                                    <span class="tag-item" onclick="insertPersonalizationTag('{{first_name}}')">{{first_name}}</span>
+                                    <span class="tag-item" onclick="insertPersonalizationTag('{{last_name}}')">{{last_name}}</span>
+                                    <span class="tag-item" onclick="insertPersonalizationTag('{{email}}')">{{email}}</span>
+                                    <span class="tag-item" onclick="insertPersonalizationTag('{{subscription_date}}')">{{subscription_date}}</span>
+                                    <span class="tag-item" onclick="insertPersonalizationTag('{{unsubscribe_link}}')">{{unsubscribe_link}}</span>
+                                    <span class="tag-item" onclick="insertPersonalizationTag('{{current_date}}')">{{current_date}}</span>
+                                <?php else: ?>
+                                    <?php foreach ($personalizationTags as $tag): ?>
+                                        <span class="tag-item" onclick="insertPersonalizationTag('{{<?php echo $tag['tag_name']; ?>}}')" title="<?php echo htmlspecialchars($tag['description']); ?>">
+                                            {{<?php echo $tag['tag_name']; ?>}}
+                                        </span>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <?php if (!empty($contentBlocks)): ?>
+                        <div class="content-blocks-panel">
+                            <div class="content-blocks-header">
+                                <i class="fas fa-puzzle-piece"></i> Content Blocks
+                            </div>
+                            <div class="content-blocks-list">
+                                <?php foreach ($contentBlocks as $block): ?>
+                                    <div class="content-block-item" onclick="insertContentBlock(<?php echo $block['id']; ?>)">
+                                        <span class="content-block-name"><?php echo htmlspecialchars($block['name']); ?></span>
+                                        <span class="block-type-badge <?php echo $block['type']; ?>">
+                                            <?php echo ucfirst($block['type']); ?>
+                                        </span>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <div class="form-group">
                             <label for="body">Newsletter Content:</label>
                             <textarea id="body" name="body"></textarea>
                         </div>
@@ -382,6 +506,27 @@ while ($row = $themesResult->fetch_assoc()) {
                 });
             });
         });
+
+        function insertPersonalizationTag(tag) {
+            tinymce.activeEditor.execCommand('mceInsertContent', false, tag);
+        }
+
+        function insertContentBlock(blockId) {
+            // AJAX request to get content block HTML
+            fetch('get_content_block.php?id=' + blockId)
+                .then(response => response.text())
+                .then(blockHtml => {
+                    if (blockHtml) {
+                        tinymce.activeEditor.execCommand('mceInsertContent', false, blockHtml);
+                    } else {
+                        alert('Error loading content block');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error loading content block');
+                });
+        }
     </script>
 </body>
 </html>
