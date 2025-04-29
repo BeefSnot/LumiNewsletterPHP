@@ -327,6 +327,57 @@ function applyDatabaseSchemaChanges($db) {
     return true;
 }
 
+// Add these statements to handle upgrades from previous versions
+
+// Check if automation_workflows table exists
+$checkTable = $db->query("SHOW TABLES LIKE 'automation_workflows'");
+if ($checkTable->num_rows === 0) {
+    // Table doesn't exist, create it
+    $db->query("CREATE TABLE automation_workflows (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        trigger_type ENUM('subscription', 'date', 'tag_added', 'segment_join', 'inactivity', 'custom') NOT NULL,
+        trigger_data JSON,
+        status ENUM('active', 'draft', 'paused') DEFAULT 'draft',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )");
+    echo "Created automation_workflows table.<br>";
+}
+
+// Check if automation_steps table exists
+$checkTable = $db->query("SHOW TABLES LIKE 'automation_steps'");
+if ($checkTable->num_rows === 0) {
+    // Table doesn't exist, create it
+    $db->query("CREATE TABLE automation_steps (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        workflow_id INT NOT NULL,
+        step_type ENUM('email', 'delay', 'condition', 'tag', 'split') NOT NULL,
+        step_data JSON,
+        position INT NOT NULL,
+        FOREIGN KEY (workflow_id) REFERENCES automation_workflows(id) ON DELETE CASCADE
+    )");
+    echo "Created automation_steps table.<br>";
+}
+
+// Check if automation_logs table exists
+$checkTable = $db->query("SHOW TABLES LIKE 'automation_logs'");
+if ($checkTable->num_rows === 0) {
+    // Table doesn't exist, create it
+    $db->query("CREATE TABLE automation_logs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        workflow_id INT NOT NULL,
+        subscriber_email VARCHAR(255) NOT NULL,
+        step_id INT NOT NULL,
+        status ENUM('pending', 'completed', 'failed', 'skipped') NOT NULL,
+        processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (workflow_id) REFERENCES automation_workflows(id) ON DELETE CASCADE,
+        FOREIGN KEY (step_id) REFERENCES automation_steps(id) ON DELETE CASCADE
+    )");
+    echo "Created automation_logs table.<br>";
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

@@ -281,16 +281,61 @@ textarea:focus {
 .update-notification {
     display: flex;
     align-items: center;
-    padding: 0 1rem;
-    background-color: rgba(251, 188, 5, 0.1);
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    background: linear-gradient(135deg, #3a7bd5, #2f5bc2);
     border-radius: var(--radius);
-    height: 40px;
     margin-right: 1rem;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    color: white;
+    min-width: 260px;
+    height: auto;
+    transition: all 0.3s ease;
+}
+
+.update-notification:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+}
+
+.update-notification-content {
+    display: flex;
+    align-items: center;
 }
 
 .update-notification i {
-    margin-right: 0.5rem;
-    color: var(--warning);
+    margin-right: 0.75rem;
+    color: #ffd54f;
+    font-size: 1.1rem;
+}
+
+.update-notification .badge {
+    background-color: rgba(255, 255, 255, 0.25);
+    color: white;
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+.update-btn {
+    background-color: white;
+    color: #3a7bd5;
+    border: none;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    margin-left: 1rem;
+    white-space: nowrap;
+}
+
+.update-btn:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
 }
 
 /* Preview */
@@ -341,5 +386,40 @@ textarea:focus {
     
     .card-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Mobile responsiveness improvements */
+@media (max-width: 768px) {
+    .header-right {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .update-notification {
+        margin-right: 0;
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+    
+    .top-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .header-left {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .update-notification {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .update-btn {
+        margin-left: 0;
+        margin-top: 0.75rem;
     }
 }

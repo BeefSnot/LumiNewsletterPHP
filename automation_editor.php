@@ -654,7 +654,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         <div class="form-actions">
                             <button type="button" class="btn btn-outline" onclick="hideStepForms()">Cancel</button>
-                            <button type="submit" name="add_step" class="btn btn-primary">Add Split Step</button>
+                            <button type="submit" name="add_split_step" class="btn btn-primary">Add Split Step</button>
                         </div>
                     </form>
                 </div>
