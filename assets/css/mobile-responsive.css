@@ -1,5 +1,10 @@
 /* Mobile Responsiveness Enhancements */
 
+/* Add this at the top of the file */
+.mobile-nav-toggle, .backdrop {
+    display: none;
+}
+
 /* Mobile Navigation Toggle */
 .mobile-nav-toggle {
     display: none;
@@ -23,6 +28,20 @@
 
 /* Responsive adjustments */
 @media (max-width: 991px) {
+    /* Show mobile toggle button */
+    .mobile-nav-toggle {
+        display: block;
+        /* rest of your mobile styles */
+    }
+    
+    .backdrop {
+        display: none;
+    }
+    
+    .backdrop.active {
+        display: block;
+    }
+    
     /* Show mobile toggle button */
     .mobile-nav-toggle {
         display: flex;

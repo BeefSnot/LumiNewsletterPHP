@@ -9,6 +9,21 @@ if (!isLoggedIn() || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+// Start capturing output to prevent text appearing before headers
+ob_start();
+
+$currentVersion = require 'version.php';
+$message = '';
+$messageType = '';
+$updateMessages = []; // Store messages for display later
+
+// Check for tables silently - store results in array instead of echoing
+$checkAPIBefore = $db->query("SHOW TABLES LIKE 'api_keys'");
+$checkSocialBefore = $db->query("SHOW TABLES LIKE 'social_shares'");
+
+// Clear any output so far to prevent it showing before HTML
+ob_end_clean();
+
 define('UPDATE_JSON_URL', 'https://lumihost.net/updates/latest_update.json');
 
 $currentVersion = require 'version.php';

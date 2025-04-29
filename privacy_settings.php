@@ -3,27 +3,37 @@ session_start();
 require_once 'includes/auth.php';
 require_once 'includes/db.php';
 
+// Display all errors for debugging - remove in production
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Check if user is admin
-requireRole('admin');
+if (!isLoggedIn() || $_SESSION['role'] !== 'admin') {
+    header('Location: login.php');
+    exit();
+}
 
 $currentVersion = require 'version.php';
 $message = '';
 $messageType = '';
 
-// Check if privacy_settings table exists
-$checkTable = $db->query("SHOW TABLES LIKE 'privacy_settings'");
-if ($checkTable->num_rows === 0) {
-    // Create the table if it doesn't exist
-    $db->query("CREATE TABLE IF NOT EXISTS privacy_settings (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        setting_key VARCHAR(100) NOT NULL UNIQUE,
-        setting_value TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    )");
-    
-    // Add default settings
-    $defaultPrivacySettings = [
+// Check if privacy_settings table exists and create it if needed
+$db->query("CREATE TABLE IF NOT EXISTS privacy_settings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    setting_key VARCHAR(100) NOT NULL UNIQUE,
+    setting_value TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)");
+
+// Check if default privacy settings exist
+$result = $db->query("SELECT COUNT(*) as count FROM privacy_settings");
+$row = $result->fetch_assoc();
+
+// Add default settings if table is empty
+if ($row['count'] == 0) {
+    $defaultSettings = [
         ['privacy_policy', ''],
         ['enable_tracking', '1'],
         ['enable_geo_analytics', '1'],
@@ -31,17 +41,17 @@ if ($checkTable->num_rows === 0) {
         ['data_retention_period', '12'],
         ['anonymize_ip', '0'],
         ['cookie_notice', '1'],
-        ['cookie_notice_text', 'We use cookies to improve your experience and analyze website traffic. By clicking "Accept", you agree to our website\'s cookie use as described in our Privacy Policy.'],
-        ['consent_prompt_text', 'I consent to receiving newsletters and agree that my email engagement may be tracked for analytics purposes.']
+        ['cookie_notice_text', 'We use cookies to improve your experience and analyze website traffic.'],
+        ['consent_prompt_text', 'I consent to receiving newsletters and tracking.']
     ];
     
     $stmt = $db->prepare("INSERT INTO privacy_settings (setting_key, setting_value) VALUES (?, ?)");
-    foreach ($defaultPrivacySettings as $setting) {
+    foreach ($defaultSettings as $setting) {
         $stmt->bind_param("ss", $setting[0], $setting[1]);
         $stmt->execute();
     }
     
-    $message = 'Privacy settings table created with default values';
+    $message = 'Default privacy settings created.';
     $messageType = 'success';
 }
 

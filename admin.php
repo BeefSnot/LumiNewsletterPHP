@@ -242,11 +242,14 @@ if ($latestUpdateInfo !== false) {
                     </div>
                 </div>
 
+                <!-- Replace the duplicate social card with this fixed one -->
                 <div class="card">
                     <div class="card-header">
                         <h2><i class="fas fa-share-alt"></i> Social Media Integration</h2>
                     </div>
                     <div class="card-body">
+                        <p>Configure social media sharing options for newsletters.</p>
+                        
                         <form method="post">
                             <div class="form-group">
                                 <label class="checkbox-label">
@@ -257,12 +260,11 @@ if ($latestUpdateInfo !== false) {
                             </div>
                             
                             <div class="form-actions">
-                                <button type="submit" name="social_sharing" class="btn btn-primary">Save Social Settings</button>
+                                <button type="submit" name="social_sharing" class="btn btn-primary">Save Setting</button>
                             </div>
                         </form>
                         
-                        <div class="mt-3">
-                            <p>Configure detailed social sharing options and view analytics:</p>
+                        <div style="margin-top: 15px;">
                             <a href="social_sharing.php" class="btn btn-outline">Social Sharing Dashboard</a>
                         </div>
                     </div>
