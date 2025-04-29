@@ -9,17 +9,27 @@ if (!isLoggedIn() || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-// Start capturing output to prevent text appearing before headers
+// Start output buffering to prevent any output before headers
 ob_start();
 
 $currentVersion = require 'version.php';
 $message = '';
 $messageType = '';
-$updateMessages = []; // Store messages for display later
 
-// Check for tables silently - store results in array instead of echoing
+// Store upgrade messages for later display instead of echo
+$updateMessages = [];
+
+// Check for API and social media tables silently
 $checkAPIBefore = $db->query("SHOW TABLES LIKE 'api_keys'");
 $checkSocialBefore = $db->query("SHOW TABLES LIKE 'social_shares'");
+
+if ($checkAPIBefore->num_rows === 0) {
+    $updateMessages[] = "Created API tables.";
+}
+
+if ($checkSocialBefore->num_rows === 0) {
+    $updateMessages[] = "Created social media tables.";
+}
 
 // Clear any output so far to prevent it showing before HTML
 ob_end_clean();

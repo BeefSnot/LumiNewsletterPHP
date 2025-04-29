@@ -16,6 +16,58 @@ echo "<p>This script will check and create any missing tables required for analy
 // Temporarily disable foreign key checks to avoid ordering issues
 $db->query("SET FOREIGN_KEY_CHECKS = 0");
 
+// Add this to the beginning of the script, right after the initial setup
+
+// Check specifically for social tables and create them properly
+echo "<h3>Checking social sharing tables</h3>";
+
+// Create social_shares table
+$checkSocialShares = $db->query("SHOW TABLES LIKE 'social_shares'");
+if ($checkSocialShares->num_rows === 0) {
+    echo "Creating social_shares table...<br>";
+    $socialSharesResult = $db->query("CREATE TABLE IF NOT EXISTS social_shares (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        newsletter_id INT NOT NULL,
+        platform VARCHAR(50) NOT NULL,
+        share_count INT DEFAULT 0,
+        click_count INT DEFAULT 0,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )");
+    
+    if ($socialSharesResult) {
+        echo "<span style='color:green'>✓ Successfully created social_shares table</span><br>";
+    } else {
+        echo "<span style='color:red'>✗ Failed to create social_shares table: " . $db->error . "</span><br>";
+    }
+}
+
+// Create social_clicks table
+$checkSocialClicks = $db->query("SHOW TABLES LIKE 'social_clicks'");
+if ($checkSocialClicks->num_rows === 0) {
+    echo "Creating social_clicks table...<br>";
+    $socialClicksResult = $db->query("CREATE TABLE IF NOT EXISTS social_clicks (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        share_id INT NOT NULL,
+        ip_address VARCHAR(45) NULL,
+        referrer VARCHAR(255) NULL,
+        clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+    
+    if ($socialClicksResult) {
+        echo "<span style='color:green'>✓ Successfully created social_clicks table</span><br>";
+    } else {
+        echo "<span style='color:red'>✗ Failed to create social_clicks table: " . $db->error . "</span><br>";
+    }
+}
+
+// Ensure social_sharing_enabled setting exists
+$checkSocialSetting = $db->query("SELECT COUNT(*) as count FROM settings WHERE name = 'social_sharing_enabled'");
+$socialSettingRow = $checkSocialSetting->fetch_assoc();
+if ($socialSettingRow['count'] == 0) {
+    $db->query("INSERT INTO settings (name, value) VALUES ('social_sharing_enabled', '1')");
+    echo "<span style='color:green'>✓ Added social_sharing_enabled setting</span><br>";
+}
+
 // Define tables that need to be created
 $requiredTables = [
     'email_opens' => "CREATE TABLE IF NOT EXISTS email_opens (

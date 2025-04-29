@@ -1,4 +1,9 @@
 <?php
+// Add at the top of the file - REMOVE AFTER DEBUGGING
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
 require_once 'includes/auth.php';
 require_once 'includes/db.php';
@@ -23,8 +28,7 @@ if ($checkSocial->num_rows === 0) {
         platform VARCHAR(50) NOT NULL,
         share_count INT DEFAULT 0,
         click_count INT DEFAULT 0,
-        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE CASCADE
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )");
     
     $db->query("CREATE TABLE IF NOT EXISTS social_clicks (
@@ -32,8 +36,7 @@ if ($checkSocial->num_rows === 0) {
         share_id INT NOT NULL,
         ip_address VARCHAR(45) NULL,
         referrer VARCHAR(255) NULL,
-        clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (share_id) REFERENCES social_shares(id) ON DELETE CASCADE
+        clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
     
     $message = "Social sharing tables have been created";

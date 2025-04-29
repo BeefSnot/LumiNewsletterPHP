@@ -1,6 +1,14 @@
+/* Hide mobile elements on desktop*/
+.mobile-nav-toggle {
+    display: none !important; /* Override any other styles */
+}
+
+.backdrop {
+    display: none !important;
+}
+
 /* Mobile Responsiveness Enhancements */
 
-/* Add this at the top of the file */
 .mobile-nav-toggle, .backdrop {
     display: none;
 }
@@ -28,6 +36,15 @@
 
 /* Responsive adjustments */
 @media (max-width: 991px) {
+    .mobile-nav-toggle {
+        display: block !important;
+        /* Other existing styles */
+    }
+    
+    .backdrop.active {
+        display: block !important;
+    }
+    
     /* Show mobile toggle button */
     .mobile-nav-toggle {
         display: block;
