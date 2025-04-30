@@ -77,19 +77,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 subject VARCHAR(255) NOT NULL,
                 content TEXT NOT NULL,
-                send_date TIMESTAMP NULL,
-                sent_at TIMESTAMP NULL,
-                scheduled_date TIMESTAMP NULL,
-                status ENUM('draft', 'scheduled', 'sent') DEFAULT 'draft',
-                creator_id INT,
-                group_id INT,
+                sender_id INT,
                 theme_id INT NULL,
                 is_ab_test TINYINT(1) DEFAULT 0,
                 ab_test_id INT NULL,
                 variant CHAR(1) NULL,
+                sent_at TIMESTAMP NULL DEFAULT NULL,  /* Added sent_at column */
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (creator_id) REFERENCES users(id),
-                FOREIGN KEY (group_id) REFERENCES `groups`(id),
+                FOREIGN KEY (sender_id) REFERENCES users(id),
                 FOREIGN KEY (theme_id) REFERENCES themes(id)
             )",
             "CREATE TABLE IF NOT EXISTS group_subscriptions (

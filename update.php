@@ -638,6 +638,35 @@ if ($checkSocialBefore->num_rows === 0) {
 // Clear any output so far to prevent it showing before HTML
 ob_end_clean();
 
+$messages = [];
+$errors = [];
+
+function addColumnIfNotExists($db, $table, $column, $definition) {
+    try {
+        // Check if column exists
+        $columnExists = $db->query("SHOW COLUMNS FROM `$table` LIKE '$column'")->num_rows > 0;
+        
+        if (!$columnExists) {
+            $db->query("ALTER TABLE `$table` ADD COLUMN `$column` $definition");
+            return true;
+        }
+        return false;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+// Add sent_at column to newsletters table
+if (addColumnIfNotExists($db, 'newsletters', 'sent_at', 'TIMESTAMP NULL DEFAULT NULL')) {
+    $messages[] = "Added sent_at column to newsletters table";
+    
+    // Update existing newsletters with sent_at based on created_at
+    $db->query("UPDATE newsletters SET sent_at = created_at WHERE sent_at IS NULL");
+    $messages[] = "Updated existing newsletters with sent_at timestamps";
+} else {
+    $messages[] = "The sent_at column already exists or couldn't be added to newsletters table";
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -736,6 +765,33 @@ ob_end_clean();
                         </div>
                     <?php endif; ?>
                 </div>
+            </div>
+            <div class="container" style="max-width: 800px; margin: 50px auto; padding: 20px;">
+                <h1>Database Schema Update</h1>
+                
+                <?php if (!empty($messages)): ?>
+                    <div class="notification success">
+                        <h3>Update Results:</h3>
+                        <ul>
+                            <?php foreach ($messages as $message): ?>
+                                <li><?php echo htmlspecialchars($message); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if (!empty($errors)): ?>
+                    <div class="notification error">
+                        <h3>Errors:</h3>
+                        <ul>
+                            <?php foreach ($errors as $error): ?>
+                                <li><?php echo htmlspecialchars($error); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                <?php endif; ?>
+                
+                <p><a href="dashboard.php" class="btn btn-primary">Return to Dashboard</a></p>
             </div>
         </main>
     </div>

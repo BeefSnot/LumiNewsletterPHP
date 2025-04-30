@@ -244,6 +244,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $failCount++;
             }
         }
+
+        // After successfully sending the newsletter, update the sent_at field
+        $updateSentTime = $db->prepare("UPDATE newsletters SET sent_at = NOW() WHERE id = ?");
+        $updateSentTime->bind_param('i', $newsletter_id);
+        $updateSentTime->execute();
+        $updateSentTime->close();
     }
 }
 

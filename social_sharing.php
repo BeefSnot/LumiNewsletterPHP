@@ -85,13 +85,12 @@ $topNewsletters = $db->query("
     SELECT 
         n.id,
         n.subject,
-        DATE_FORMAT(COALESCE(n.sent_at, n.created_at), '%Y-%m-%d') as date, 
-        SUM(ss.share_count) as total_shares,
-        SUM(ss.click_count) as total_clicks
+        n.created_at, /* Using created_at as fallback if sent_at doesn't exist yet */
+        COUNT(DISTINCT ss.id) as share_count
     FROM newsletters n
-    JOIN social_shares ss ON n.id = ss.newsletter_id
+    LEFT JOIN social_shares ss ON n.id = ss.newsletter_id
     GROUP BY n.id
-    ORDER BY total_shares DESC
+    ORDER BY n.created_at DESC
     LIMIT 10
 ");
 
