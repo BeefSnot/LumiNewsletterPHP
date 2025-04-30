@@ -178,8 +178,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     require_once 'includes/social_sharing.php';
                     require_once 'includes/social_widget.php';
                     
-                    // Add social buttons - more robust insertion
-                    $socialButtons = getSocialShareButtons($newsletter_id, $subject, $db, [
+                    // Add social buttons with inline styles
+                    $socialButtons = '<style>
+                    /* Social Sharing Buttons */
+                    .social-sharing {
+                        margin-top: 30px;
+                        padding-top: 20px;
+                        border-top: 1px solid #eee;
+                        text-align: center;
+                    }
+                    .social-buttons {
+                        display: flex;
+                        gap: 10px;
+                        justify-content: center;
+                        flex-wrap: wrap;
+                        margin-top: 10px;
+                    }
+                    .social-btn {
+                        display: inline-block;
+                        padding: 8px 15px;
+                        border-radius: 4px;
+                        color: white !important;
+                        text-decoration: none;
+                        font-weight: 500;
+                        margin: 0 5px;
+                    }
+                    .facebook { background-color: #3b5998; }
+                    .twitter { background-color: #1da1f2; }
+                    .linkedin { background-color: #0077b5; }
+                    .email { background-color: #777777; }
+                    </style>';
+
+                    // Get the social buttons HTML
+                    $socialButtons .= getSocialShareButtons($newsletter_id, $subject, $db, [
                         'facebook' => true,
                         'twitter' => true,
                         'linkedin' => true,
@@ -187,8 +218,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'size' => 'large',
                         'style' => 'default'
                     ]);
-                    
-                    // More robust pattern matching (case insensitive and optional whitespace)
+
+                    // Insert before closing body tag
                     $pattern = '/<\/\s*body\s*>/i';
                     if (preg_match($pattern, $personalizedBody)) {
                         $personalizedBody = preg_replace($pattern, $socialButtons . '</body>', $personalizedBody);
