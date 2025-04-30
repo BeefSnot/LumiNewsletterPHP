@@ -40,7 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
     try {
         // Test database connection with better error reporting
         try {
-            $db = new mysqli($db_host, $db_user, $db_pass, "", 3306, null, MYSQLI_CLIENT_CONNECT_TIMEOUT_MS => 5000);
+            // More compatible connection syntax
+            $db = new mysqli($db_host, $db_user, $db_pass);
+            // Set timeout manually if needed
+            $db->options(MYSQLI_OPT_CONNECT_TIMEOUT, 5);
         } catch (Exception $e) {
             throw new Exception('Connection failed: ' . $e->getMessage() . ' - Please verify your database credentials.');
         }

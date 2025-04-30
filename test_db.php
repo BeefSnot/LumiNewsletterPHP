@@ -21,14 +21,13 @@ if (empty($db_host) || empty($db_user)) {
 
 // Try to connect
 try {
-    $db = @new mysqli($db_host, $db_user, $db_pass, "", 3306, null);
+    $db = @new mysqli($db_host, $db_user, $db_pass);
     
     // Check for connection error
     if ($db->connect_error) {
         echo json_encode([
             'success' => false, 
-            'message' => 'Connection failed: ' . $db->connect_error,
-            'error_code' => $db->connect_errno
+            'message' => 'Connection failed: ' . $db->connect_error
         ]);
         exit;
     }
