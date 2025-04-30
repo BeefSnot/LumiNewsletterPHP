@@ -66,22 +66,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
             "CREATE TABLE IF NOT EXISTS newsletters (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 subject VARCHAR(255) NOT NULL,
-                body TEXT NOT NULL,
-                sender_id INT NOT NULL,
-                theme_id INT,
-                sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                content TEXT NOT NULL,
+                send_date TIMESTAMP NULL,
+                scheduled_date TIMESTAMP NULL,
+                status ENUM('draft', 'scheduled', 'sent') DEFAULT 'draft',
+                creator_id INT,
+                group_id INT,
+                theme_id INT NULL,
                 is_ab_test TINYINT(1) DEFAULT 0,
                 ab_test_id INT NULL,
                 variant CHAR(1) NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (sender_id) REFERENCES users(id),
+                FOREIGN KEY (creator_id) REFERENCES users(id),
+                FOREIGN KEY (group_id) REFERENCES groups(id),
                 FOREIGN KEY (theme_id) REFERENCES themes(id)
             )",
             "CREATE TABLE IF NOT EXISTS group_subscriptions (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                email VARCHAR(100) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                first_name VARCHAR(100) NULL,
+                last_name VARCHAR(100) NULL,
                 group_id INT NOT NULL,
-                UNIQUE KEY email_group (email, group_id),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (group_id) REFERENCES groups(id)
             )",
             "CREATE TABLE IF NOT EXISTS newsletter_groups (
@@ -239,10 +245,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
             "CREATE TABLE IF NOT EXISTS personalization_tags (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 tag_name VARCHAR(255) NOT NULL,
-                description TEXT,
                 replacement_type ENUM('field', 'function', 'api') NOT NULL DEFAULT 'field',
                 field_name VARCHAR(255) NULL,
-                example VARCHAR(255) NULL,
+                function_name VARCHAR(255) NULL,
+                api_endpoint TEXT NULL,
+                description TEXT,
+                example VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )",
             // Privacy settings table
@@ -737,7 +745,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
         
         .progress-fill {
             height: 100%;
-            background-color: var(--primary);
+            background-color: var (--primary);
             width: <?php echo ($current_step / $total_steps) * 100; ?>%;
             transition: width 0.5s;
         }

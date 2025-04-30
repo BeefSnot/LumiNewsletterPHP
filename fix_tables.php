@@ -314,6 +314,31 @@ if ($checkCreatedAt->num_rows === 0) {
     echo "<span style='color:green'>✓ Added created_at column to newsletters table</span><br>";
 }
 
+// Add this check after your other table checks:
+
+// Check if group_subscriptions table has created_at column
+$checkSubCreatedAt = $db->query("SHOW COLUMNS FROM group_subscriptions LIKE 'created_at'");
+if ($checkSubCreatedAt->num_rows === 0) {
+    // Add created_at column if it doesn't exist
+    $db->query("ALTER TABLE group_subscriptions ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+    echo "<span style='color:green'>✓ Added created_at column to group_subscriptions table</span><br>";
+}
+
+// Check if group_subscriptions table has first_name and last_name columns
+$checkFirstName = $db->query("SHOW COLUMNS FROM group_subscriptions LIKE 'first_name'");
+if ($checkFirstName->num_rows === 0) {
+    // Add first_name column if it doesn't exist
+    $db->query("ALTER TABLE group_subscriptions ADD COLUMN first_name VARCHAR(100) NULL AFTER email");
+    echo "<span style='color:green'>✓ Added first_name column to group_subscriptions table</span><br>";
+}
+
+$checkLastName = $db->query("SHOW COLUMNS FROM group_subscriptions LIKE 'last_name'");
+if ($checkLastName->num_rows === 0) {
+    // Add last_name column if it doesn't exist
+    $db->query("ALTER TABLE group_subscriptions ADD COLUMN last_name VARCHAR(100) NULL AFTER first_name");
+    echo "<span style='color:green'>✓ Added last_name column to group_subscriptions table</span><br>";
+}
+
 // After creating all tables, add foreign keys
 $foreignKeys = [
     "ALTER TABLE email_opens ADD INDEX (newsletter_id), ADD CONSTRAINT fk_opens_newsletter FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE CASCADE",

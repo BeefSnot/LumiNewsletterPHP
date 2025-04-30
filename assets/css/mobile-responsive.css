@@ -1,10 +1,10 @@
-/* Hide mobile elements on desktop*/
+/* Hide mobile elements on desktop */
 .mobile-nav-toggle {
-    display: none !important; /* Override any other styles */
+    display: none;
 }
 
 .backdrop {
-    display: none !important;
+    display: none;
 }
 
 /* Mobile Responsiveness Enhancements */
@@ -37,9 +37,37 @@
 /* Responsive adjustments */
 @media (max-width: 991px) {
     .mobile-nav-toggle {
-        display: block !important;
-        /* Other existing styles */
+        display: block;
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        font-size: 24px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        z-index: 1001;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
+    
+    .backdrop.active {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+    }
+    
+    /* Rest of your mobile styles */
     
     .backdrop.active {
         display: block !important;

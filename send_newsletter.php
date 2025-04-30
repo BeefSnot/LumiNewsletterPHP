@@ -141,41 +141,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $site_url = $protocol . $host . rtrim($path, '/');
         }
 
-        // Send the newsletter using PHPMailer
-        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
-        try {
-            $mail->isSMTP();
-            $mail->Host = $config['smtp_host'];
-            $mail->SMTPAuth = true;
-            $mail->Username = $config['smtp_user'];
-            $mail->Password = $config['smtp_pass'];
-            $mail->SMTPSecure = $config['smtp_secure'];
-            $mail->Port = $config['smtp_port'];
+        // Include the functions file
+        require_once 'includes/functions.php';
 
-            $mail->setFrom($config['smtp_user'], 'Newsletter');
-            $mail->Subject = $subject;
-            $mail->isHTML(true);
-
-            foreach ($recipients as $recipient) {
-                $mail->addAddress($recipient); // Recipients are already email addresses
+        // Loop through recipients and send emails
+        foreach ($recipients as $email) {
+            $mail = new PHPMailer(true);
+            
+            try {
+                // Configure SMTP settings
+                $mail->isSMTP();
+                $mail->Host = $config['smtp_host'];
+                $mail->SMTPAuth = true;
+                $mail->Username = $config['smtp_user'];
+                $mail->Password = $config['smtp_pass'];
+                $mail->SMTPSecure = $config['smtp_secure'];
+                $mail->Port = $config['smtp_port'];
                 
-                // Add tracking to the newsletter content
-                $trackableContent = addTrackingToEmail($body, $newsletter_id, $recipient, $site_url);
+                // Recipients and content
+                $mail->setFrom($config['smtp_user'], 'Newsletter');
+                $mail->addAddress($email);
+                $mail->isHTML(true);
+                $mail->Subject = $subject;
                 
-                $mail->Body = $trackableContent; // Use the trackable version
-                if (!$mail->send()) {
-                    $message .= 'Mailer Error (' . htmlspecialchars($recipient) . ') ' . $mail->ErrorInfo . '<br>';
-                    error_log('Mailer Error (' . htmlspecialchars($recipient) . ') ' . $mail->ErrorInfo);
+                // Get subscriber data for personalization
+                $stmt = $db->prepare("SELECT * FROM group_subscriptions WHERE email = ?");
+                $stmt->bind_param('s', $email);
+                $stmt->execute();
+                $subscriber = $stmt->get_result()->fetch_assoc();
+                $stmt->close();
+                
+                // Process personalization tags
+                $personalizedBody = $body;
+                if ($subscriber) {
+                    $personalizedBody = processPersonalization($body, $subscriber, $db);
                 }
-                $mail->clearAddresses(); // Clear recipients after each send
+                
+                $mail->Body = $personalizedBody;
+                
+                $mail->send();
+                $success = true;
+            } catch (Exception $e) {
+                error_log('Error sending to ' . $email . ': ' . $mail->ErrorInfo);
+                $failCount++;
             }
-
-            if (empty($message)) {
-                $message = 'Newsletter sent successfully';
-            }
-        } catch (Exception $e) {
-            $message = 'Message could not be sent. Mailer Error: ' . $mail->ErrorInfo;
-            error_log('Mailer Error: ' . $mail->ErrorInfo);
         }
     }
 }

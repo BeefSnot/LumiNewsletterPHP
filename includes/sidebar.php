@@ -56,6 +56,7 @@ function isGroupActive($pages) {
             </li>
             
             <!-- Analytics & Testing Group -->
+            <?php if ($_SESSION['role'] === 'admin'): // Only show to admin users ?>
             <li class="menu-group">
                 <div class="menu-group-header <?php echo isGroupActive(['analytics.php', 'ab_testing.php']); ?>">
                     <i class="fas fa-chart-bar"></i> Analytics & Testing
@@ -66,8 +67,10 @@ function isGroupActive($pages) {
                     <li><a href="ab_testing.php" class="nav-item <?php echo isActive('ab_testing.php'); ?>"><i class="fas fa-flask"></i> A/B Testing</a></li>
                 </ul>
             </li>
+            <?php endif; ?>
             
             <!-- Integration Group -->
+            <?php if ($_SESSION['role'] === 'admin'): // Only show to admin users ?>
             <li class="menu-group">
                 <div class="menu-group-header <?php echo isGroupActive(['social_sharing.php', 'embed_docs.php', 'api_keys.php', 'api_docs.php']); ?>">
                     <i class="fas fa-plug"></i> Integrations
@@ -80,8 +83,10 @@ function isGroupActive($pages) {
                     <li><a href="api_docs.php" class="nav-item <?php echo isActive('api_docs.php'); ?>"><i class="fas fa-book"></i> API Docs</a></li>
                 </ul>
             </li>
+            <?php endif; ?>
             
             <!-- Automation Group -->
+            <?php if ($_SESSION['role'] === 'admin'): // Only show to admin users ?>
             <li class="menu-group">
                 <div class="menu-group-header <?php echo isGroupActive(['automations.php', 'content_blocks.php']); ?>">
                     <i class="fas fa-robot"></i> Automation
@@ -92,6 +97,7 @@ function isGroupActive($pages) {
                     <li><a href="content_blocks.php" class="nav-item <?php echo isActive('content_blocks.php'); ?>"><i class="fas fa-th-large"></i> Content Blocks</a></li>
                 </ul>
             </li>
+            <?php endif; ?>
             
             <?php if ($isAdmin): ?>
             <!-- Admin Settings Group - Admin Only -->

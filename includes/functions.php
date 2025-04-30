@@ -7,6 +7,31 @@
  * @return string Processed content
  */
 function processPersonalization($content, $subscriber, $db) {
+    // Replace basic tags
+    $replacements = [
+        '{{email}}' => $subscriber['email'],
+        '{{first_name}}' => $subscriber['first_name'] ?? 'Subscriber',
+        '{{last_name}}' => $subscriber['last_name'] ?? '',
+        '{{subscription_date}}' => date('F j, Y', strtotime($subscriber['created_at'] ?? 'now')),
+        '{{current_date}}' => date('F j, Y')
+    ];
+    
+    // Full name (combine first and last if available)
+    $fullName = trim(($subscriber['first_name'] ?? '') . ' ' . ($subscriber['last_name'] ?? ''));
+    $fullName = empty($fullName) ? 'Subscriber' : $fullName;
+    $replacements['{{full_name}}'] = $fullName;
+    
+    // Unsubscribe link
+    $token = md5($subscriber['email'] . '|' . ($subscriber['token'] ?? 'token'));
+    $siteUrl = getSiteUrl($db);
+    $unsubscribeLink = $siteUrl . '/unsubscribe.php?email=' . urlencode($subscriber['email']) . '&token=' . $token;
+    $replacements['{{unsubscribe_link}}'] = $unsubscribeLink;
+    
+    // Perform replacements
+    foreach ($replacements as $tag => $value) {
+        $content = str_replace($tag, $value, $content);
+    }
+    
     // Process content blocks first
     $pattern = '/<!-- CONTENT_BLOCK_START:(\d+) -->(.+?)<!-- CONTENT_BLOCK_END:\1 -->/s';
     if (preg_match_all($pattern, $content, $matches, PREG_SET_ORDER)) {
@@ -36,31 +61,6 @@ function processPersonalization($content, $subscriber, $db) {
         }
     }
     
-    // Replace basic tags
-    $replacements = [
-        '{{email}}' => $subscriber['email'],
-        '{{first_name}}' => $subscriber['first_name'] ?? 'Subscriber',
-        '{{last_name}}' => $subscriber['last_name'] ?? '',
-        '{{subscription_date}}' => date('F j, Y', strtotime($subscriber['created_at'] ?? 'now')),
-        '{{current_date}}' => date('F j, Y')
-    ];
-    
-    // Full name (combine first and last if available)
-    $fullName = trim(($subscriber['first_name'] ?? '') . ' ' . ($subscriber['last_name'] ?? ''));
-    $fullName = empty($fullName) ? 'Subscriber' : $fullName;
-    $replacements['{{full_name}}'] = $fullName;
-    
-    // Unsubscribe link
-    $token = md5($subscriber['email'] . '|' . ($subscriber['token'] ?? 'token'));
-    $siteUrl = getSiteUrl($db);
-    $unsubscribeLink = $siteUrl . '/unsubscribe.php?email=' . urlencode($subscriber['email']) . '&token=' . $token;
-    $replacements['{{unsubscribe_link}}'] = $unsubscribeLink;
-    
-    // Perform replacements
-    foreach ($replacements as $tag => $value) {
-        $content = str_replace($tag, $value, $content);
-    }
-    
     // Process advanced personalization with fallback values
     // Format: {{tag|fallback}}
     $pattern = '/{{(\w+)\|(.*?)}}/';
@@ -68,7 +68,12 @@ function processPersonalization($content, $subscriber, $db) {
         foreach ($matches as $match) {
             $tag = $match[1];
             $fallback = $match[2];
-            $value = $replacements['{{' . $tag . '}}'] ?? '';
+            $value = '';
+            
+            // Get value based on tag
+            if (isset($replacements['{{'.$tag.'}}'])) {
+                $value = $replacements['{{'.$tag.'}}'];
+            }
             
             // Use fallback if value is empty
             if (empty($value)) {
@@ -80,48 +85,50 @@ function processPersonalization($content, $subscriber, $db) {
         }
     }
     
-    // Process conditional logic
+    // Process conditional content
     // Format: {if tag="value"}content{else}alternative{/if}
     $pattern = '/{if\s+(\w+)([=!<>]+)"([^"]*)"}(.*?)(?:{else}(.*?))?{\/if}/s';
     if (preg_match_all($pattern, $content, $matches, PREG_SET_ORDER)) {
         foreach ($matches as $match) {
-            $field = $match[1];
+            $tag = $match[1];
             $operator = $match[2];
             $compareValue = $match[3];
             $contentIfTrue = $match[4];
             $contentIfFalse = isset($match[5]) ? $match[5] : '';
             
-            $fieldValue = '';
+            $show = false;
+            $tagValue = '';
             
-            // Get the field value
-            switch ($field) {
-                case 'tag':
-                    // Check if subscriber has this tag
-                    $stmt = $db->prepare("SELECT COUNT(*) AS count FROM subscriber_tags WHERE email = ? AND tag = ?");
-                    $stmt->bind_param("ss", $subscriber['email'], $compareValue);
-                    $stmt->execute();
-                    $result = $stmt->get_result()->fetch_assoc();
-                    $fieldValue = $result['count'] > 0 ? $compareValue : '';
-                    break;
-                    
-                case 'subscription_months':
-                    // Calculate months since subscription
-                    $subscriptionDate = new DateTime($subscriber['created_at'] ?? 'now');
-                    $currentDate = new DateTime();
-                    $interval = $currentDate->diff($subscriptionDate);
-                    $fieldValue = ($interval->y * 12) + $interval->m;
-                    break;
-                    
-                default:
-                    $fieldValue = $subscriber[$field] ?? '';
+            // Get the tag value
+            if (array_key_exists('{{'.$tag.'}}', $replacements)) {
+                $tagValue = $replacements['{{'.$tag.'}}'];
             }
             
-            // Evaluate the condition
-            $conditionMet = evaluateOperator($fieldValue, $operator, $compareValue);
+            // Compare values based on operator
+            switch ($operator) {
+                case '=':
+                case '==':
+                    $show = ($tagValue == $compareValue);
+                    break;
+                case '!=':
+                    $show = ($tagValue != $compareValue);
+                    break;
+                case '>':
+                    $show = ($tagValue > $compareValue);
+                    break;
+                case '<':
+                    $show = ($tagValue < $compareValue);
+                    break;
+                case '>=':
+                    $show = ($tagValue >= $compareValue);
+                    break;
+                case '<=':
+                    $show = ($tagValue <= $compareValue);
+                    break;
+            }
             
-            // Replace the conditional block with the appropriate content
-            $replacement = $conditionMet ? $contentIfTrue : $contentIfFalse;
-            $content = str_replace($match[0], $replacement, $content);
+            // Replace with appropriate content
+            $content = str_replace($match[0], $show ? $contentIfTrue : $contentIfFalse, $content);
         }
     }
     
@@ -211,16 +218,15 @@ function evaluateOperator($fieldValue, $operator, $compareValue) {
  * Get site URL from database settings
  */
 function getSiteUrl($db) {
-    // Get site URL from settings
+    $siteUrl = '';
     $result = $db->query("SELECT value FROM settings WHERE name = 'site_url'");
     if ($result && $result->num_rows > 0) {
-        return $result->fetch_assoc()['value'];
+        $siteUrl = $result->fetch_assoc()['value'];
+    } else {
+        // Fallback to constructed URL
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
+        $host = $_SERVER['HTTP_HOST'];
+        $siteUrl = $protocol . $host;
     }
-    
-    // Fallback: auto-detect URL
-    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
-    $host = $_SERVER['HTTP_HOST'];
-    $path = dirname($_SERVER['PHP_SELF']);
-    
-    return $protocol . $host . $path;
+    return $siteUrl;
 }
