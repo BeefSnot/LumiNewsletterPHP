@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Insert the newsletter into the database
-        $stmt = $db->prepare('INSERT INTO newsletters (subject, body, sender_id, theme_id) VALUES (?, ?, ?, ?)');
+        $stmt = $db->prepare('INSERT INTO newsletters (subject, content, sender_id, theme_id) VALUES (?, ?, ?, ?)');
         if ($stmt === false) {
             error_log('Prepare failed: ' . htmlspecialchars($db->error));
             die('Prepare failed: ' . htmlspecialchars($db->error));
@@ -248,7 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Fetch available groups
-$groupsResult = $db->query("SELECT id, name FROM groups");
+$groupsResult = $db->query("SELECT id, name FROM `groups`");
 $groups = [];
 while ($row = $groupsResult->fetch_assoc()) {
     $groups[] = $row;

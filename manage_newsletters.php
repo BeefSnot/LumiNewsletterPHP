@@ -13,11 +13,12 @@ if (!isLoggedIn()) {
 
 // Fetch all newsletters
 $query = "
-    SELECT n.id, n.subject, n.body, n.sent_at, u.username AS sender, GROUP_CONCAT(g.name SEPARATOR ', ') AS groups
+    SELECT n.id, n.subject, n.content, n.sent_at, u.username AS sender, 
+           GROUP_CONCAT(g.name SEPARATOR ', ') AS `groups`
     FROM newsletters n
-    JOIN users u ON n.sender_id = u.id
+    JOIN users u ON n.creator_id = u.id
     LEFT JOIN newsletter_groups ng ON n.id = ng.newsletter_id
-    LEFT JOIN groups g ON ng.group_id = g.id
+    LEFT JOIN `groups` g ON ng.group_id = g.id
     GROUP BY n.id
     ORDER BY n.sent_at DESC
 ";
@@ -106,7 +107,7 @@ error_log('Fetched newsletters: ' . print_r($newsletters, true));
                                                 <i class="fas fa-eye"></i> View
                                             </button>
                                             <div id="content-<?php echo $newsletter['id']; ?>" style="display: none; margin-top: 10px; padding: 10px; background-color: #f9f9f9; border-radius: 4px;">
-                                                <?php echo $newsletter['body'] ?? ''; ?>
+                                                <?php echo $newsletter['content'] ?? ''; ?>
                                             </div>
                                         </td>
                                     </tr>

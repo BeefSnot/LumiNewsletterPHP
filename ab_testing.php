@@ -209,7 +209,7 @@ $testsResult = $db->query("SELECT ab.*, g.name as group_name,
                           (SELECT COUNT(*) FROM link_clicks lc JOIN newsletters n ON lc.newsletter_id = n.id WHERE n.ab_test_id = ab.id AND n.variant = 'A') as clicks_a,
                           (SELECT COUNT(*) FROM link_clicks lc JOIN newsletters n ON lc.newsletter_id = n.id WHERE n.ab_test_id = ab.id AND n.variant = 'B') as clicks_b
                           FROM ab_tests ab 
-                          LEFT JOIN groups g ON ab.group_id = g.id
+                          LEFT JOIN `groups` g ON ab.group_id = g.id
                           ORDER BY ab.created_at DESC");
 $tests = [];
 while ($testsResult && $row = $testsResult->fetch_assoc()) {
@@ -217,7 +217,7 @@ while ($testsResult && $row = $testsResult->fetch_assoc()) {
 }
 
 // Get all groups for dropdown
-$groupsResult = $db->query("SELECT id, name FROM groups");
+$groupsResult = $db->query("SELECT id, name FROM `groups`");
 $groups = [];
 while ($groupsResult && $row = $groupsResult->fetch_assoc()) {
     $groups[] = $row;
