@@ -22,6 +22,8 @@ if (!file_exists('includes/phpmailer/src')) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
+    set_time_limit(30); // Set a reasonable timeout
+
     $db_host = $_POST['db_host'];
     $db_user = $_POST['db_user'];
     $db_pass = $_POST['db_pass'];
@@ -36,10 +38,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
     $smtp_secure = $_POST['smtp_secure'];
 
     try {
-        // Test database connection
-        $db = new mysqli($db_host, $db_user, $db_pass);
+        // Test database connection with better error reporting
+        try {
+            $db = new mysqli($db_host, $db_user, $db_pass, "", 3306, null, MYSQLI_CLIENT_CONNECT_TIMEOUT_MS => 5000);
+        } catch (Exception $e) {
+            throw new Exception('Connection failed: ' . $e->getMessage() . ' - Please verify your database credentials.');
+        }
+        
         if ($db->connect_error) {
-            throw new Exception('Connection failed: ' . $db->connect_error);
+            throw new Exception('Connection failed: ' . $db->connect_error . ' - Error code: ' . $db->connect_errno);
         }
         
         // Create database if it doesn't exist
@@ -425,6 +432,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
         
     } catch (Exception $e) {
         $error_message = 'Installation failed: ' . $e->getMessage();
+        // Reset any partial success indication
+        $info_message = '';
+        $current_step = 4; // Stay on the current step to allow corrections
     }
 }
 ?>
@@ -738,7 +748,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
         .progress-bar {
             height: 5px;
             background-color: var(--gray-light);
-            border-radius: var(--radius);
+            border-radius: var (--radius);
             overflow: hidden;
             margin: 0 2rem 1rem 2rem;
         }
@@ -924,7 +934,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 <form method="post" action="?step=3" id="db-form">
                     <div class="form-group">
                         <label for="db_host">Database Host:</label>
-                        <input type="text" id="db_host" name="db_host" value="127.0.0.1" required>
+                        <select id="db_host" name="db_host" required>
+                            <option value="localhost">localhost (socket connection)</option>
+                            <option value="127.0.0.1" selected>127.0.0.1 (TCP/IP connection)</option>
+                        </select>
+                        <small class="form-text text-muted">Choose 127.0.0.1 if you experience connection issues with localhost, or vice versa.</small>
                     </div>
                     
                     <div class="form-group">
@@ -943,6 +957,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                             <input type="password" id="db_pass" name="db_pass" required>
                             <i class="fas fa-eye password-toggle" onclick="togglePassword('db_pass')"></i>
                         </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="button" class="btn btn-outline test-connection">
+                            <i class="fas fa-database"></i> Test Connection
+                        </button>
+                        <span id="connection-result" style="margin-left: 15px;"></span>
                     </div>
                     
                     <div class="form-buttons">
@@ -1134,6 +1155,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 toggle.classList.add('fa-eye');
             }
         }
+
+        // Test database connection
+        document.querySelector('.test-connection')?.addEventListener('click', function() {
+            const host = document.getElementById('db_host').value;
+            const user = document.getElementById('db_user').value;
+            const password = document.getElementById('db_pass').value;
+            const resultSpan = document.getElementById('connection-result');
+            
+            resultSpan.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing connection...';
+            
+            // Create a form and submit it to a special endpoint
+            const formData = new FormData();
+            formData.append('action', 'test_db_connection');
+            formData.append('db_host', host);
+            formData.append('db_user', user);
+            formData.append('db_pass', password);
+            
+            fetch('test_db.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    resultSpan.innerHTML = '<span style="color: var(--accent);"><i class="fas fa-check-circle"></i> Connection successful!</span>';
+                } else {
+                    resultSpan.innerHTML = '<span style="color: var(--error);"><i class="fas fa-times-circle"></i> ' + data.message + '</span>';
+                }
+            })
+            .catch(error => {
+                resultSpan.innerHTML = '<span style="color: var(--error);"><i class="fas fa-times-circle"></i> Test failed: Network error</span>';
+            });
+        });
     </script>
 </body>
 </html>
