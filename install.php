@@ -78,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 subject VARCHAR(255) NOT NULL,
                 content TEXT NOT NULL,
                 send_date TIMESTAMP NULL,
+                sent_at TIMESTAMP NULL,
                 scheduled_date TIMESTAMP NULL,
                 status ENUM('draft', 'scheduled', 'sent') DEFAULT 'draft',
                 creator_id INT,
@@ -593,7 +594,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
         
         p {
             margin-bottom: 1.5rem;
-            color: var(--gray);
+            color: var (--gray);
         }
         
         .form-group {
@@ -940,8 +941,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                         <select id="db_host" name="db_host" required>
                             <option value="localhost">localhost (socket connection)</option>
                             <option value="127.0.0.1" selected>127.0.0.1 (TCP/IP connection)</option>
+                            <option value="%">% (wildcard - for certain hosting configurations)</option>
                         </select>
-                        <small class="form-text text-muted">Choose 127.0.0.1 if you experience connection issues with localhost, or vice versa.</small>
+                        <small class="form-text text-muted">Choose "%" if you're using DirectAdmin or another control panel that configures database users with wildcard hosts.</small>
                     </div>
                     
                     <div class="form-group">
