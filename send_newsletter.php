@@ -174,43 +174,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($subscriber) {
                     $personalizedBody = processPersonalization($body, $subscriber, $db);
                     
-                    // Include both social sharing files
                     require_once 'includes/social_sharing.php';
                     require_once 'includes/social_widget.php';
-                    
-                    // Add social buttons with inline styles
+
+                    // Make sure social tables exist first
+                    $checkSocial = $db->query("SHOW TABLES LIKE 'social_shares'");
+                    if ($checkSocial->num_rows === 0) {
+                        // Create required tables silently
+                        $db->query("CREATE TABLE IF NOT EXISTS social_shares (
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            newsletter_id INT NOT NULL,
+                            platform VARCHAR(50) NOT NULL,
+                            share_count INT DEFAULT 0,
+                            click_count INT DEFAULT 0,
+                            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                        )");
+                        
+                        $db->query("CREATE TABLE IF NOT EXISTS social_clicks (
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            share_id INT NOT NULL,
+                            ip_address VARCHAR(45) NULL,
+                            referrer VARCHAR(255) NULL,
+                            clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        )");
+                    }
+
+                    // Add social buttons with complete inline styles (email-friendly)
                     $socialButtons = '<style>
                     /* Social Sharing Buttons */
-                    .social-sharing {
-                        margin-top: 30px;
-                        padding-top: 20px;
-                        border-top: 1px solid #eee;
-                        text-align: center;
-                    }
-                    .social-buttons {
-                        display: flex;
-                        gap: 10px;
-                        justify-content: center;
-                        flex-wrap: wrap;
-                        margin-top: 10px;
-                    }
-                    .social-btn {
-                        display: inline-block;
-                        padding: 8px 15px;
-                        border-radius: 4px;
-                        color: white !important;
-                        text-decoration: none;
-                        font-weight: 500;
-                        margin: 0 5px;
-                    }
-                    .facebook { background-color: #3b5998; }
-                    .twitter { background-color: #1da1f2; }
-                    .linkedin { background-color: #0077b5; }
-                    .email { background-color: #777777; }
+                    .social-sharing {margin-top:30px;padding-top:20px;border-top:1px solid #eee;text-align:center}
+                    .social-sharing h4 {font-size:16px;margin-bottom:10px;color:#333}
+                    .social-buttons {display:flex;justify-content:center;flex-wrap:wrap;margin-top:10px}
+                    .social-btn {display:inline-block !important;padding:8px 15px !important;border-radius:4px !important;color:white !important;text-decoration:none !important;font-weight:500 !important;margin:0 5px !important;font-family:Arial,sans-serif !important}
+                    .facebook {background-color:#3b5998 !important}
+                    .twitter {background-color:#1da1f2 !important}
+                    .linkedin {background-color:#0077b5 !important}
+                    .email {background-color:#777777 !important}
                     </style>';
 
+                    // Add "View in browser" link to ensure tracking works
+                    $viewInBrowser = "<div style='text-align:center;margin-bottom:15px;font-size:12px;color:#888'>Can't see this email properly? <a href='{$site_url}/newsletter_view.php?id={$newsletter_id}'>View it in your browser</a></div>";
+
                     // Get the social buttons HTML
-                    $socialButtons .= getSocialShareButtons($newsletter_id, $subject, $db, [
+                    $socialButtons .= $viewInBrowser . getSocialShareButtons($newsletter_id, $subject, $db, [
                         'facebook' => true,
                         'twitter' => true,
                         'linkedin' => true,
