@@ -924,7 +924,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 <form method="post" action="?step=3" id="db-form">
                     <div class="form-group">
                         <label for="db_host">Database Host:</label>
-                        <input type="text" id="db_host" name="db_host" value="localhost" required>
+                        <input type="text" id="db_host" name="db_host" value="127.0.0.1" required>
                     </div>
                     
                     <div class="form-group">
