@@ -73,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 is_ab_test TINYINT(1) DEFAULT 0,
                 ab_test_id INT NULL,
                 variant CHAR(1) NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (sender_id) REFERENCES users(id),
                 FOREIGN KEY (theme_id) REFERENCES themes(id)
             )",
@@ -306,7 +307,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 referrer VARCHAR(255) NULL,
                 clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (share_id) REFERENCES social_shares(id) ON DELETE CASCADE
-            )"
+            )",
+            // Add social sharing setting in settings table initialization
+            "INSERT INTO settings (name, value) VALUES ('social_sharing_enabled', '1')"
         ];
 
         foreach ($queries as $query) {

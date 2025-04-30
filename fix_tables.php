@@ -306,6 +306,14 @@ if ($result->num_rows === 0) {
     }
 }
 
+// Check if newsletters table has created_at column
+$checkCreatedAt = $db->query("SHOW COLUMNS FROM newsletters LIKE 'created_at'");
+if ($checkCreatedAt->num_rows === 0) {
+    // Add created_at column if it doesn't exist
+    $db->query("ALTER TABLE newsletters ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+    echo "<span style='color:green'>✓ Added created_at column to newsletters table</span><br>";
+}
+
 // After creating all tables, add foreign keys
 $foreignKeys = [
     "ALTER TABLE email_opens ADD INDEX (newsletter_id), ADD CONSTRAINT fk_opens_newsletter FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE CASCADE",

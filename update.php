@@ -16,22 +16,51 @@ $currentVersion = require 'version.php';
 $message = '';
 $messageType = '';
 
-// Store upgrade messages for later display instead of echo
-$updateMessages = [];
+// Collect any database changes/messages here instead of echoing them
+$dbUpdates = [];
 
 // Check for API and social media tables silently
 $checkAPIBefore = $db->query("SHOW TABLES LIKE 'api_keys'");
 $checkSocialBefore = $db->query("SHOW TABLES LIKE 'social_shares'");
 
-if ($checkAPIBefore->num_rows === 0) {
-    $updateMessages[] = "Created API tables.";
+// Check if newsletters table has created_at column
+$checkCreatedAt = $db->query("SHOW COLUMNS FROM newsletters LIKE 'created_at'");
+if ($checkCreatedAt->num_rows === 0) {
+    // Add created_at column if it doesn't exist
+    $db->query("ALTER TABLE newsletters ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+    $dbUpdates[] = "Added created_at column to newsletters table";
 }
 
+// Deal with social tables if they don't exist
 if ($checkSocialBefore->num_rows === 0) {
-    $updateMessages[] = "Created social media tables.";
+    $db->query("CREATE TABLE IF NOT EXISTS social_shares (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        newsletter_id INT NOT NULL,
+        platform VARCHAR(50) NOT NULL,
+        share_count INT DEFAULT 0,
+        click_count INT DEFAULT 0,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )");
+    
+    $db->query("CREATE TABLE IF NOT EXISTS social_clicks (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        share_id INT NOT NULL,
+        ip_address VARCHAR(45) NULL,
+        referrer VARCHAR(255) NULL,
+        clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+    
+    // Ensure social_sharing_enabled setting exists
+    $checkSocialSetting = $db->query("SELECT COUNT(*) as count FROM settings WHERE name = 'social_sharing_enabled'");
+    $socialSettingRow = $checkSocialSetting->fetch_assoc();
+    if ($socialSettingRow['count'] == 0) {
+        $db->query("INSERT INTO settings (name, value) VALUES ('social_sharing_enabled', '1')");
+    }
+    
+    $dbUpdates[] = "Created social media sharing tables";
 }
 
-// Clear any output so far to prevent it showing before HTML
+// Clear buffer before any HTML output
 ob_end_clean();
 
 define('UPDATE_JSON_URL', 'https://lumihost.net/updates/latest_update.json');
