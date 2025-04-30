@@ -1,3 +1,11 @@
+<?php
+// Make sure there is NO whitespace or line breaks before the opening PHP tag
+
+/* Add these at the top to properly locate errors */
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 /**
  * Process personalization tags in content for a specific subscriber
  *

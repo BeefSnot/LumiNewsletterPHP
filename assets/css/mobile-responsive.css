@@ -1,3 +1,14 @@
+/* At the very top of your file, add these stronger rules */
+@media (min-width: 992px) {
+    .mobile-nav-toggle, #mobileNavToggle {
+        display: none !important; /* Important flag to override any conflicting rules */
+    }
+    
+    .backdrop, #backdrop {
+        display: none !important;
+    }
+}
+
 /* Hide mobile elements on desktop */
 .mobile-nav-toggle {
     display: none;

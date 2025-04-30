@@ -409,8 +409,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         function initializeEditor(content) {
             try {
+                // If editor already exists, destroy it first
+                if (window.editor) {
+                    try {
+                        window.editor.destroy();
+                    } catch (e) {
+                        console.error("Error destroying editor:", e);
+                    }
+                }
+
                 // Configure editor
-                editor = grapesjs.init({
+                window.editor = grapesjs.init({
                     container: '#gjs',
                     height: '700px',
                     width: 'auto',
@@ -440,7 +449,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 // Set content if provided
                 if (content) {
-                    editor.setComponents(content);
+                    window.editor.setComponents(content);
                 }
                 
                 // Make sure editor is responsive on mobile
@@ -465,7 +474,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }, 500);
                 }
                 
-                // Make sure theme edit overlay doesn't interfere with hamburger menu
+                // Set z-index for overlays to be below mobile menu
                 const themeOverlays = document.querySelectorAll('.gjs-mdl-dialog, .gjs-editor-cont');
                 themeOverlays.forEach(overlay => {
                     overlay.style.zIndex = '1039'; // Below hamburger button
@@ -475,8 +484,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 document.getElementById('theme-form').addEventListener('submit', function(e) {
                     try {
                         // Get HTML content from editor
-                        const html = editor.getHtml();
-                        const css = editor.getCss();
+                        const html = window.editor.getHtml();
+                        const css = window.editor.getCss();
                         
                         // Combine HTML and CSS
                         const fullContent = `<!DOCTYPE html>
@@ -500,7 +509,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
             } catch (error) {
                 console.error('Error initializing editor:', error);
-                alert('Error initializing editor. Check console for details.');
+                document.getElementById('editor-error').style.display = 'block';
+                document.getElementById('editor-error').innerHTML += '<br>Error details: ' + error.message;
             }
         }
         
@@ -550,6 +560,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } catch (error) {
                 console.error('Error switching view:', error);
                 alert('Error switching view. See console for details.');
+            }
+        }
+
+        function selectTemplate(element, index) {
+            if (templates && templates[index] && templates[index].content) {
+                // Set name and update editor
+                document.getElementById('theme_name').value = templates[index].name + ' (Copy)';
+                if (window.editor) {
+                    window.editor.setComponents(templates[index].content);
+                } else {
+                    initializeEditor(templates[index].content);
+                }
             }
         }
     </script>
