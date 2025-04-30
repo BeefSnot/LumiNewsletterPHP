@@ -37,7 +37,7 @@
 /* Responsive adjustments */
 @media (max-width: 991px) {
     .mobile-nav-toggle {
-        display: block;
+        display: flex;
         position: fixed;
         top: 1rem;
         left: 1rem;
@@ -48,10 +48,9 @@
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        z-index: 1001;
+        z-index: 1051; /* Higher than anything else */
         cursor: pointer;
         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        display: flex;
         align-items: center;
         justify-content: center;
     }
@@ -64,7 +63,13 @@
         width: 100%;
         height: 100%;
         background: rgba(0,0,0,0.5);
-        z-index: 999;
+        z-index: 1040;
+    }
+    
+    /* Make sure the sidebar appears above the backdrop */
+    .sidebar.active {
+        transform: translateX(0);
+        z-index: 1045 !important;
     }
     
     /* Rest of your mobile styles */
@@ -254,5 +259,40 @@
     
     .card {
         margin-bottom: 1.5rem;
+    }
+    
+    /* Fix for template selection on mobile */
+    .template-card {
+        flex-direction: column;
+    }
+    
+    .template-preview {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .template-info {
+        width: 100%;
+    }
+    
+    /* Ensure editor toolbar is usable on mobile */
+    .gjs-pn-buttons {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    /* Fix for mobile menu button */
+    .mobile-nav-toggle {
+        z-index: 1050 !important;
+        position: fixed !important;
+        top: 15px !important;
+        left: 15px !important;
+        cursor: pointer !important;
+        user-select: none !important;
+    }
+    
+    /* Make sure mobile menu displays above all other content */
+    #sidebar.active {
+        z-index: 1040 !important;
     }
 }

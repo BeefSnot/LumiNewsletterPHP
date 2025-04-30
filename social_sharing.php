@@ -551,39 +551,6 @@ $recentActivity = $db->query("
             }
         });
         <?php endif; ?>
-        
-        // Mobile menu toggle
-        document.addEventListener('DOMContentLoaded', function() {
-            const mobileNavToggle = document.getElementById('mobileNavToggle');
-            const sidebar = document.getElementById('sidebar');
-            const backdrop = document.getElementById('backdrop');
-            const menuIcon = document.getElementById('menuIcon');
-            
-            function toggleMenu() {
-                sidebar.classList.toggle('active');
-                backdrop.classList.toggle('active');
-                
-                if (sidebar.classList.contains('active')) {
-                    menuIcon.classList.remove('fa-bars');
-                    menuIcon.classList.add('fa-times');
-                } else {
-                    menuIcon.classList.remove('fa-times');
-                    menuIcon.classList.add('fa-bars');
-                }
-            }
-            
-            mobileNavToggle.addEventListener('click', toggleMenu);
-            backdrop.addEventListener('click', toggleMenu);
-            
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    if (window.innerWidth <= 991 && sidebar.classList.contains('active')) {
-                        toggleMenu();
-                    }
-                });
-            });
-        });
     </script>
 </body>
 </html>

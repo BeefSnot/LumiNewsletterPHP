@@ -180,57 +180,5 @@ echo htmlspecialchars($embedCode);
     </footer>
     
     <script src="assets/js/sidebar.js"></script>
-    
-    <script>
-        function copyCode(elementId) {
-            const codeElement = document.getElementById(elementId);
-            const textArea = document.createElement('textarea');
-            textArea.value = codeElement.textContent;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            
-            // Show feedback
-            const button = document.querySelector(`#${elementId} + .copy-button, #${elementId} ~ .copy-button`);
-            const originalText = button.textContent;
-            button.textContent = 'Copied!';
-            setTimeout(() => {
-                button.textContent = originalText;
-            }, 2000);
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const mobileNavToggle = document.getElementById('mobileNavToggle');
-            const sidebar = document.getElementById('sidebar');
-            const backdrop = document.getElementById('backdrop');
-            const menuIcon = document.getElementById('menuIcon');
-            
-            function toggleMenu() {
-                sidebar.classList.toggle('active');
-                backdrop.classList.toggle('active');
-                
-                if (sidebar.classList.contains('active')) {
-                    menuIcon.classList.remove('fa-bars');
-                    menuIcon.classList.add('fa-times');
-                } else {
-                    menuIcon.classList.remove('fa-times');
-                    menuIcon.classList.add('fa-bars');
-                }
-            }
-            
-            mobileNavToggle.addEventListener('click', toggleMenu);
-            backdrop.addEventListener('click', toggleMenu);
-            
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    if (window.innerWidth <= 991 && sidebar.classList.contains('active')) {
-                        toggleMenu();
-                    }
-                });
-            });
-        });
-    </script>
 </body>
 </html>

@@ -362,136 +362,180 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.addEventListener('DOMContentLoaded', function() {
             try {
                 // Render template previews
-                templates.forEach((template, index) => {
-                    const previewEl = document.getElementById(`preview-frame-${index}`);
-                    if (previewEl) {
-                        previewEl.innerHTML = template.content;
-                    }
-                });
-                
-                // Initialize GrapesJS with better error handling
-                initializeEditor();
-                
-                // Set up form submission
-                document.getElementById('theme-form').addEventListener('submit', function(e) {
-                    if (currentMode === 'visual' && editor) {
-                        document.getElementById('theme_content').value = editor.getHtml() + '<style>' + editor.getCss() + '</style>';
-                    }
-                });
-                
-                // Select first template by default
-                if (templates.length > 0) {
-                    selectTemplate(document.querySelector('.template-card'), 0);
+                const templateContainer = document.getElementById('template-container');
+                if (templateContainer) {
+                    templates.forEach((template, index) => {
+                        const templateCard = document.createElement('div');
+                        templateCard.className = 'template-card';
+                        templateCard.dataset.id = template.id;
+                        templateCard.innerHTML = `
+                            <div class="template-preview">
+                                <div class="template-image">${template.preview_html || '<div class="no-preview">No Preview</div>'}</div>
+                            </div>
+                            <div class="template-info">
+                                <h3>${template.name}</h3>
+                                <p>${template.description}</p>
+                                <button type="button" class="btn btn-primary use-template-btn" data-id="${template.id}">
+                                    Use This Template
+                                </button>
+                            </div>
+                        `;
+                        templateContainer.appendChild(templateCard);
+                    });
+                    
+                    // Add use template event listeners
+                    document.querySelectorAll('.use-template-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const templateId = this.dataset.id;
+                            const template = templates.find(t => t.id == templateId);
+                            if (template) {
+                                // Reset editor if it exists
+                                if (editor) {
+                                    editor.destroy();
+                                }
+                                
+                                // Show editor step
+                                document.querySelector('.step[data-step="1"]').classList.remove('active');
+                                document.querySelector('.step[data-step="2"]').classList.add('active');
+                                
+                                // Initialize editor with template
+                                initializeEditor(template.content);
+                                
+                                // Set name and description
+                                document.getElementById('theme_name').value = template.name + ' (Copy)';
+                                document.getElementById('theme_description').value = template.description;
+                            }
+                        });
+                    });
                 }
+                
+                // Initialize blank editor
+                document.getElementById('create-blank').addEventListener('click', function() {
+                    document.querySelector('.step[data-step="1"]').classList.remove('active');
+                    document.querySelector('.step[data-step="2"]').classList.add('active');
+                    
+                    initializeEditor('');
+                    
+                    document.getElementById('theme_name').value = 'My New Theme';
+                    document.getElementById('theme_description').value = '';
+                });
+                
             } catch (error) {
-                console.error('Error initializing editor:', error);
-                document.getElementById('editor-error').style.display = 'block';
-                document.getElementById('editor-error').innerHTML += '<br>Error details: ' + error.message;
+                console.error('Error initializing templates:', error);
+                alert('Error initializing templates. Check console for details.');
             }
         });
         
-        function initializeEditor() {
-            // Make sure GrapesJS is loaded
-            if (typeof grapesjs === 'undefined') {
-                throw new Error('GrapesJS library not loaded. Check your internet connection or try a different browser.');
-            }
-            
-            // Initialize the editor
-            editor = grapesjs.init({
-                container: '#gjs',
-                components: templates.length > 0 ? templates[0].content : '',
-                height: '100%',
-                width: 'auto',
-                storageManager: false,
-                plugins: ['gjs-preset-newsletter'],
-                pluginsOpts: {
-                    'gjs-preset-newsletter': {
-                        modalTitleImport: 'Import your code',
-                        modalLabelImport: 'Paste your HTML or CSS code here',
-                        modalBtnImport: 'Import',
-                        modalLabelExport: 'Get HTML & CSS',
-                        modalBtnExport: 'Export',
-                        modalTitleExport: 'Export template',
-                        overwriteImport: true
-                    }
-                },
-                deviceManager: {
-                    devices: [
-                        {
-                            name: 'Desktop',
-                            width: '100%'
-                        }
-                    ]
-                },
-                panels: {
-                    defaults: [
-                        {
-                            id: 'panel-devices',
-                            el: '.panel__devices',
-                            buttons: [],
-                        },
-                        {
-                            id: 'panel-switcher',
-                            el: '.panel__switcher',
-                            buttons: [],
-                        }
-                    ]
-                },
-                assetManager: {
-                    assets: [
-                        'https://via.placeholder.com/350x250/78c5d6/fff',
-                        'https://via.placeholder.com/350x250/459ba8/fff',
-                        'https://via.placeholder.com/350x250/79c267/fff',
-                        'https://via.placeholder.com/350x250/c5d647/fff',
-                        'https://via.placeholder.com/350x250/f28c33/fff'
-                    ],
-                    upload: false
-                }
-            });
-            
-            // Show success message once editor is loaded
-            editor.on('load', () => {
-                console.log('Editor loaded successfully');
-            });
-            
-            // Show error message if editor fails to load
-            editor.on('error', (err) => {
-                console.error('Editor error:', err);
-                document.getElementById('editor-error').style.display = 'block';
-                document.getElementById('editor-error').innerHTML += '<br>Editor error: ' + err;
-            });
-        }
-        
-        function selectTemplate(element, index) {
+        function initializeEditor(content) {
             try {
-                // Remove active class from all templates
-                document.querySelectorAll('.template-card').forEach(card => {
-                    card.classList.remove('active');
+                // Configure editor
+                editor = grapesjs.init({
+                    container: '#gjs',
+                    height: '700px',
+                    width: 'auto',
+                    storageManager: false,
+                    panels: { defaults: [] },
+                    deviceManager: {
+                        devices: [
+                            {
+                                name: 'Desktop',
+                                width: '',
+                            }, 
+                            {
+                                name: 'Mobile',
+                                width: '320px',
+                                widthMedia: '480px',
+                            }
+                        ]
+                    },
+                    pluginsOpts: {
+                        'gjs-preset-newsletter': {
+                            modalTitleImport: 'Import template',
+                            // Other newsletter options
+                        }
+                    },
+                    plugins: ['gjs-preset-newsletter']
                 });
                 
-                // Add active class to selected template
-                element.classList.add('active');
-                
-                // Load template into editor
-                const templateContent = templates[index].content;
-                
-                if (currentMode === 'visual' && editor) {
-                    editor.setComponents(templateContent);
-                } else {
-                    document.getElementById('theme_content').value = templateContent;
+                // Set content if provided
+                if (content) {
+                    editor.setComponents(content);
                 }
+                
+                // Make sure editor is responsive on mobile
+                const editorContainer = document.getElementById('editor-container') || document.getElementById('gjs');
+                if (editorContainer) {
+                    editorContainer.style.maxWidth = '100%';
+                    editorContainer.style.overflowX = 'auto';
+                    
+                    // Fix editor canvas
+                    setTimeout(() => {
+                        const canvas = document.querySelector('.gjs-cv-canvas');
+                        if (canvas) {
+                            canvas.style.width = '100%';
+                            canvas.style.overflow = 'auto';
+                        }
+                        
+                        const editorToolbar = document.querySelector('.gjs-pn-panel');
+                        if (editorToolbar) {
+                            editorToolbar.style.maxWidth = '100vw';
+                            editorToolbar.style.overflowX = 'auto';
+                        }
+                    }, 500);
+                }
+                
+                // Make sure theme edit overlay doesn't interfere with hamburger menu
+                const themeOverlays = document.querySelectorAll('.gjs-mdl-dialog, .gjs-editor-cont');
+                themeOverlays.forEach(overlay => {
+                    overlay.style.zIndex = '1039'; // Below hamburger button
+                });
+                
+                // Form submission handler
+                document.getElementById('theme-form').addEventListener('submit', function(e) {
+                    // Get HTML content from editor
+                    const html = editor.getHtml();
+                    const css = editor.getCss();
+                    
+                    // Combine HTML and CSS
+                    const fullContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <style>${css}</style>
+                    </head>
+                    <body>
+                        ${html}
+                    </body>
+                    </html>`;
+                    
+                    // Set to hidden field
+                    document.getElementById('theme_content').value = fullContent;
+                });
+                
             } catch (error) {
-                console.error('Error selecting template:', error);
-                alert('Error selecting template. See console for details.');
+                console.error('Error initializing editor:', error);
+                alert('Error initializing editor. Check console for details.');
             }
         }
         
         function switchView(mode) {
             try {
-                // Get current content
                 let content = '';
+                
+                // Get content from current view
                 if (currentMode === 'visual' && editor) {
-                    content = editor.getHtml() + '<style>' + editor.getCss() + '</style>';
+                    const html = editor.getHtml();
+                    const css = editor.getCss();
+                    content = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <style>${css}</style>
+                    </head>
+                    <body>
+                        ${html}
+                    </body>
+                    </html>`;
                 } else {
                     content = document.getElementById('theme_content').value;
                 }
@@ -507,6 +551,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     document.getElementById('gjs').style.display = 'block';
                     document.getElementById('theme_content').style.display = 'none';
                     if (editor) {
+                        // Just update components without re-initializing
                         editor.setComponents(content);
                     }
                 } else {
@@ -521,39 +566,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 alert('Error switching view. See console for details.');
             }
         }
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const mobileNavToggle = document.getElementById('mobileNavToggle');
-            const sidebar = document.getElementById('sidebar');
-            const backdrop = document.getElementById('backdrop');
-            const menuIcon = document.getElementById('menuIcon');
-            
-            function toggleMenu() {
-                sidebar.classList.toggle('active');
-                backdrop.classList.toggle('active');
-                
-                if (sidebar.classList.contains('active')) {
-                    menuIcon.classList.remove('fa-bars');
-                    menuIcon.classList.add('fa-times');
-                } else {
-                    menuIcon.classList.remove('fa-times');
-                    menuIcon.classList.add('fa-bars');
-                }
-            }
-            
-            mobileNavToggle.addEventListener('click', toggleMenu);
-            backdrop.addEventListener('click', toggleMenu);
-            
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    if (window.innerWidth <= 991 && sidebar.classList.contains('active')) {
-                        toggleMenu();
-                    }
-                });
-            });
-        });
     </script>
 </body>
 </html>
