@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
 require_once 'includes/auth.php';
 require_once 'includes/db.php';
@@ -50,23 +54,29 @@ if (count($templates) == 0) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $themeName = $_POST['theme_name'];
-    $themeContent = $_POST['theme_content'];
+    try {
+        $themeName = $_POST['theme_name'];
+        $themeContent = $_POST['theme_content'];
 
-    // Save the theme to the database
-    $stmt = $db->prepare('INSERT INTO themes (name, content) VALUES (?, ?)');
-    if ($stmt) {
-        $stmt->bind_param('ss', $themeName, $themeContent);
-        if ($stmt->execute()) {
-            $message = 'Theme created successfully!';
-            $messageType = 'success';
+        // Save the theme to the database
+        $stmt = $db->prepare('INSERT INTO themes (name, content) VALUES (?, ?)');
+        if ($stmt) {
+            $stmt->bind_param('ss', $themeName, $themeContent);
+            if ($stmt->execute()) {
+                $message = 'Theme created successfully!';
+                $messageType = 'success';
+            } else {
+                $message = 'Error saving theme: ' . $stmt->error;
+                $messageType = 'error';
+            }
+            $stmt->close();
         } else {
-            $message = 'Error saving theme: ' . $stmt->error;
+            $message = 'Database error: ' . $db->error;
             $messageType = 'error';
         }
-        $stmt->close();
-    } else {
-        $message = 'Database error: ' . $db->error;
+    } catch (Exception $e) {
+        error_log('Theme creation error: ' . $e->getMessage());
+        $message = 'An error occurred: ' . $e->getMessage();
         $messageType = 'error';
     }
 }
@@ -361,68 +371,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         document.addEventListener('DOMContentLoaded', function() {
             try {
-                // Render template previews
-                const templateContainer = document.getElementById('template-container');
-                if (templateContainer) {
-                    templates.forEach((template, index) => {
-                        const templateCard = document.createElement('div');
-                        templateCard.className = 'template-card';
-                        templateCard.dataset.id = template.id;
-                        templateCard.innerHTML = `
-                            <div class="template-preview">
-                                <div class="template-image">${template.preview_html || '<div class="no-preview">No Preview</div>'}</div>
-                            </div>
-                            <div class="template-info">
-                                <h3>${template.name}</h3>
-                                <p>${template.description}</p>
-                                <button type="button" class="btn btn-primary use-template-btn" data-id="${template.id}">
-                                    Use This Template
-                                </button>
-                            </div>
-                        `;
-                        templateContainer.appendChild(templateCard);
-                    });
-                    
-                    // Add use template event listeners
-                    document.querySelectorAll('.use-template-btn').forEach(button => {
-                        button.addEventListener('click', function() {
-                            const templateId = this.dataset.id;
-                            const template = templates.find(t => t.id == templateId);
-                            if (template) {
-                                // Reset editor if it exists
-                                if (editor) {
-                                    editor.destroy();
-                                }
-                                
-                                // Show editor step
-                                document.querySelector('.step[data-step="1"]').classList.remove('active');
-                                document.querySelector('.step[data-step="2"]').classList.add('active');
-                                
-                                // Initialize editor with template
-                                initializeEditor(template.content);
-                                
-                                // Set name and description
-                                document.getElementById('theme_name').value = template.name + ' (Copy)';
-                                document.getElementById('theme_description').value = template.description;
-                            }
-                        });
-                    });
+                // Initialize the editor immediately - no need to wait for steps
+                initializeEditor(templates[0]?.content || '');
+                
+                // Set initial theme name if a template is selected
+                if (templates[0]) {
+                    document.getElementById('theme_name').value = templates[0].name + ' (Copy)';
                 }
                 
-                // Initialize blank editor
-                document.getElementById('create-blank').addEventListener('click', function() {
-                    document.querySelector('.step[data-step="1"]').classList.remove('active');
-                    document.querySelector('.step[data-step="2"]').classList.add('active');
-                    
-                    initializeEditor('');
-                    
-                    document.getElementById('theme_name').value = 'My New Theme';
-                    document.getElementById('theme_description').value = '';
+                // Set up template selection
+                document.querySelectorAll('.template-card').forEach((card, index) => {
+                    card.addEventListener('click', function() {
+                        // Remove active class from all cards
+                        document.querySelectorAll('.template-card').forEach(c => 
+                            c.classList.remove('active'));
+                        // Add active class to clicked card
+                        this.classList.add('active');
+                        
+                        // Get template content and update editor
+                        const templateId = this.getAttribute('data-template-id');
+                        const template = templates.find(t => t.id == templateId);
+                        if (template && template.content) {
+                            // Set name and update editor
+                            document.getElementById('theme_name').value = template.name + ' (Copy)';
+                            if (editor) {
+                                editor.setComponents(template.content);
+                            }
+                        }
+                    });
                 });
                 
             } catch (error) {
-                console.error('Error initializing templates:', error);
-                alert('Error initializing templates. Check console for details.');
+                console.error('Error initializing editor:', error);
+                document.getElementById('editor-error').style.display = 'block';
             }
         });
         
@@ -492,24 +473,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 // Form submission handler
                 document.getElementById('theme-form').addEventListener('submit', function(e) {
-                    // Get HTML content from editor
-                    const html = editor.getHtml();
-                    const css = editor.getCss();
-                    
-                    // Combine HTML and CSS
-                    const fullContent = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <style>${css}</style>
-                    </head>
-                    <body>
-                        ${html}
-                    </body>
-                    </html>`;
-                    
-                    // Set to hidden field
-                    document.getElementById('theme_content').value = fullContent;
+                    try {
+                        // Get HTML content from editor
+                        const html = editor.getHtml();
+                        const css = editor.getCss();
+                        
+                        // Combine HTML and CSS
+                        const fullContent = `<!DOCTYPE html>
+<html>
+<head>
+    <style>${css}</style>
+</head>
+<body>
+    ${html}
+</body>
+</html>`;
+                        
+                        // Set to hidden field
+                        document.getElementById('theme_content').value = fullContent;
+                    } catch (error) {
+                        console.error('Error preparing theme content:', error);
+                        e.preventDefault(); // Prevent form submission on error
+                        alert('Error preparing theme content. Please check console for details.');
+                    }
                 });
                 
             } catch (error) {

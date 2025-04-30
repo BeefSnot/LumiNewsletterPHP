@@ -3,6 +3,7 @@ session_start();
 require_once 'includes/auth.php';
 require_once 'includes/db.php';
 require_once 'includes/init.php';  // Replace vendor/autoload.php
+require_once 'includes/functions.php';  // MOVE THIS LINE HERE
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
@@ -140,9 +141,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $path = dirname($_SERVER['PHP_SELF']);
             $site_url = $protocol . $host . rtrim($path, '/');
         }
-
-        // Include the functions file
-        require_once 'includes/functions.php';
 
         // Loop through recipients and send emails
         foreach ($recipients as $email) {
