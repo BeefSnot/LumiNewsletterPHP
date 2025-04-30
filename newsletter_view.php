@@ -2,6 +2,7 @@
 require_once 'includes/db.php';
 require_once 'includes/functions.php';
 require_once 'includes/social_sharing.php';
+require_once 'includes/social_widget.php';
 
 // Get newsletter ID from URL
 $newsletter_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -166,6 +167,63 @@ if ($result && $result->num_rows > 0) {
                 padding: 1.5rem;
             }
         }
+
+        /* Social Sharing Buttons */
+        .social-sharing {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+
+        .social-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 15px;
+            border-radius: 4px;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+
+        .social-btn:hover {
+            opacity: 0.9;
+        }
+
+        .social-btn i {
+            margin-right: 8px;
+        }
+
+        .facebook { background-color: #3b5998; }
+        .twitter { background-color: #1da1f2; }
+        .linkedin { background-color: #0077b5; }
+        .email { background-color: #777777; }
+
+        /* Size variations */
+        .social-btn.btn-sm { padding: 5px 10px; font-size: 0.8rem; }
+        .social-btn.btn-lg { padding: 10px 20px; font-size: 1.1rem; }
+
+        /* Style variations */
+        .social-btn-simple { background: transparent; border: 1px solid; }
+        .social-btn-simple.facebook { color: #3b5998; border-color: #3b5998; }
+        .social-btn-simple.twitter { color: #1da1f2; border-color: #1da1f2; }
+        .social-btn-simple.linkedin { color: #0077b5; border-color: #0077b5; }
+        .social-btn-simple.email { color: #777777; border-color: #777777; }
+
+        .social-btn-minimal { background: transparent; padding: 5px; }
+        .social-btn-minimal.facebook { color: #3b5998; }
+        .social-btn-minimal.twitter { color: #1da1f2; }
+        .social-btn-minimal.linkedin { color: #0077b5; }
+        .social-btn-minimal.email { color: #777777; }
     </style>
 </head>
 <body>
@@ -181,7 +239,23 @@ if ($result && $result->num_rows > 0) {
         <div class="newsletter-body">
             <?php echo $newsletter['body']; ?>
             
-            <?php echo generateSocialButtons($newsletter_id, $newsletter['subject'], $db); ?>
+            <?php 
+            // Check if social sharing is enabled
+            $sharingEnabled = true;
+            $result = $db->query("SELECT value FROM settings WHERE name = 'social_sharing_enabled'");
+            if ($result && $result->num_rows > 0) {
+                $sharingEnabled = $result->fetch_assoc()['value'] == '1';
+            }
+            
+            if ($sharingEnabled) {
+                // Try both functions to ensure at least one works
+                if (function_exists('generateSocialButtons')) {
+                    echo generateSocialButtons($newsletter_id, $newsletter['subject'], $db);
+                } else if (function_exists('getSocialShareButtons')) {
+                    echo getSocialShareButtons($newsletter_id, $newsletter['subject'], $db);
+                }
+            }
+            ?>
         </div>
         
         <div class="newsletter-footer">

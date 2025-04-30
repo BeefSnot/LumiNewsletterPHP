@@ -174,23 +174,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($subscriber) {
                     $personalizedBody = processPersonalization($body, $subscriber, $db);
                     
-                    // Include social widget helper
+                    // Include both social sharing files
+                    require_once 'includes/social_sharing.php';
                     require_once 'includes/social_widget.php';
                     
-                    // Add customized social buttons at end of email
-                    $socialOptions = [
-                        'facebook' => true, 
+                    // Add social buttons - more robust insertion
+                    $socialButtons = getSocialShareButtons($newsletter_id, $subject, $db, [
+                        'facebook' => true,
                         'twitter' => true,
                         'linkedin' => true,
                         'email' => true,
-                        'size' => 'large',    // 'small', 'normal', or 'large'
-                        'style' => 'default'  // 'default', 'simple', or 'minimal'
-                    ];
+                        'size' => 'large',
+                        'style' => 'default'
+                    ]);
                     
-                    $socialButtons = getSocialShareButtons($newsletter_id, $subject, $db, $socialOptions);
+                    // More robust pattern matching (case insensitive and optional whitespace)
+                    $pattern = '/<\/\s*body\s*>/i';
+                    if (preg_match($pattern, $personalizedBody)) {
+                        $personalizedBody = preg_replace($pattern, $socialButtons . '</body>', $personalizedBody);
+                    } else {
+                        // If no closing body tag, append to the end
+                        $personalizedBody .= $socialButtons;
+                    }
                     
-                    // Add buttons before closing body tag
-                    $personalizedBody = preg_replace('/<\/body>/', $socialButtons . '</body>', $personalizedBody);
                     $mail->Body = $personalizedBody;
                 }
                 

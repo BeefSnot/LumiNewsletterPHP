@@ -1,14 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Sidebar.js loading...");
     
-    // Toggle dropdown menus
+    // Fix 1: Better handling of dropdown menus with direct event listeners
     const menuHeaders = document.querySelectorAll('.menu-group-header');
     menuHeaders.forEach(header => {
-        // Remove any existing event listeners first to prevent duplicates
-        const newHeader = header.cloneNode(true);
-        header.parentNode.replaceChild(newHeader, header);
-        
-        newHeader.addEventListener('click', function(e) {
+        header.addEventListener('click', function(e) {
             // Prevent default action and stop propagation
             e.preventDefault();
             e.stopPropagation();
@@ -24,20 +20,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Auto-expand menu if it contains active item
-        const submenu = newHeader.nextElementSibling;
+        const submenu = header.nextElementSibling;
         if (submenu && submenu.querySelector('.nav-item.active')) {
-            newHeader.classList.add('active');
+            header.classList.add('active');
             submenu.classList.add('show');
         }
     });
     
-    // Mobile menu toggle functionality
+    // Fix 2: Improved mobile menu toggle that works across pages
     const mobileNavToggle = document.getElementById('mobileNavToggle');
-    const sidebar = document.querySelector('.sidebar');
+    const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('backdrop');
     
     if (mobileNavToggle && sidebar && backdrop) {
-        function toggleMenu() {
+        function toggleMenu(event) {
+            if (event) {
+                event.preventDefault();
+            }
+            
             sidebar.classList.toggle('active');
             backdrop.classList.toggle('active');
             
@@ -53,20 +53,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
+        // Fix 3: Direct event listeners without cloning
         mobileNavToggle.addEventListener('click', toggleMenu);
         backdrop.addEventListener('click', toggleMenu);
     }
     
-    // Fix clicks on nav items - don't close menu automatically on desktop
+    // Fix 4: Ensure mobile menu closes after navigation on small screens
     const navItems = document.querySelectorAll('.nav-item');
     navItems.forEach(item => {
-        // If it's a link with a submenu, let it work normally
+        // Skip links inside dropdown menus - they should navigate normally
         if (item.closest('.submenu')) {
-            // These are regular links, preserve their behavior
             return;
         }
         
-        // Otherwise, let the link navigate normally
-        // The browser will handle the navigation
+        // For other nav items, add click handler to close mobile menu when clicked
+        item.addEventListener('click', function(e) {
+            // Only close the menu on mobile
+            if (window.innerWidth <= 991 && sidebar && sidebar.classList.contains('active')) {
+                // Let the link navigate first, then close the menu
+                setTimeout(() => {
+                    sidebar.classList.remove('active');
+                    backdrop.classList.remove('active');
+                    
+                    const menuIcon = document.getElementById('menuIcon');
+                    if (menuIcon) {
+                        menuIcon.classList.remove('fa-times');
+                        menuIcon.classList.add('fa-bars');
+                    }
+                }, 100);
+            }
+        });
     });
 });
