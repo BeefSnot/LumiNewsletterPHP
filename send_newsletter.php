@@ -173,9 +173,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $personalizedBody = $body;
                 if ($subscriber) {
                     $personalizedBody = processPersonalization($body, $subscriber, $db);
+                    
+                    // Include social widget helper
+                    require_once 'includes/social_widget.php';
+                    
+                    // Add customized social buttons at end of email
+                    $socialOptions = [
+                        'facebook' => true, 
+                        'twitter' => true,
+                        'linkedin' => true,
+                        'email' => true,
+                        'size' => 'large',    // 'small', 'normal', or 'large'
+                        'style' => 'default'  // 'default', 'simple', or 'minimal'
+                    ];
+                    
+                    $socialButtons = getSocialShareButtons($newsletter_id, $subject, $db, $socialOptions);
+                    
+                    // Add buttons before closing body tag
+                    $personalizedBody = preg_replace('/<\/body>/', $socialButtons . '</body>', $personalizedBody);
+                    $mail->Body = $personalizedBody;
                 }
-                
-                $mail->Body = $personalizedBody;
                 
                 $mail->send();
                 $success = true;

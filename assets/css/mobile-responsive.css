@@ -192,6 +192,21 @@
         margin-right: 10px;
         text-align: center;
     }
+    
+    .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        z-index: 1050;
+        transition: transform 0.3s ease;
+        width: 250px;
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
 }
 
 @media (max-width: 576px) {

@@ -31,45 +31,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Mobile menu toggle - centralized implementation
+    // Mobile menu toggle functionality
     const mobileNavToggle = document.getElementById('mobileNavToggle');
-    const sidebar = document.getElementById('sidebar');
+    const sidebar = document.querySelector('.sidebar');
     const backdrop = document.getElementById('backdrop');
-    const menuIcon = document.getElementById('menuIcon');
     
-    if (mobileNavToggle && sidebar && backdrop && menuIcon) {
-        console.log("Mobile menu elements found");
-        
-        function toggleMenu(e) {
-            if(e) e.preventDefault();
-            if(e) e.stopPropagation();
-            
+    if (mobileNavToggle && sidebar && backdrop) {
+        function toggleMenu() {
             sidebar.classList.toggle('active');
             backdrop.classList.toggle('active');
             
-            if (sidebar.classList.contains('active')) {
-                menuIcon.classList.remove('fa-bars');
-                menuIcon.classList.add('fa-times');
-            } else {
-                menuIcon.classList.remove('fa-times');
-                menuIcon.classList.add('fa-bars');
+            const menuIcon = document.getElementById('menuIcon');
+            if (menuIcon) {
+                if (sidebar.classList.contains('active')) {
+                    menuIcon.classList.remove('fa-bars');
+                    menuIcon.classList.add('fa-times');
+                } else {
+                    menuIcon.classList.remove('fa-times');
+                    menuIcon.classList.add('fa-bars');
+                }
             }
         }
         
-        // Remove any existing click event listeners first
-        mobileNavToggle.replaceWith(mobileNavToggle.cloneNode(true));
-        backdrop.replaceWith(backdrop.cloneNode(true));
-        
-        // Get the fresh elements after replacement
-        const freshMobileNavToggle = document.getElementById('mobileNavToggle');
-        const freshBackdrop = document.getElementById('backdrop');
-        
-        // Add new event listeners
-        freshMobileNavToggle.addEventListener('click', toggleMenu);
-        freshBackdrop.addEventListener('click', toggleMenu);
-        
-        // Don't add click handlers to nav items that close the menu
-        // This prevents navigation issues
+        mobileNavToggle.addEventListener('click', toggleMenu);
+        backdrop.addEventListener('click', toggleMenu);
     }
     
     // Fix clicks on nav items - don't close menu automatically on desktop
