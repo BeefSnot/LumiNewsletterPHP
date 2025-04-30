@@ -1,2 +1,2 @@
 <?php
-return '1.555'; // Your current version
+return '1.556'; // Your current version

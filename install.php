@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 name VARCHAR(50) NOT NULL,
                 content TEXT NOT NULL
             )",
-            "CREATE TABLE IF NOT EXISTS groups (
+            "CREATE TABLE IF NOT EXISTS `groups` (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(50) NOT NULL
             )",
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 variant CHAR(1) NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (creator_id) REFERENCES users(id),
-                FOREIGN KEY (group_id) REFERENCES groups(id),
+                FOREIGN KEY (group_id) REFERENCES `groups`(id),
                 FOREIGN KEY (theme_id) REFERENCES themes(id)
             )",
             "CREATE TABLE IF NOT EXISTS group_subscriptions (
@@ -88,14 +88,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 last_name VARCHAR(100) NULL,
                 group_id INT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (group_id) REFERENCES groups(id)
+                FOREIGN KEY (group_id) REFERENCES `groups`(id)
             )",
             "CREATE TABLE IF NOT EXISTS newsletter_groups (
                 newsletter_id INT NOT NULL,
                 group_id INT NOT NULL,
                 PRIMARY KEY (newsletter_id, group_id),
                 FOREIGN KEY (newsletter_id) REFERENCES newsletters(id),
-                FOREIGN KEY (group_id) REFERENCES groups(id)
+                FOREIGN KEY (group_id) REFERENCES `groups`(id)
             )",
             "CREATE TABLE IF NOT EXISTS updates (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -167,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 split_percentage INT NOT NULL DEFAULT 50,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 sent_at TIMESTAMP NULL,
-                FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+                FOREIGN KEY (group_id) REFERENCES `groups`(id) ON DELETE CASCADE
             )",
             // Subscriber management tables
             "CREATE TABLE IF NOT EXISTS subscriber_scores (
