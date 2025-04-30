@@ -85,7 +85,7 @@ $topNewsletters = $db->query("
     SELECT 
         n.id,
         n.subject,
-        DATE_FORMAT(n.send_date, '%Y-%m-%d') as date, 
+        DATE_FORMAT(COALESCE(n.sent_at, n.created_at), '%Y-%m-%d') as date, 
         SUM(ss.share_count) as total_shares,
         SUM(ss.click_count) as total_clicks
     FROM newsletters n
