@@ -13,14 +13,15 @@ if (!isLoggedIn()) {
 
 // Fetch all newsletters
 $query = "
-    SELECT n.id, n.subject, n.content, n.sent_at, u.username AS sender, 
+    SELECT n.id, n.subject, n.content, COALESCE(n.created_at, n.send_date) AS sent_at, 
+           u.username AS sender, 
            GROUP_CONCAT(g.name SEPARATOR ', ') AS `groups`
     FROM newsletters n
     JOIN users u ON n.creator_id = u.id
     LEFT JOIN newsletter_groups ng ON n.id = ng.newsletter_id
     LEFT JOIN `groups` g ON ng.group_id = g.id
     GROUP BY n.id
-    ORDER BY n.sent_at DESC
+    ORDER BY COALESCE(n.created_at, n.send_date) DESC
 ";
 
 $newslettersResult = $db->query($query);
