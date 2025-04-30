@@ -2,7 +2,7 @@
 
 ![LumiNewsletter Logo](https://github.com/BeefSnot/LumiNewsletterPHP/raw/main/assets/images/lumihost.png)
 
-## Test site - https://newsletter.jameshamby.me
+## Test site - https://newsletter.lumisolutions.tech
 
 Test login (only editor, no admin. Working on an actual test site as we speak)
 
@@ -12,7 +12,7 @@ Test1234
 
 **I will be organizing project very soon!**
 
-**Current Version: 1.53** | **Release Date: April 27, 2025**
+**Current Version: 1.559** | **Release Date: April 27, 2025**
 
 ## 📋 Table of Contents
 
@@ -61,7 +61,7 @@ LumiNewsletter is a comprehensive, self-hosted email marketing system designed f
 ## 📦 Installation Guide
 
 ### 1️⃣ Preparation
-1. **Download** from [the official website](https://lumihost.net) Can also use github releases to download the zip!
+1. **Download** from [The Official Download Link](https://lumisolutions.tech/newsletterupdates/luminewsletterlatest.zip), or you can also use github releases to download the zip!
 2. **Upload** all files to your web server
 3. **Extract** all the files, and move them to root directory!
 4. **Ensure** file permissions are set correctly (755 for directories, 644 for files)
