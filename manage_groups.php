@@ -1,4 +1,8 @@
 <?php
+// Enable error reporting for debugging (remove in production)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 require_once 'includes/auth.php';
 require_once 'includes/db.php';
@@ -7,6 +11,42 @@ require_once 'includes/db.php';
 if (!isLoggedIn() || $_SESSION['role'] !== 'admin') {
     header('Location: login.php');
     exit();
+}
+
+// Verify required tables exist
+$tablesNeeded = ['groups', 'group_subscriptions'];
+$missingTables = [];
+
+foreach ($tablesNeeded as $table) {
+    $result = $db->query("SHOW TABLES LIKE '$table'");
+    if ($result->num_rows === 0) {
+        $missingTables[] = $table;
+    }
+}
+
+// If tables are missing, create them
+if (!empty($missingTables)) {
+    // Create groups table if missing
+    if (in_array('groups', $missingTables)) {
+        $db->query("CREATE TABLE IF NOT EXISTS `groups` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `name` VARCHAR(255) NOT NULL,
+            `description` TEXT NULL,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )");
+    }
+    
+    // Create group_subscriptions table if missing
+    if (in_array('group_subscriptions', $missingTables)) {
+        $db->query("CREATE TABLE IF NOT EXISTS `group_subscriptions` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `group_id` INT NOT NULL,
+            `email` VARCHAR(255) NOT NULL,
+            `subscribed_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX (`group_id`),
+            INDEX (`email`)
+        )");
+    }
 }
 
 $currentVersion = require 'version.php';
@@ -103,19 +143,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Get all groups
-$groupsResult = $db->query("
-    SELECT g.*, 
-        (SELECT COUNT(*) FROM group_subscriptions WHERE group_id = g.id) as subscriber_count 
-    FROM groups g 
-    ORDER BY g.name
-");
-
+// Safely get all groups with subscriber count
 $groups = [];
-if ($groupsResult) {
-    while ($row = $groupsResult->fetch_assoc()) {
-        $groups[] = $row;
+try {
+    // First check if the tables exist
+    $tableCheck = $db->query("SHOW TABLES LIKE 'groups'");
+    if ($tableCheck->num_rows > 0) {
+        // Use a safer query that doesn't rely on subqueries
+        $groupsResult = $db->query("SELECT g.* FROM groups g ORDER BY g.name");
+        
+        if ($groupsResult) {
+            while ($row = $groupsResult->fetch_assoc()) {
+                // Get subscriber count in a separate query
+                $countResult = $db->query("SELECT COUNT(*) as count FROM group_subscriptions WHERE group_id = {$row['id']}");
+                $countRow = $countResult ? $countResult->fetch_assoc() : ['count' => 0];
+                $row['subscriber_count'] = $countRow['count'];
+                $groups[] = $row;
+            }
+        }
     }
+} catch (Exception $e) {
+    $message = "Database error: " . $e->getMessage();
+    $messageType = "error";
 }
 
 // Get group details for editing

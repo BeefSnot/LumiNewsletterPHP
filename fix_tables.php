@@ -33,6 +33,10 @@ $required_columns = [
     'newsletters' => [
         'sent_at' => 'TIMESTAMP NULL DEFAULT NULL'
     ],
+    'groups' => [
+        'description' => 'TEXT NULL',
+        'created_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP'
+    ],
     // Add other tables and their required columns as needed
 ];
 

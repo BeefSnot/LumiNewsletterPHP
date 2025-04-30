@@ -667,6 +667,28 @@ if (addColumnIfNotExists($db, 'newsletters', 'sent_at', 'TIMESTAMP NULL DEFAULT 
     $messages[] = "The sent_at column already exists or couldn't be added to newsletters table";
 }
 
+// Add this after the database connection and necessary includes:
+
+// Check if groups table exists
+$checkTable = $db->query("SHOW TABLES LIKE 'groups'");
+if ($checkTable->num_rows > 0) {
+    // Check if description column exists
+    $checkColumn = $db->query("SHOW COLUMNS FROM `groups` LIKE 'description'");
+    if ($checkColumn->num_rows === 0) {
+        // Add description column if it doesn't exist
+        $db->query("ALTER TABLE `groups` ADD COLUMN `description` TEXT NULL AFTER `name`");
+        echo "Added description column to groups table.<br>";
+    }
+    
+    // Check if created_at column exists
+    $checkColumn = $db->query("SHOW COLUMNS FROM `groups` LIKE 'created_at'");
+    if ($checkColumn->num_rows === 0) {
+        // Add created_at column if it doesn't exist
+        $db->query("ALTER TABLE `groups` ADD COLUMN `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+        echo "Added created_at column to groups table.<br>";
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -714,6 +736,16 @@ if (addColumnIfNotExists($db, 'newsletters', 'sent_at', 'TIMESTAMP NULL DEFAULT 
                     <strong>Database Setup:</strong> If you experience missing tables or database errors, use our table repair tool.
                     <a href="fix_tables.php" class="btn btn-sm" style="margin-left: 10px; background-color: var(--primary); color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; display: inline-block; margin-top: 5px;">
                         <i class="fas fa-wrench"></i> Run Fix Tables
+                    </a>
+                </div>
+            </div>
+
+            <div class="notification info" style="background-color: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; color: #856404; margin-top: 15px;">
+                <i class="fas fa-users"></i>
+                <div>
+                    <strong>Subscriber Groups:</strong> If you're experiencing issues with subscriber groups or the 'description' column, use our group repair tool.
+                    <a href="fix_groups_table.php" class="btn btn-sm" style="margin-left: 10px; background-color: #ffc107; color: #212529; text-decoration: none; padding: 5px 10px; border-radius: 4px; display: inline-block; margin-top: 5px;">
+                        <i class="fas fa-user-cog"></i> Run Group Fix
                     </a>
                 </div>
             </div>
