@@ -61,7 +61,7 @@ LumiNewsletter is a comprehensive, self-hosted email marketing system designed f
 ## 📦 Installation Guide
 
 ### 1️⃣ Preparation
-1. **Download** from [The Official Download Link](https://lumisolutions.tech/newsletterupdates/luminewsletterlatest.zip) Can also use github releases to download the zip!
+1. **Download** from [The Official Download Link](https://lumisolutions.tech/newsletterupdates/luminewsletterlatest.zip), or you can also use github releases to download the zip!
 2. **Upload** all files to your web server
 3. **Extract** all the files, and move them to root directory!
 4. **Ensure** file permissions are set correctly (755 for directories, 644 for files)
