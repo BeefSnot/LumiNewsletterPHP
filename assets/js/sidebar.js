@@ -4,19 +4,29 @@ document.addEventListener('DOMContentLoaded', function() {
     // Toggle dropdown menus
     const menuHeaders = document.querySelectorAll('.menu-group-header');
     menuHeaders.forEach(header => {
-        header.addEventListener('click', function() {
+        // Remove any existing event listeners first to prevent duplicates
+        const newHeader = header.cloneNode(true);
+        header.parentNode.replaceChild(newHeader, header);
+        
+        newHeader.addEventListener('click', function(e) {
+            // Prevent default action and stop propagation
+            e.preventDefault();
+            e.stopPropagation();
+            
             // Toggle active class on the header
             this.classList.toggle('active');
             
             // Toggle submenu visibility
             const submenu = this.nextElementSibling;
-            if(submenu) submenu.classList.toggle('show');
+            if(submenu && submenu.classList.contains('submenu')) {
+                submenu.classList.toggle('show');
+            }
         });
         
         // Auto-expand menu if it contains active item
-        const submenu = header.nextElementSibling;
+        const submenu = newHeader.nextElementSibling;
         if (submenu && submenu.querySelector('.nav-item.active')) {
-            header.classList.add('active');
+            newHeader.classList.add('active');
             submenu.classList.add('show');
         }
     });
@@ -31,8 +41,9 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Mobile menu elements found");
         
         function toggleMenu(e) {
+            if(e) e.preventDefault();
             if(e) e.stopPropagation();
-            console.log("Toggle menu clicked");
+            
             sidebar.classList.toggle('active');
             backdrop.classList.toggle('active');
             
@@ -46,36 +57,31 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Remove any existing click event listeners first
-        mobileNavToggle.removeEventListener('click', toggleMenu);
-        backdrop.removeEventListener('click', toggleMenu);
+        mobileNavToggle.replaceWith(mobileNavToggle.cloneNode(true));
+        backdrop.replaceWith(backdrop.cloneNode(true));
         
-        // Add new event listeners with debug
-        mobileNavToggle.addEventListener('click', function(e) {
-            console.log("Mobile toggle clicked");
-            toggleMenu(e);
-        });
+        // Get the fresh elements after replacement
+        const freshMobileNavToggle = document.getElementById('mobileNavToggle');
+        const freshBackdrop = document.getElementById('backdrop');
         
-        backdrop.addEventListener('click', function(e) {
-            console.log("Backdrop clicked");
-            toggleMenu(e);
-        });
+        // Add new event listeners
+        freshMobileNavToggle.addEventListener('click', toggleMenu);
+        freshBackdrop.addEventListener('click', toggleMenu);
         
-        // Close mobile menu when clicking a nav item (on small screens)
-        const navItems = document.querySelectorAll('.nav-item');
-        navItems.forEach(item => {
-            item.removeEventListener('click', toggleMenu);
-            item.addEventListener('click', function() {
-                if (window.innerWidth <= 991 && sidebar.classList.contains('active')) {
-                    toggleMenu();
-                }
-            });
-        });
-    } else {
-        console.error('Mobile menu elements not found:', { 
-            mobileNavToggle: mobileNavToggle ? true : false, 
-            sidebar: sidebar ? true : false,
-            backdrop: backdrop ? true : false,
-            menuIcon: menuIcon ? true : false
-        });
+        // Don't add click handlers to nav items that close the menu
+        // This prevents navigation issues
     }
+    
+    // Fix clicks on nav items - don't close menu automatically on desktop
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        // If it's a link with a submenu, let it work normally
+        if (item.closest('.submenu')) {
+            // These are regular links, preserve their behavior
+            return;
+        }
+        
+        // Otherwise, let the link navigate normally
+        // The browser will handle the navigation
+    });
 });
