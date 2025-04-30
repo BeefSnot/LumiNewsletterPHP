@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Insert the newsletter into the database
-        $stmt = $db->prepare('INSERT INTO newsletters (subject, content, sender_id, theme_id) VALUES (?, ?, ?, ?)');
+        $stmt = $db->prepare('INSERT INTO newsletters (subject, content, creator_id, theme_id) VALUES (?, ?, ?, ?)');
         if ($stmt === false) {
             error_log('Prepare failed: ' . htmlspecialchars($db->error));
             die('Prepare failed: ' . htmlspecialchars($db->error));

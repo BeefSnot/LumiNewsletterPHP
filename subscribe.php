@@ -264,7 +264,6 @@ $currentVersion = require 'version.php';
     </style>
 </head>
 <body>
-    <!-- With this simpler container structure -->
     <div class="container">
         <header class="simple-header">
             <div class="logo">
@@ -367,32 +366,9 @@ $currentVersion = require 'version.php';
         <p>&copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars($siteTitle); ?> - Professional Newsletter Management</p>
     </footer>
     
-    <script src="assets/js/sidebar.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Toggle mobile menu
-            const mobileNavToggle = document.getElementById('mobileNavToggle');
-            const sidebar = document.querySelector('.sidebar');
-            const backdrop = document.getElementById('backdrop');
-            const menuIcon = document.getElementById('menuIcon');
-            
-            function toggleMenu() {
-                sidebar.classList.toggle('active');
-                backdrop.classList.toggle('active');
-                
-                if (sidebar.classList.contains('active')) {
-                    menuIcon.classList.remove('fa-bars');
-                    menuIcon.classList.add('fa-times');
-                } else {
-                    menuIcon.classList.remove('fa-times');
-                    menuIcon.classList.add('fa-bars');
-                }
-            }
-            
-            if (mobileNavToggle) mobileNavToggle.addEventListener('click', toggleMenu);
-            if (backdrop) backdrop.addEventListener('click', toggleMenu);
-            
-            // Make action radio buttons control consent visibility
+            // Keep only this part that controls consent visibility
             const actionRadios = document.querySelectorAll('input[name="action"]');
             const consentCheckbox = document.getElementById('consent-section');
             

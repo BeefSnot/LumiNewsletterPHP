@@ -31,7 +31,15 @@ function ensureColumnExists($db, $table, $column, $definition) {
 // Define required columns for each table
 $required_columns = [
     'newsletters' => [
-        'sent_at' => 'TIMESTAMP NULL DEFAULT NULL'
+        'creator_id' => 'INT NULL',
+        'subject' => 'VARCHAR(255) NOT NULL',
+        'content' => 'TEXT NOT NULL',
+        'theme_id' => 'INT NULL',
+        'sent_at' => 'TIMESTAMP NULL DEFAULT NULL',
+        'created_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+        'is_ab_test' => 'TINYINT(1) DEFAULT 0',
+        'ab_test_id' => 'INT NULL',
+        'variant' => 'CHAR(1) NULL'
     ],
     'groups' => [
         'description' => 'TEXT NULL AFTER name',
