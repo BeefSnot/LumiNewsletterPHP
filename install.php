@@ -89,14 +89,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 FOREIGN KEY (sender_id) REFERENCES users(id),
                 FOREIGN KEY (theme_id) REFERENCES themes(id)
             )",
-            "CREATE TABLE IF NOT EXISTS group_subscriptions (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                email VARCHAR(255) NOT NULL,
-                first_name VARCHAR(100) NULL,
-                last_name VARCHAR(100) NULL,
-                group_id INT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (group_id) REFERENCES `groups`(id)
+            "CREATE TABLE IF NOT EXISTS `group_subscriptions` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `group_id` INT NOT NULL,
+                `email` VARCHAR(255) NOT NULL,
+                `name` VARCHAR(255) NULL,
+                `subscribed_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX (`group_id`),
+                INDEX (`email`)
             )",
             "CREATE TABLE IF NOT EXISTS newsletter_groups (
                 newsletter_id INT NOT NULL,

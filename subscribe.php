@@ -64,15 +64,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($action === 'subscribe') {
                 $success = true;
                 foreach ($groups as $group_id) {
-                    $stmt = $db->prepare("INSERT INTO group_subscriptions (email, name, group_id) VALUES (?, ?, ?) 
-                                        ON DUPLICATE KEY UPDATE name = ?");
+                    $stmt = $db->prepare("INSERT INTO group_subscriptions (email, group_id) VALUES (?, ?) 
+                                        ON DUPLICATE KEY UPDATE email = ?");
                     if ($stmt === false) {
                         $success = false;
                         $error = 'Database error: ' . htmlspecialchars($db->error);
                         break;
                     }
                     
-                    $stmt->bind_param("ssis", $email, $name, $group_id, $name);
+                    $stmt->bind_param("sis", $email, $group_id, $email);
                     if ($stmt->execute() === false) {
                         $success = false;
                         $error = 'Database error: ' . htmlspecialchars($stmt->error);
@@ -264,13 +264,14 @@ $currentVersion = require 'version.php';
     </style>
 </head>
 <body>
-    <!-- Mobile navigation toggle button -->
-    <button class="mobile-nav-toggle" id="mobileNavToggle">
-        <i class="fas fa-bars" id="menuIcon"></i>
-    </button>
-    
-    <!-- Backdrop for mobile menu -->
-    <div class="backdrop" id="backdrop"></div>
+    <!-- With this simpler container structure -->
+    <div class="container">
+        <header class="simple-header">
+            <div class="logo">
+                <i class="fas fa-paper-plane"></i>
+                <h2><?php echo htmlspecialchars($siteTitle); ?></h2>
+            </div>
+        </header>
     
     <div class="app-container">
         <?php include 'includes/sidebar.php'; ?>

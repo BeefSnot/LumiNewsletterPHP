@@ -687,6 +687,26 @@ if ($checkTable->num_rows > 0) {
         $db->query("ALTER TABLE `groups` ADD COLUMN `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
         echo "Added created_at column to groups table.<br>";
     }
+    
+    // Check if group_subscriptions table exists
+    $checkTable = $db->query("SHOW TABLES LIKE 'group_subscriptions'");
+    if ($checkTable->num_rows > 0) {
+        // Check if name column exists in group_subscriptions
+        $checkColumn = $db->query("SHOW COLUMNS FROM `group_subscriptions` LIKE 'name'");
+        if ($checkColumn->num_rows === 0) {
+            // Add name column if it doesn't exist
+            $db->query("ALTER TABLE `group_subscriptions` ADD COLUMN `name` VARCHAR(255) NULL AFTER `email`");
+            $messages[] = "Added name column to group_subscriptions table";
+        }
+        
+        // Check if subscribed_at column exists
+        $checkColumn = $db->query("SHOW COLUMNS FROM `group_subscriptions` LIKE 'subscribed_at'");
+        if ($checkColumn->num_rows === 0) {
+            // Add subscribed_at column if it doesn't exist
+            $db->query("ALTER TABLE `group_subscriptions` ADD COLUMN `subscribed_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+            $messages[] = "Added subscribed_at column to group_subscriptions table";
+        }
+    }
 }
 
 ?>
@@ -746,6 +766,17 @@ if ($checkTable->num_rows > 0) {
                     <strong>Subscriber Groups:</strong> If you're experiencing issues with subscriber groups or the 'description' column, use our group repair tool.
                     <a href="fix_groups_table.php" class="btn btn-sm" style="margin-left: 10px; background-color: #ffc107; color: #212529; text-decoration: none; padding: 5px 10px; border-radius: 4px; display: inline-block; margin-top: 5px;">
                         <i class="fas fa-user-cog"></i> Run Group Fix
+                    </a>
+                </div>
+            </div>
+
+            <!-- Add the new notification for fixing subscriptions -->
+            <div class="notification info" style="background-color: rgba(40, 167, 69, 0.1); border-left: 4px solid #28a745; color: #155724; margin-top: 15px;">
+                <i class="fas fa-envelope"></i>
+                <div>
+                    <strong>Subscriber Data:</strong> If you're having issues with the 'name' field for subscribers or other subscription data, use our subscription repair tool.
+                    <a href="fix_subscriptions.php" class="btn btn-sm" style="margin-left: 10px; background-color: #28a745; color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; display: inline-block; margin-top: 5px;">
+                        <i class="fas fa-envelope-open-text"></i> Fix Subscriptions
                     </a>
                 </div>
             </div>

@@ -34,8 +34,12 @@ $required_columns = [
         'sent_at' => 'TIMESTAMP NULL DEFAULT NULL'
     ],
     'groups' => [
-        'description' => 'TEXT NULL',
+        'description' => 'TEXT NULL AFTER name',
         'created_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP'
+    ],
+    'group_subscriptions' => [
+        'name' => 'VARCHAR(255) NULL AFTER email',
+        'subscribed_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP'
     ],
     // Add other tables and their required columns as needed
 ];

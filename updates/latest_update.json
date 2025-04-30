@@ -1,12 +1,12 @@
 {
-    "version": "1.563",
-    "version_code": 1563,
-    "version_name": "LumiNewsletter v1.563",
+    "version": "1.5631",
+    "version_code": 15631,
+    "version_name": "LumiNewsletter v1.5631",
     "author": "Lumi Solutions",
     "description": "LumiNewsletter is a powerful and flexible newsletter module for your website, allowing you to manage subscriptions, send newsletters, and analyze performance.",
     "changelog": "- Added analytics, tracking, and reporting features.\n- Improved user interface for better usability.\n- Fixed bugs related to subscription management and email delivery.\n- Enhanced security measures for data protection.",
     "release_date": "2025-04-29",
-    "download_url": "https://lumihost.net/updates/LumiNewsletterv1.563.zip",
+    "download_url": "https://lumihost.net/updates/LumiNewsletterv1.5631.zip",
     "size": "3.5 MB",
-    "update_url": "https://lumihost.net/updates/LumiNewsletterv1.563.zip"
+    "update_url": "https://lumihost.net/updates/LumiNewsletterv1.5631.zip"
 }
