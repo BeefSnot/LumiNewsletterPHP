@@ -130,6 +130,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $stmt->close();
 
+        // Initialize email sending counters
+        $failCount = 0;
+        $successCount = 0;
+
         // Get site URL from settings for tracking links
         $settingsResult = $db->query("SELECT value FROM settings WHERE name = 'site_url'");
         if ($settingsResult && $settingsResult->num_rows > 0) {
@@ -243,6 +247,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 error_log('Error sending to ' . $email . ': ' . $mail->ErrorInfo);
                 $failCount++;
             }
+        }
+
+        // Set message based on sending results
+        $totalEmails = count($recipients);
+        $message = "Newsletter sent! Delivered to " . ($totalEmails - $failCount) . " of " . $totalEmails . " recipients.";
+        if ($failCount > 0) {
+            $message .= " Failed to deliver to " . $failCount . " recipients. Check error log for details.";
         }
 
         // After successfully sending the newsletter, update the sent_at field
