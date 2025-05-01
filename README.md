@@ -2,6 +2,8 @@
 
 ![LumiNewsletter Logo](https://github.com/BeefSnot/LumiNewsletterPHP/raw/main/assets/images/lumihost.png)
 
+##Website (currently work in progress, but works!) [LumiNewsletter Homepage](https://lumisolutions.tech/newsletterv1/index.php
+
 ## Test site - https://newsletter.lumisolutions.tech
 
 Test login (only editor, no admin. Working on an actual test site as we speak)
