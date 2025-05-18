@@ -102,7 +102,7 @@ function isGroupActive($pages) {
             <?php if ($isAdmin): ?>
             <!-- Admin Settings Group - Admin Only -->
             <li class="menu-group">
-                <div class="menu-group-header <?php echo isGroupActive(['admin.php', 'manage_users.php', 'manage_smtp.php', 'privacy_settings.php', 'update.php']); ?>">
+                <div class="menu-group-header <?php echo isGroupActive(['admin.php', 'manage_users.php', 'manage_smtp.php', 'privacy_settings.php', 'update.php', 'system_features.php']); ?>">
                     <i class="fas fa-cog"></i> Administration
                     <i class="fas fa-chevron-down toggle-icon"></i>
                 </div>
@@ -112,19 +112,12 @@ function isGroupActive($pages) {
                     <li><a href="manage_smtp.php" class="nav-item <?php echo isActive('manage_smtp.php'); ?>"><i class="fas fa-server"></i> SMTP Settings</a></li>
                     <li><a href="privacy_settings.php" class="nav-item <?php echo isActive('privacy_settings.php'); ?>"><i class="fas fa-shield-alt"></i> Privacy</a></li>
                     <li><a href="update.php" class="nav-item <?php echo isActive('update.php'); ?>"><i class="fas fa-sync-alt"></i> Updates</a></li>
-                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                    <li>
-                        <a href="system_features.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'system_features.php' ? 'active' : ''; ?>">
-                            <i class="fas fa-toggle-on sidebar-icon"></i>
-                            <span class="sidebar-text">System Features</span>
-                        </a>
-                    </li>
-                    <?php endif; ?>
+                    <li><a href="system_features.php" class="nav-item <?php echo isActive('system_features.php'); ?>"><i class="fas fa-toggle-on"></i> System Features</a></li>
                 </ul>
             </li>
             <?php endif; ?>
             
-            <!-- Tools Group -->
+            <!-- AI Assistant (if enabled) -->
             <?php 
             // Check if AI Assistant is enabled
             $aiEnabled = false;
@@ -135,12 +128,7 @@ function isGroupActive($pages) {
 
             if ($aiEnabled): 
             ?>
-            <li>
-                <a href="ai_assistant.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'ai_assistant.php' ? 'active' : ''; ?>">
-                    <i class="fas fa-robot sidebar-icon"></i>
-                    <span class="sidebar-text">AI Assistant</span>
-                </a>
-            </li>
+            <li><a href="ai_assistant.php" class="nav-item <?php echo isActive('ai_assistant.php'); ?>"><i class="fas fa-robot"></i> AI Assistant</a></li>
             <?php endif; ?>
             
             <li><a href="logout.php" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>

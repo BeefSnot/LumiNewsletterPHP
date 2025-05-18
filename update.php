@@ -962,5 +962,41 @@ if ($checkTable->num_rows > 0) {
     </footer>
     
     <script src="assets/js/sidebar.js"></script>
+    <script>
+    // Ensure the sidebar is properly initialized after update
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the sidebar menu
+        const menuHeaders = document.querySelectorAll('.menu-group-header');
+        menuHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                this.classList.toggle('active');
+                const submenu = this.nextElementSibling;
+                if (submenu && submenu.classList.contains('submenu')) {
+                    submenu.classList.toggle('show');
+                }
+            });
+        });
+        
+        // Fix for back button functionality
+        document.getElementById('back-button').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = 'admin.php';
+        });
+    });
+    
+    // Add safety timeout to redirect in case of issues
+    setTimeout(function() {
+        // If user is still on update page after 30 seconds, provide manual navigation
+        const updateCompleteElement = document.getElementById('update-complete');
+        if (updateCompleteElement) {
+            updateCompleteElement.innerHTML = '<div class="notification warning"><i class="fas fa-exclamation-triangle"></i> If you\'re stuck on this page, <a href="admin.php" style="color: inherit; text-decoration: underline; font-weight: bold;">click here to return to Admin</a></div>';
+        }
+    }, 30000);
+    </script>
+
+    <!-- Add a back button and update status indicator -->
+    <div id="update-complete" style="margin-top: 20px; text-align: center;">
+        <button id="back-button" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Return to Admin Panel</button>
+    </div>
 </body>
 </html>
