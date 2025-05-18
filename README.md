@@ -11,6 +11,7 @@ Test login (only editor, no admin. Working on an actual test site as we speak)
 Test
 Test1234
 
+**I AM CURRENTLY ACCEPTING CONTRIBUTORS!**
 
 **I will be organizing project very soon!**
 
