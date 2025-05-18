@@ -451,6 +451,8 @@ while ($row = $themesResult->fetch_assoc()) {
                             <input type="text" id="subject" name="subject" required>
                         </div>
                         
+                        <?php echo getAIHelperWidget(); ?>
+
                         <div class="form-group">
                             <label for="theme">Theme:</label>
                             <select id="theme" name="theme" onchange="loadThemeContent(this.value)">

@@ -112,7 +112,34 @@ function isGroupActive($pages) {
                     <li><a href="manage_smtp.php" class="nav-item <?php echo isActive('manage_smtp.php'); ?>"><i class="fas fa-server"></i> SMTP Settings</a></li>
                     <li><a href="privacy_settings.php" class="nav-item <?php echo isActive('privacy_settings.php'); ?>"><i class="fas fa-shield-alt"></i> Privacy</a></li>
                     <li><a href="update.php" class="nav-item <?php echo isActive('update.php'); ?>"><i class="fas fa-sync-alt"></i> Updates</a></li>
+                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                    <li>
+                        <a href="system_features.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'system_features.php' ? 'active' : ''; ?>">
+                            <i class="fas fa-toggle-on sidebar-icon"></i>
+                            <span class="sidebar-text">System Features</span>
+                        </a>
+                    </li>
+                    <?php endif; ?>
                 </ul>
+            </li>
+            <?php endif; ?>
+            
+            <!-- Tools Group -->
+            <?php 
+            // Check if AI Assistant is enabled
+            $aiEnabled = false;
+            $featureResult = $db->query("SELECT enabled FROM features WHERE feature_name = 'ai_assistant'");
+            if ($featureResult && $featureResult->num_rows > 0) {
+                $aiEnabled = (bool)$featureResult->fetch_assoc()['enabled'];
+            }
+
+            if ($aiEnabled): 
+            ?>
+            <li>
+                <a href="ai_assistant.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'ai_assistant.php' ? 'active' : ''; ?>">
+                    <i class="fas fa-robot sidebar-icon"></i>
+                    <span class="sidebar-text">AI Assistant</span>
+                </a>
             </li>
             <?php endif; ?>
             

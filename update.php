@@ -635,6 +635,104 @@ if ($checkSocialBefore->num_rows === 0) {
     $updateMessages[] = "Created social media tables.";
 }
 
+// Add these checks after your existing database checks
+
+// Check for AI Assistant tables and create them if they don't exist
+$checkAISettings = $db->query("SHOW TABLES LIKE 'ai_settings'");
+if ($checkAISettings->num_rows === 0) {
+    // Create AI settings table
+    $db->query("CREATE TABLE IF NOT EXISTS ai_settings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        api_provider VARCHAR(50) NOT NULL DEFAULT 'openai',
+        api_key VARCHAR(255) NOT NULL DEFAULT '',
+        model VARCHAR(100) DEFAULT 'gpt-3.5-turbo',
+        max_tokens INT DEFAULT 500,
+        temperature FLOAT DEFAULT 0.7,
+        enabled TINYINT(1) DEFAULT 1,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )");
+    
+    // Insert default settings
+    $db->query("INSERT INTO ai_settings (api_provider, api_key, model, enabled) 
+                VALUES ('openai', '', 'gpt-3.5-turbo', 1)");
+    
+    $dbUpdates[] = "Created AI settings table with default configuration";
+}
+
+$checkContentSuggestions = $db->query("SHOW TABLES LIKE 'content_suggestions'");
+if ($checkContentSuggestions->num_rows === 0) {
+    // Create content suggestions table
+    $db->query("CREATE TABLE IF NOT EXISTS content_suggestions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        newsletter_id INT NULL,
+        type VARCHAR(50) NOT NULL,
+        original_content TEXT NULL,
+        suggested_content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        applied TINYINT(1) DEFAULT 0,
+        FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE SET NULL
+    )");
+    
+    $dbUpdates[] = "Created content suggestions table for AI assistant";
+}
+
+$checkSubjectSuggestions = $db->query("SHOW TABLES LIKE 'subject_suggestions'");
+if ($checkSubjectSuggestions->num_rows === 0) {
+    // Create subject suggestions table
+    $db->query("CREATE TABLE IF NOT EXISTS subject_suggestions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        newsletter_id INT NULL,
+        original_subject VARCHAR(255) NULL,
+        suggested_subject VARCHAR(255) NOT NULL,
+        reason TEXT NULL,
+        predicted_open_rate FLOAT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        applied TINYINT(1) DEFAULT 0,
+        FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE SET NULL
+    )");
+    
+    $dbUpdates[] = "Created subject suggestions table for AI assistant";
+}
+
+$checkContentAnalysis = $db->query("SHOW TABLES LIKE 'content_analysis'");
+if ($checkContentAnalysis->num_rows === 0) {
+    // Create content analysis table
+    $db->query("CREATE TABLE IF NOT EXISTS content_analysis (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        newsletter_id INT NULL,
+        readability_score FLOAT NULL,
+        sentiment_score FLOAT NULL,
+        spam_score FLOAT NULL,
+        word_count INT NULL,
+        read_time INT NULL,
+        analysis_json JSON NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE SET NULL
+    )");
+    
+    $dbUpdates[] = "Created content analysis table for AI assistant";
+}
+
+// Check and add the 'features' table if it doesn't exist
+$checkFeatures = $db->query("SHOW TABLES LIKE 'features'");
+if ($checkFeatures->num_rows === 0) {
+    // Create features table for toggling system features
+    $db->query("CREATE TABLE IF NOT EXISTS features (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        feature_name VARCHAR(50) NOT NULL UNIQUE,
+        enabled TINYINT(1) DEFAULT 1,
+        added_version VARCHAR(20) NULL,
+        description TEXT NULL,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )");
+    
+    // Add AI Assistant feature entry
+    $db->query("INSERT INTO features (feature_name, enabled, added_version, description) 
+                VALUES ('ai_assistant', 1, '$latestVersion', 'AI-powered content suggestions, subject line optimization, and content analysis')");
+    
+    $dbUpdates[] = "Created features management table";
+}
+
 // Clear any output so far to prevent it showing before HTML
 ob_end_clean();
 
