@@ -14,7 +14,7 @@ Test1234
 
 **I will be organizing project very soon!**
 
-**Current Version: 1.559** | **Release Date: April 27, 2025**
+**Current Version: 1.563131** | **Release Date: May 18, 2025** **Release Note: Fixed Manage Subscribers page issue for editor role**
 
 ## 📋 Table of Contents
 
