@@ -3,7 +3,7 @@ session_start();
 require_once 'includes/auth.php';
 require_once 'includes/db.php';
 
-if (!isLoggedIn() || $_SESSION['role'] !== 'admin') {
+if (!isLoggedIn() || ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'editor')) {
     header('Location: login.php');
     exit();
 }
