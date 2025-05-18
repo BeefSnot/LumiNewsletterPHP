@@ -67,6 +67,29 @@ if ($row['count'] == 0) {
     $db->query("INSERT INTO settings (name, value) VALUES ('social_sharing_enabled', '1')");
 }
 
-echo "<p>Social sharing tables have been created and configured successfully!</p>";
-echo "<p><a href='admin.php'>Return to admin panel</a></p>";
+// Create API tables
+$db->query("CREATE TABLE IF NOT EXISTS api_keys (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    api_key VARCHAR(64) NOT NULL,
+    api_secret VARCHAR(128) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+    last_used TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY (api_key)
+)");
+
+$db->query("CREATE TABLE IF NOT EXISTS api_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    api_key_id INT NOT NULL,
+    endpoint VARCHAR(100) NOT NULL,
+    method VARCHAR(10) NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    status_code INT NOT NULL,
+    request_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)");
+
+echo "<h2>Social sharing and API tables have been created successfully!</h2>";
+echo "<p><a href='update.php'>Return to update page</a></p>";
 ?>
