@@ -137,4 +137,16 @@ function isGroupActive($pages) {
     <div class="sidebar-footer">
         <p>Version <?php echo htmlspecialchars($currentVersion ?? '1.0.0'); ?></p>
     </div>
+    <div class="nav-item">
+        <a href="manage_templates.php" class="nav-link">
+            <i class="fas fa-envelope-open-text"></i>
+            <span>Email Templates</span>
+        </a>
+    </div>
+    <div class="nav-item">
+        <a href="media_library.php" class="nav-link">
+            <i class="fas fa-images"></i>
+            <span>Media Library</span>
+        </a>
+    </div>
 </aside>
