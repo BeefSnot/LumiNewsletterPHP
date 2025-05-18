@@ -1,0 +1,101 @@
+/* Social Sharing Widget Styles */
+.social-sharing-widget {
+    margin: 20px 0;
+}
+
+.social-sharing-widget .share-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.social-sharing-widget.display-vertical .share-buttons {
+    flex-direction: column;
+}
+
+.social-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 15px;
+    border-radius: 4px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.social-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.social-btn i {
+    margin-right: 8px;
+}
+
+/* Platforms */
+.social-btn.facebook {
+    background-color: #3b5998;
+}
+
+.social-btn.twitter {
+    background-color: #1da1f2;
+}
+
+.social-btn.linkedin {
+    background-color: #0077b5;
+}
+
+.social-btn.email {
+    background-color: #777777;
+}
+
+/* Sizes */
+.social-btn.size-small {
+    font-size: 12px;
+    padding: 5px 10px;
+}
+
+.social-btn.size-medium {
+    font-size: 14px;
+    padding: 8px 15px;
+}
+
+.social-btn.size-large {
+    font-size: 16px;
+    padding: 10px 20px;
+}
+
+/* Style variations */
+.social-btn.style-minimal {
+    padding: 8px;
+}
+
+.social-btn.style-minimal i {
+    margin-right: 0;
+}
+
+.social-btn.style-outlined {
+    background-color: transparent;
+    border: 1px solid;
+}
+
+.social-btn.style-outlined.facebook {
+    color: #3b5998;
+    border-color: #3b5998;
+}
+
+.social-btn.style-outlined.twitter {
+    color: #1da1f2;
+    border-color: #1da1f2;
+}
+
+.social-btn.style-outlined.linkedin {
+    color: #0077b5;
+    border-color: #0077b5;
+}
+
+.social-btn.style-outlined.email {
+    color: #777777;
+    border-color: #777777;
+}

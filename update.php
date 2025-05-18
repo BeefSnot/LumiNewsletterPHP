@@ -719,14 +719,58 @@ $checkApiBefore = $db->query("SHOW TABLES LIKE 'api_keys'");
 $checkSocialBefore = $db->query("SHOW TABLES LIKE 'social_shares'");
 
 if ($checkApiBefore->num_rows === 0) {
-    $db->query($requiredTables['api_keys']);
-    $db->query($requiredTables['api_requests']);
+    $db->query("CREATE TABLE IF NOT EXISTS api_keys (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        api_key VARCHAR(64) NOT NULL,
+        api_secret VARCHAR(128) NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+        last_used TIMESTAMP NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY (api_key),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )");
+    
+    $db->query("CREATE TABLE IF NOT EXISTS api_requests (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        api_key_id INT NOT NULL,
+        endpoint VARCHAR(100) NOT NULL,
+        method VARCHAR(10) NOT NULL,
+        ip_address VARCHAR(45) NOT NULL,
+        status_code INT NOT NULL,
+        request_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (api_key_id) REFERENCES api_keys(id) ON DELETE CASCADE
+    )");
     echo "Created API tables. ";
 }
 
 if ($checkSocialBefore->num_rows === 0) {
-    $db->query($requiredTables['social_shares']);
-    $db->query($requiredTables['social_clicks']);
+    $db->query("CREATE TABLE IF NOT EXISTS social_shares (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        newsletter_id INT NOT NULL,
+        platform VARCHAR(50) NOT NULL,
+        share_count INT DEFAULT 0,
+        click_count INT DEFAULT 0,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (newsletter_id) REFERENCES newsletters(id) ON DELETE CASCADE
+    )");
+    
+    $db->query("CREATE TABLE IF NOT EXISTS social_clicks (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        share_id INT NOT NULL,
+        ip_address VARCHAR(45) NULL,
+        referrer VARCHAR(255) NULL,
+        clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (share_id) REFERENCES social_shares(id) ON DELETE CASCADE
+    )");
+    
+    // Ensure social_sharing_enabled setting exists
+    $checkSocialSetting = $db->query("SELECT COUNT(*) as count FROM settings WHERE name = 'social_sharing_enabled'");
+    $socialSettingRow = $checkSocialSetting->fetch_assoc();
+    if ($socialSettingRow['count'] == 0) {
+        $db->query("INSERT INTO settings (name, value) VALUES ('social_sharing_enabled', '1')");
+    }
     echo "Created social media tables. ";
 }
 echo "<br>";

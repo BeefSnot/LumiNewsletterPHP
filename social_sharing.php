@@ -1,15 +1,10 @@
 <?php
-// Add at the top of the file - REMOVE AFTER DEBUGGING
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 session_start();
 require_once 'includes/auth.php';
 require_once 'includes/db.php';
 require_once 'includes/social_sharing.php';
 
-if (!isLoggedIn()) {
+if (!isLoggedIn() || ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'editor')) {
     header('Location: login.php');
     exit();
 }
@@ -21,26 +16,13 @@ $messageType = '';
 // Check if social tables exist
 $checkSocial = $db->query("SHOW TABLES LIKE 'social_shares'");
 if ($checkSocial->num_rows === 0) {
-    // Create required tables
-    $db->query("CREATE TABLE IF NOT EXISTS social_shares (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        newsletter_id INT NOT NULL,
-        platform VARCHAR(50) NOT NULL,
-        share_count INT DEFAULT 0,
-        click_count INT DEFAULT 0,
-        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    )");
-    
-    $db->query("CREATE TABLE IF NOT EXISTS social_clicks (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        share_id INT NOT NULL,
-        ip_address VARCHAR(45) NULL,
-        referrer VARCHAR(255) NULL,
-        clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )");
-    
-    $message = "Social sharing tables have been created";
-    $messageType = "success";
+    // Tables don't exist, redirect to update page
+    $message = "Social sharing tables need to be created first. Please run the system update.";
+    $messageType = "error";
+    $_SESSION['message'] = $message;
+    $_SESSION['message_type'] = $messageType;
+    header('Location: update.php');
+    exit();
 }
 
 // Check if social sharing is enabled
@@ -85,12 +67,13 @@ $topNewsletters = $db->query("
     SELECT 
         n.id,
         n.subject,
-        n.created_at, /* Using created_at as fallback if sent_at doesn't exist yet */
-        COUNT(DISTINCT ss.id) as share_count
+        DATE_FORMAT(n.created_at, '%Y-%m-%d') as date,
+        SUM(ss.share_count) as total_shares,
+        SUM(ss.click_count) as total_clicks
     FROM newsletters n
-    LEFT JOIN social_shares ss ON n.id = ss.newsletter_id
+    JOIN social_shares ss ON n.id = ss.newsletter_id
     GROUP BY n.id
-    ORDER BY n.created_at DESC
+    ORDER BY total_shares DESC, total_clicks DESC
     LIMIT 10
 ");
 
@@ -100,8 +83,9 @@ $recentActivity = $db->query("
         n.id,
         n.subject,
         ss.platform,
-        DATE_FORMAT(sc.clicked_at, '%Y-%m-%d %H:%i') as clicked_at,
-        sc.referrer
+        sc.ip_address,
+        sc.referrer,
+        DATE_FORMAT(sc.clicked_at, '%Y-%m-%d %H:%i') as clicked_at
     FROM social_clicks sc
     JOIN social_shares ss ON sc.share_id = ss.id
     JOIN newsletters n ON ss.newsletter_id = n.id

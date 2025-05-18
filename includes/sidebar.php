@@ -149,4 +149,10 @@ function isGroupActive($pages) {
             <span>Media Library</span>
         </a>
     </div>
+    <div class="nav-item">
+        <a href="social_sharing.php" class="nav-link">
+            <i class="fas fa-share-alt"></i>
+            <span>Social Analytics</span>
+        </a>
+    </div>
 </aside>
