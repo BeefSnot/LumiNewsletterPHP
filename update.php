@@ -423,6 +423,79 @@ function applyDatabaseSchemaChanges($db) {
             referrer VARCHAR(255) NULL,
             clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (share_id) REFERENCES social_shares(id) ON DELETE CASCADE
+        )",
+        // E-commerce marketplace tables
+        'marketplace_settings' => "CREATE TABLE IF NOT EXISTS marketplace_settings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            setting_key VARCHAR(100) NOT NULL UNIQUE,
+            setting_value TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )",
+        'shopify_settings' => "CREATE TABLE IF NOT EXISTS shopify_settings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            setting_key VARCHAR(100) NOT NULL UNIQUE,
+            setting_value TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )",
+        'woocommerce_settings' => "CREATE TABLE IF NOT EXISTS woocommerce_settings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            setting_key VARCHAR(100) NOT NULL UNIQUE,
+            setting_value TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )",
+        'etsy_settings' => "CREATE TABLE IF NOT EXISTS etsy_settings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            setting_key VARCHAR(100) NOT NULL UNIQUE,
+            setting_value TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )",
+        'ecommerce_customers' => "CREATE TABLE IF NOT EXISTS ecommerce_customers (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            platform VARCHAR(50) NOT NULL,
+            platform_id VARCHAR(100) NOT NULL,
+            email VARCHAR(255) NOT NULL,
+            name VARCHAR(255),
+            data JSON,
+            synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_customer (platform, platform_id)
+        )",
+        'ecommerce_products' => "CREATE TABLE IF NOT EXISTS ecommerce_products (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            platform VARCHAR(50) NOT NULL,
+            platform_id VARCHAR(100) NOT NULL,
+            name VARCHAR(255) NOT NULL,
+            description TEXT,
+            price DECIMAL(10,2),
+            image_url VARCHAR(255),
+            product_url VARCHAR(255),
+            data JSON,
+            synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_product (platform, platform_id)
+        )",
+        'ecommerce_orders' => "CREATE TABLE IF NOT EXISTS ecommerce_orders (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            platform VARCHAR(50) NOT NULL,
+            platform_id VARCHAR(100) NOT NULL,
+            customer_id INT,
+            order_date DATETIME,
+            total_amount DECIMAL(10,2),
+            status VARCHAR(50),
+            data JSON,
+            synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_order (platform, platform_id),
+            FOREIGN KEY (customer_id) REFERENCES ecommerce_customers(id) ON DELETE SET NULL
+        )",
+        'product_recommendations' => "CREATE TABLE IF NOT EXISTS product_recommendations (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            subscriber_email VARCHAR(255) NOT NULL,
+            product_id INT NOT NULL,
+            score FLOAT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (product_id) REFERENCES ecommerce_products(id) ON DELETE CASCADE
         )"
     ];
     

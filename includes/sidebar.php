@@ -131,9 +131,34 @@ function isGroupActive($pages) {
             <li><a href="ai_assistant.php" class="nav-item <?php echo isActive('ai_assistant.php'); ?>"><i class="fas fa-robot"></i> AI Assistant</a></li>
             <?php endif; ?>
             
-            <li><a href="manage_templates.php" class="nav-item <?php echo isActive('manage_templates.php'); ?>"><i class="fas fa-envelope-open-text"></i> Email Templates</a></li>
-            <li><a href="media_library.php" class="nav-item <?php echo isActive('media_library.php'); ?>"><i class="fas fa-images"></i> Media Library</a></li>
-            <li><a href="social_sharing.php" class="nav-item <?php echo isActive('social_sharing.php'); ?>"><i class="fas fa-share-alt"></i> Social Analytics</a></li>
+            <!-- Content & Media Group -->
+            <li class="menu-group">
+                <div class="menu-group-header <?php echo isGroupActive(['manage_templates.php', 'media_library.php', 'content_library.php']); ?>">
+                    <i class="fas fa-file-alt"></i> Content & Media
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <ul class="submenu">
+                    <li><a href="manage_templates.php" class="nav-item <?php echo isActive('manage_templates.php'); ?>"><i class="fas fa-envelope-open-text"></i> Email Templates</a></li>
+                    <li><a href="media_library.php" class="nav-item <?php echo isActive('media_library.php'); ?>"><i class="fas fa-images"></i> Media Library</a></li>
+                    <li><a href="content_library.php" class="nav-item <?php echo isActive('content_library.php'); ?>"><i class="fas fa-paragraph"></i> Content Library</a></li>
+                </ul>
+            </li>
+
+            <!-- Marketplace Integrations Group -->
+            <?php if ($isAdmin): // Only show to admin users ?>
+            <li class="menu-group">
+                <div class="menu-group-header <?php echo isGroupActive(['marketplace_settings.php', 'shopify_integration.php', 'woocommerce_integration.php', 'etsy_integration.php']); ?>">
+                    <i class="fas fa-shopping-cart"></i> Marketplace
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <ul class="submenu">
+                    <li><a href="marketplace_settings.php" class="nav-item <?php echo isActive('marketplace_settings.php'); ?>"><i class="fas fa-cog"></i> Settings</a></li>
+                    <li><a href="shopify_integration.php" class="nav-item <?php echo isActive('shopify_integration.php'); ?>"><i class="fas fa-shopping-bag"></i> Shopify</a></li>
+                    <li><a href="woocommerce_integration.php" class="nav-item <?php echo isActive('woocommerce_integration.php'); ?>"><i class="fab fa-wordpress"></i> WooCommerce</a></li>
+                    <li><a href="etsy_integration.php" class="nav-item <?php echo isActive('etsy_integration.php'); ?>"><i class="fas fa-store"></i> Etsy</a></li>
+                </ul>
+            </li>
+            <?php endif; ?>
             
             <li><a href="logout.php" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
         </ul>
