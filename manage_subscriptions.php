@@ -27,6 +27,98 @@ if (isset($_POST['delete']) && isset($_POST['id'])) {
     $stmt->close();
 }
 
+// Handle importing subscribers from CSV
+if (isset($_POST['import_subscribers']) && isset($_FILES['import_file'])) {
+    $defaultGroupId = (int)$_POST['default_group'];
+    $skipDuplicates = isset($_POST['skip_duplicates']);
+    $importFile = $_FILES['import_file'];
+    
+    $successCount = 0;
+    $errorCount = 0;
+    $duplicateCount = 0;
+    
+    // Check file upload
+    if ($importFile['error'] == 0 && $importFile['size'] > 0) {
+        // Check file type (simple check, can be improved)
+        $fileExt = strtolower(pathinfo($importFile['name'], PATHINFO_EXTENSION));
+        if ($fileExt == 'csv') {
+            // Open the file
+            $handle = fopen($importFile['tmp_name'], 'r');
+            
+            if ($handle !== FALSE) {
+                // Read the header row
+                $header = fgetcsv($handle);
+                
+                // Convert header to lowercase for case-insensitive matching
+                $header = array_map('strtolower', $header);
+                
+                // Find column indexes
+                $emailIndex = array_search('email', $header);
+                $nameIndex = array_search('name', $header);
+                $groupIndex = array_search('group_id', $header);
+                
+                // Prepare statements
+                $checkStmt = $db->prepare("SELECT id FROM group_subscriptions WHERE email = ? AND group_id = ?");
+                $insertStmt = $db->prepare("INSERT INTO group_subscriptions (email, name, group_id) VALUES (?, ?, ?)");
+                
+                // Process each row
+                while (($row = fgetcsv($handle)) !== FALSE) {
+                    // Get data from row
+                    $email = filter_var($row[$emailIndex] ?? '', FILTER_SANITIZE_EMAIL);
+                    $name = $row[$nameIndex] ?? '';
+                    $groupId = (int)($row[$groupIndex] ?? $defaultGroupId);
+                    
+                    // Validate email
+                    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $errorCount++;
+                        continue;
+                    }
+                    
+                    // Validate group ID
+                    if ($groupId <= 0) {
+                        $groupId = $defaultGroupId;
+                    }
+                    
+                    // Check for duplicates if requested
+                    if ($skipDuplicates) {
+                        $checkStmt->bind_param("si", $email, $groupId);
+                        $checkStmt->execute();
+                        $result = $checkStmt->get_result();
+                        
+                        if ($result->num_rows > 0) {
+                            $duplicateCount++;
+                            continue;
+                        }
+                    }
+                    
+                    // Insert the subscriber
+                    $insertStmt->bind_param("ssi", $email, $name, $groupId);
+                    if ($insertStmt->execute()) {
+                        $successCount++;
+                    } else {
+                        $errorCount++;
+                    }
+                }
+                
+                fclose($handle);
+                $message = "Import complete: $successCount subscribers added";
+                if ($duplicateCount > 0) {
+                    $message .= ", $duplicateCount duplicates skipped";
+                }
+                if ($errorCount > 0) {
+                    $message .= ", $errorCount errors";
+                }
+            } else {
+                $message = "Could not open the uploaded file";
+            }
+        } else {
+            $message = "Please upload a CSV file";
+        }
+    } else {
+        $message = "Error uploading file: " . $importFile['error'];
+    }
+}
+
 // Build query based on selected group
 $query = "
     SELECT gs.id, gs.email, g.name as group_name, g.id as group_id
@@ -111,6 +203,47 @@ while ($row = $groupsResult->fetch_assoc()) {
                             </select>
                         </div>
                     </form>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-upload"></i> Import Subscribers</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="import_file">Upload CSV File:</label>
+                            <input type="file" id="import_file" name="import_file" accept=".csv" required>
+                            <small class="form-text">CSV format should have headers: email,name,group_id</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="default_group">Default Group (if not specified in CSV):</label>
+                            <select id="default_group" name="default_group" required>
+                                <option value="">-- Select Group --</option>
+                                <?php foreach ($groups as $group): ?>
+                                    <option value="<?php echo $group['id']; ?>"><?php echo htmlspecialchars($group['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" name="skip_duplicates" checked>
+                                Skip duplicate emails (recommended)
+                            </label>
+                        </div>
+                        
+                        <button type="submit" name="import_subscribers" class="btn btn-primary">
+                            <i class="fas fa-file-import"></i> Import Subscribers
+                        </button>
+                    </form>
+                    <p class="mt-3">
+                        <a href="download_sample_csv.php" class="btn btn-sm">
+                            <i class="fas fa-download"></i> Download Sample CSV
+                        </a>
+                    </p>
                 </div>
             </div>
             
