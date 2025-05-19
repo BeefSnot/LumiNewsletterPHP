@@ -131,28 +131,14 @@ function isGroupActive($pages) {
             <li><a href="ai_assistant.php" class="nav-item <?php echo isActive('ai_assistant.php'); ?>"><i class="fas fa-robot"></i> AI Assistant</a></li>
             <?php endif; ?>
             
+            <li><a href="manage_templates.php" class="nav-item <?php echo isActive('manage_templates.php'); ?>"><i class="fas fa-envelope-open-text"></i> Email Templates</a></li>
+            <li><a href="media_library.php" class="nav-item <?php echo isActive('media_library.php'); ?>"><i class="fas fa-images"></i> Media Library</a></li>
+            <li><a href="social_sharing.php" class="nav-item <?php echo isActive('social_sharing.php'); ?>"><i class="fas fa-share-alt"></i> Social Analytics</a></li>
+            
             <li><a href="logout.php" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
         </ul>
     </nav>
     <div class="sidebar-footer">
         <p>Version <?php echo htmlspecialchars($currentVersion ?? '1.0.0'); ?></p>
-    </div>
-    <div class="nav-item">
-        <a href="manage_templates.php" class="nav-link">
-            <i class="fas fa-envelope-open-text"></i>
-            <span>Email Templates</span>
-        </a>
-    </div>
-    <div class="nav-item">
-        <a href="media_library.php" class="nav-link">
-            <i class="fas fa-images"></i>
-            <span>Media Library</span>
-        </a>
-    </div>
-    <div class="nav-item">
-        <a href="social_sharing.php" class="nav-link">
-            <i class="fas fa-share-alt"></i>
-            <span>Social Analytics</span>
-        </a>
     </div>
 </aside>
