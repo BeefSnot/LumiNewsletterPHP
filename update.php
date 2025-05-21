@@ -23,6 +23,29 @@ $dbUpdates = [];
 $checkAPIBefore = $db->query("SHOW TABLES LIKE 'api_keys'");
 $checkSocialBefore = $db->query("SHOW TABLES LIKE 'social_shares'");
 
+// Check for features table
+$checkFeatures = $db->query("SHOW TABLES LIKE 'features'");
+if ($checkFeatures->num_rows === 0) {
+    // Create features table
+    $db->query("CREATE TABLE IF NOT EXISTS features (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        feature_name VARCHAR(50) NOT NULL UNIQUE,
+        description TEXT NOT NULL,
+        enabled TINYINT(1) NOT NULL DEFAULT 1,
+        added_version VARCHAR(20) NOT NULL,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )");
+    
+    // Add default features
+    $db->query("INSERT INTO features (feature_name, description, enabled, added_version) VALUES 
+        ('ai_assistant', 'AI-powered content generation and suggestions', 1, '1.5631335'),
+        ('email_scheduler', 'Schedule newsletters to be sent automatically', 1, '1.5631335'),
+        ('analytics_dashboard', 'View detailed statistics about newsletter performance', 1, '1.5631335')
+    ");
+    
+    $dbUpdates[] = "Created features table with default features enabled";
+}
+
 // Check if newsletters table has created_at column
 $checkCreatedAt = $db->query("SHOW COLUMNS FROM newsletters LIKE 'created_at'");
 if ($checkCreatedAt->num_rows === 0) {
@@ -496,6 +519,14 @@ function applyDatabaseSchemaChanges($db) {
             score FLOAT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (product_id) REFERENCES ecommerce_products(id) ON DELETE CASCADE
+        )",
+        'features' => "CREATE TABLE IF NOT EXISTS features (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            feature_name VARCHAR(50) NOT NULL UNIQUE,
+            description TEXT NOT NULL,
+            enabled TINYINT(1) NOT NULL DEFAULT 1,
+            added_version VARCHAR(20) NOT NULL,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )"
     ];
     

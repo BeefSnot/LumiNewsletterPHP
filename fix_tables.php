@@ -3,7 +3,7 @@ session_start();
 require_once 'includes/auth.php';
 require_once 'includes/db.php';
 
-// Only admin can access this script
+// Only admin users can access this utility
 if (!isLoggedIn() || $_SESSION['role'] !== 'admin') {
     header('Location: login.php');
     exit();
@@ -274,6 +274,14 @@ $requiredTables = [
         `step_id` INT NOT NULL,
         `status` ENUM('pending', 'completed', 'failed', 'skipped') NOT NULL,
         `processed_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )",
+    'features' => "CREATE TABLE IF NOT EXISTS features (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        feature_name VARCHAR(50) NOT NULL UNIQUE,
+        description TEXT NOT NULL,
+        enabled TINYINT(1) NOT NULL DEFAULT 1,
+        added_version VARCHAR(20) NOT NULL,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )"
 ];
 
@@ -577,6 +585,36 @@ if (file_exists($sendNewsletterPath)) {
     }
 }
 
+// Loop through all tables and create any that are missing
+foreach ($requiredTables as $tableName => $createSQL) {
+    $checkTable = $db->query("SHOW TABLES LIKE '$tableName'");
+    
+    if ($checkTable->num_rows === 0) {
+        // Table doesn't exist, so create it
+        if ($db->query($createSQL)) {
+            $messages[] = "Created missing table: $tableName";
+            
+            // Add default data for certain tables
+            if ($tableName == 'features') {
+                $insertResult = $db->query("INSERT INTO features (feature_name, description, enabled, added_version) VALUES 
+                    ('ai_assistant', 'AI-powered content generation and suggestions', 1, '1.5631335'),
+                    ('email_scheduler', 'Schedule newsletters to be sent automatically', 1, '1.5631335'),
+                    ('analytics_dashboard', 'View detailed statistics about newsletter performance', 1, '1.5631335')
+                ");
+                
+                if ($insertResult) {
+                    $messages[] = "Added default features to the features table";
+                } else {
+                    $errors[] = "Failed to add default features: " . $db->error;
+                }
+            }
+        } else {
+            $errors[] = "Failed to create table $tableName: " . $db->error;
+        }
+    } else {
+        $messages[] = "Table $tableName already exists.";
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

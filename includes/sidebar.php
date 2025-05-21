@@ -119,14 +119,39 @@ function isGroupActive($pages) {
             
             <!-- AI Assistant (if enabled) -->
             <?php 
-            // Check if AI Assistant is enabled
-            $aiEnabled = false;
-            $featureResult = $db->query("SELECT enabled FROM features WHERE feature_name = 'ai_assistant'");
-            if ($featureResult && $featureResult->num_rows > 0) {
-                $aiEnabled = (bool)$featureResult->fetch_assoc()['enabled'];
+            // Check if features table exists before querying it
+            $features = [];
+            $featuresEnabled = [];
+
+            $checkFeaturesTable = $db->query("SHOW TABLES LIKE 'features'");
+            if ($checkFeaturesTable->num_rows > 0) {
+                // Table exists, safely query it
+                $featuresResult = $db->query("SELECT * FROM features WHERE enabled = 1");
+                if ($featuresResult) {
+                    while ($row = $featuresResult->fetch_assoc()) {
+                        $features[] = $row;
+                        $featuresEnabled[$row['feature_name']] = true;
+                    }
+                }
+            } else {
+                // Table doesn't exist, use default features
+                // This prevents errors and keeps basic functionality working
+                $featuresEnabled = [
+                    'ai_assistant' => true,
+                    'email_scheduler' => true, 
+                    'analytics_dashboard' => true
+                ];
+                
+                // Show admin notification about missing table
+                if (isLoggedIn() && $_SESSION['role'] === 'admin') {
+                    echo '<div class="notification warning" style="margin: 10px;">
+                            Database issue detected! The features table is missing. 
+                            <a href="fix_tables.php" class="btn btn-sm btn-warning">Fix Database</a>
+                          </div>';
+                }
             }
 
-            if ($aiEnabled): 
+            if (isset($featuresEnabled['ai_assistant'])): 
             ?>
             <li><a href="ai_assistant.php" class="nav-item <?php echo isActive('ai_assistant.php'); ?>"><i class="fas fa-robot"></i> AI Assistant</a></li>
             <?php endif; ?>
