@@ -48,22 +48,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
                     }
                     
                     // Save to database
-                    $stmt = $db->prepare("INSERT INTO media_library (filename, filepath, filetype, filesize, dimensions, uploaded_by) VALUES (?, ?, ?, ?, ?, ?)");
+                    $stmt = $db->prepare("
+                        INSERT INTO media_library 
+                        (file_name, file_path, file_type, uploaded_by, uploaded_at, 
+                         filename, filepath, filetype, filesize, dimensions, created_at)
+                        VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, NOW())
+                    ");
+                    
+                    // Bind the same values to both old and new column names 
                     $stmt->bind_param(
-                        'sssisi',
-                        $filename,
-                        $filepath,
-                        $file['type'],
-                        $file['size'],
-                        $dimensions,
-                        $_SESSION['user_id']
+                        "sssssssss", 
+                        $filename, $filepath, $file['type'], $_SESSION['user_id'],  // Old column naming
+                        $filename, $filepath, $file['type'], $file['size'], $dimensions  // New column naming
                     );
                     
+                    // Execute the statement
                     if ($stmt->execute()) {
                         $message = "File uploaded successfully";
                         $messageType = 'success';
                     } else {
-                        $message = "Database error: " . $db->error;
+                        $message = "Error uploading file: " . $stmt->error;
                         $messageType = 'error';
                     }
                 } else {
