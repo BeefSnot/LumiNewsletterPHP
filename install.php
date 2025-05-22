@@ -438,6 +438,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
         $current_step = 4; // Stay on the current step to allow corrections
     }
 }
+
+// Add this to the database setup section (Step 2)
+if ($current_step == 2 && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $db_host = $_POST['db_host'];
+    $db_user = $_POST['db_user'];
+    $db_pass = $_POST['db_pass'];
+    $db_name = $_POST['db_name'];
+
+    $mysqli = new mysqli($db_host, $db_user, $db_pass, $db_name);
+
+    if ($mysqli->connect_error) {
+        $error_message = "Database connection failed: " . $mysqli->connect_error;
+    } else {
+        // Create missing tables
+        $queries = [
+            "CREATE TABLE IF NOT EXISTS email_templates (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                description TEXT,
+                content LONGTEXT NOT NULL,
+                created_by INT NOT NULL,
+                is_system BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )",
+            "CREATE TABLE IF NOT EXISTS media_library (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                file_name VARCHAR(255) NOT NULL,
+                file_path VARCHAR(255) NOT NULL,
+                file_type VARCHAR(50),
+                uploaded_by INT NOT NULL,
+                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )"
+        ];
+
+        foreach ($queries as $query) {
+            if (!$mysqli->query($query)) {
+                $error_message = "Error creating tables: " . $mysqli->error;
+                break;
+            }
+        }
+
+        if (!isset($error_message)) {
+            $info_message = "Database tables created successfully.";
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
