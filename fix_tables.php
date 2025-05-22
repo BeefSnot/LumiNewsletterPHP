@@ -640,7 +640,13 @@ $queries = [
         file_path VARCHAR(255) NOT NULL,
         file_type VARCHAR(50),
         uploaded_by INT NOT NULL,
-        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        filename VARCHAR(255) NOT NULL,
+        filepath VARCHAR(255) NOT NULL,
+        filetype VARCHAR(50),
+        filesize INT NOT NULL,
+        dimensions VARCHAR(20) NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )"
 ];
 
@@ -657,6 +663,51 @@ if (tableExists($db, 'media_library')) {
             $messages[] = "Added 'created_at' column to media_library table.";
         } else {
             $errors[] = "Failed to add 'created_at' column to media_library table: " . $db->error;
+        }
+    }
+}
+
+if (tableExists($db, 'media_library')) {
+    // Check and add missing columns
+    $missingColumns = [
+        'filename' => 'VARCHAR(255) NOT NULL',
+        'filepath' => 'VARCHAR(255) NOT NULL',
+        'filetype' => 'VARCHAR(50)',
+        'filesize' => 'INT NOT NULL',
+        'dimensions' => 'VARCHAR(20) NULL',
+        'created_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP'
+    ];
+    
+    foreach ($missingColumns as $column => $definition) {
+        if (!columnExists($db, 'media_library', $column)) {
+            $result = $db->query("ALTER TABLE media_library ADD COLUMN $column $definition");
+            if ($result) {
+                $messages[] = "Added '$column' column to media_library table.";
+            } else {
+                $errors[] = "Failed to add '$column' column to media_library table: " . $db->error;
+            }
+        }
+    }
+    
+    // Copy data from old columns to new columns for compatibility
+    if (columnExists($db, 'media_library', 'file_name') && columnExists($db, 'media_library', 'filename')) {
+        $result = $db->query("UPDATE media_library SET filename = file_name WHERE filename = ''");
+        if ($result) {
+            $messages[] = "Synchronized file_name to filename.";
+        }
+    }
+    
+    if (columnExists($db, 'media_library', 'file_path') && columnExists($db, 'media_library', 'filepath')) {
+        $result = $db->query("UPDATE media_library SET filepath = file_path WHERE filepath = ''");
+        if ($result) {
+            $messages[] = "Synchronized file_path to filepath.";
+        }
+    }
+    
+    if (columnExists($db, 'media_library', 'file_type') && columnExists($db, 'media_library', 'filetype')) {
+        $result = $db->query("UPDATE media_library SET filetype = file_type WHERE filetype = ''");
+        if ($result) {
+            $messages[] = "Synchronized file_type to filetype.";
         }
     }
 }

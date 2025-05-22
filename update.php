@@ -988,11 +988,22 @@ if ($checkMediaLibrary->num_rows === 0) {
     )");
     $dbUpdates[] = "Created media_library table.";
 } else {
-    // Add check for created_at column and add it if it doesn't exist
-    $checkCreatedAtColumn = $db->query("SHOW COLUMNS FROM media_library LIKE 'created_at'");
-    if ($checkCreatedAtColumn->num_rows === 0) {
-        $db->query("ALTER TABLE media_library ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
-        $dbUpdates[] = "Added 'created_at' column to media_library table.";
+    // Check for missing columns and add them
+    $missingColumns = [
+        'filename' => 'VARCHAR(255) NOT NULL',
+        'filepath' => 'VARCHAR(255) NOT NULL',
+        'filetype' => 'VARCHAR(50)',
+        'filesize' => 'INT NOT NULL',
+        'dimensions' => 'VARCHAR(20) NULL',
+        'created_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP'
+    ];
+    
+    foreach ($missingColumns as $column => $definition) {
+        $checkColumn = $db->query("SHOW COLUMNS FROM media_library LIKE '$column'");
+        if ($checkColumn->num_rows === 0) {
+            $db->query("ALTER TABLE media_library ADD COLUMN $column $definition");
+            $dbUpdates[] = "Added '$column' column to media_library table.";
+        }
     }
 }
 
