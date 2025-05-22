@@ -88,11 +88,8 @@ function getAIHelperWidget() {
                                 ${suggestion.reason}
                             </div>
                             <div class="suggestion-actions">
-                                <button class="btn btn-sm btn-outline" onclick="copyToClipboard('${suggestion.subject.replace(/'/g, "\\'")}')">
-                                    <i class="fas fa-copy"></i> Copy
-                                </button>
-                                <button class="btn btn-sm btn-primary" onclick="useSubject('${suggestion.subject.replace(/'/g, "\\'")}')">
-                                    <i class="fas fa-check"></i> Use This
+                                <button type="button" class="btn btn-sm" onclick="applySubject('${suggestion.subject.replace(/'/g, "\\'")}')">
+                                    Use This Subject
                                 </button>
                             </div>
                         </div>
@@ -107,9 +104,11 @@ function getAIHelperWidget() {
         }
         
         function improveContent() {
-            const content = tinymce.get('body').getContent();
+            const contentEditor = document.getElementById('body');
+            const content = contentEditor.value;
+            
             if (!content) {
-                alert('Please add some content to enhance');
+                alert('Please enter some content first');
                 return;
             }
             
@@ -142,24 +141,16 @@ function getAIHelperWidget() {
                             <p>${data.analysis}</p>
                             <div style="margin-top: 15px;">
                                 <strong>Improved Content:</strong>
-                                <div style="border: 1px solid #ddd; padding: 10px; margin-top: 5px; max-height: 200px; overflow-y: auto;">
-                                    ${data.improved_content}
-                                </div>
+                                <pre style="background: #f9f9f9; padding: 10px; border-radius: 4px; margin-top: 5px;">${data.improved_content}</pre>
                             </div>
                         </div>
-                        <div class="suggestion-actions" style="margin-top: 15px;">
-                            <button class="btn btn-sm btn-outline" onclick="copyEnhancedContent()">
-                                <i class="fas fa-copy"></i> Copy
-                            </button>
-                            <button class="btn btn-sm btn-primary" onclick="useEnhancedContent()">
-                                <i class="fas fa-check"></i> Use Enhanced Content
+                        <div class="suggestion-actions">
+                            <button type="button" class="btn btn-sm" onclick="applyContent(\`${data.improved_content.replace(/`/g, '\\`')}\`)">
+                                Use This Content
                             </button>
                         </div>
                     </div>
                 `;
-                
-                // Store the enhanced content for later use
-                window.enhancedContent = data.improved_content;
             })
             .catch(error => {
                 resultsDiv.innerHTML = `<div class="notification error">Error: ${error.message}</div>`;
@@ -167,9 +158,11 @@ function getAIHelperWidget() {
         }
         
         function analyzeSpamScore() {
-            const content = tinymce.get('body').getContent();
-            if (!content) {
-                alert('Please add some content to analyze');
+            const subject = document.getElementById('subject').value;
+            const content = document.getElementById('body').value;
+            
+            if (!subject || !content) {
+                alert('Please enter both subject and content first');
                 return;
             }
             
@@ -184,7 +177,7 @@ function getAIHelperWidget() {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: 'action=analyze_spam&content=' + encodeURIComponent(content)
+                body: 'action=analyze_spam&subject=' + encodeURIComponent(subject) + '&content=' + encodeURIComponent(content)
             })
             .then(response => response.json())
             .then(data => {
@@ -193,28 +186,25 @@ function getAIHelperWidget() {
                     return;
                 }
                 
+                let scoreColor = data.score < 3 ? 'green' : (data.score < 7 ? 'orange' : 'red');
+                
                 resultsDiv.innerHTML = `
                     <div class="ai-suggestion">
                         <div class="suggestion-header">
-                            <span class="suggestion-title">Spam Score Analysis</span>
-                            <span class="suggestion-score">${data.risk_level}</span>
+                            <span class="suggestion-title">Spam Analysis</span>
+                            <span class="suggestion-score" style="background-color: ${scoreColor};">${data.score}/10</span>
                         </div>
                         <div class="suggestion-content">
-                            <p>${data.summary}</p>
-                            <div style="margin: 15px 0;">
-                                <div style="background: linear-gradient(to right, green, yellow, red); height: 10px; border-radius: 5px; position: relative;">
-                                    <div style="position: absolute; left: ${data.score}%; top: -6px; width: 2px; height: 20px; background: black;"></div>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; margin-top: 5px;">
-                                    <span>Low Risk</span>
-                                    <span>Medium</span>
-                                    <span>High Risk</span>
-                                </div>
-                            </div>
-                            <p><strong>Tips to improve:</strong></p>
-                            <ul>
-                                ${data.tips.map(tip => `<li>${tip}</li>`).join('')}
+                            <p>${data.analysis}</p>
+                            <ul style="margin-top: 10px;">
+                                ${data.issues.map(issue => `<li>${issue}</li>`).join('')}
                             </ul>
+                            <div style="margin-top: 15px;">
+                                <strong>Recommendations:</strong>
+                                <ul>
+                                    ${data.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -224,27 +214,32 @@ function getAIHelperWidget() {
             });
         }
         
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Copied to clipboard!');
-            });
-        }
-        
-        function useSubject(subject) {
+        function applySubject(subject) {
             document.getElementById('subject').value = subject;
             document.getElementById('ai-assistant-results').style.display = 'none';
         }
         
-        function copyEnhancedContent() {
-            navigator.clipboard.writeText(window.enhancedContent).then(() => {
-                alert('Enhanced content copied to clipboard!');
-            });
-        }
-        
-        function useEnhancedContent() {
-            tinymce.get('body').setContent(window.enhancedContent);
+        function applyContent(content) {
+            document.getElementById('body').value = content;
             document.getElementById('ai-assistant-results').style.display = 'none';
         }
     </script>
 HTML;
+}
+
+/**
+ * Generate an AI-powered subject line based on content
+ * @param string $content The newsletter content
+ * @return string|null The generated subject line, or null if generation failed
+ */
+function generateAISubjectLine($content) {
+    global $db;
+    
+    if (!isAIAssistantEnabled()) {
+        return null;
+    }
+    
+    // In a real implementation, this would call an AI API
+    // For demonstration, we'll return a basic subject line
+    return "Newsletter: " . date("F Y") . " Updates";
 }

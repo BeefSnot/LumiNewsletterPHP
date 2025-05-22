@@ -4,6 +4,7 @@ require_once 'includes/auth.php';
 require_once 'includes/db.php';
 require_once 'includes/init.php';  // Replace vendor/autoload.php
 require_once 'includes/functions.php';  // MOVE THIS LINE HERE
+require_once 'includes/ai_helper.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;

@@ -881,6 +881,28 @@ if ($checkFeatures->num_rows === 0) {
     $dbUpdates[] = "Created features management table";
 }
 
+// Add this to your database update queries:
+
+$checkAISettings = $db->query("SHOW TABLES LIKE 'ai_settings'");
+if ($checkAISettings->num_rows === 0) {
+    $db->query("CREATE TABLE IF NOT EXISTS `ai_settings` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY,
+        `api_provider` VARCHAR(50) NOT NULL DEFAULT 'openai',
+        `api_key` VARCHAR(255) NOT NULL,
+        `model` VARCHAR(50) NOT NULL DEFAULT 'gpt-3.5-turbo',
+        `max_tokens` INT NOT NULL DEFAULT 500,
+        `temperature` FLOAT NOT NULL DEFAULT 0.7,
+        `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )");
+    
+    // Insert default AI settings
+    $db->query("INSERT INTO `ai_settings` 
+        (api_provider, api_key, model, max_tokens, temperature) 
+        VALUES ('openai', '', 'gpt-3.5-turbo', 500, 0.7)");
+    
+    $dbUpdates[] = "Created ai_settings table with default values.";
+}
+
 // Clear any output so far to prevent it showing before HTML
 ob_end_clean();
 

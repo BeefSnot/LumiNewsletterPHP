@@ -349,6 +349,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 filesize INT NOT NULL,
                 dimensions VARCHAR(20) NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )",
+            "CREATE TABLE IF NOT EXISTS `ai_settings` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `api_provider` VARCHAR(50) NOT NULL DEFAULT 'openai',
+                `api_key` VARCHAR(255) NOT NULL,
+                `model` VARCHAR(50) NOT NULL DEFAULT 'gpt-3.5-turbo',
+                `max_tokens` INT NOT NULL DEFAULT 500,
+                `temperature` FLOAT NOT NULL DEFAULT 0.7,
+                `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )"
         ];
 
@@ -450,6 +459,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
             $stmt->bind_param("ss", $setting[0], $setting[1]);
             $stmt->execute();
         }
+
+        // Insert default AI settings
+        $db->query("INSERT INTO `ai_settings` 
+            (api_provider, api_key, model, max_tokens, temperature) 
+            VALUES ('openai', '', 'gpt-3.5-turbo', 500, 0.7)");
 
         // Installation complete! Show success message
         $info_message = "<strong>Installation successful!</strong> Your LumiNewsletter system has been installed successfully.";

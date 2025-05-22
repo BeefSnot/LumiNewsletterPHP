@@ -282,6 +282,15 @@ $requiredTables = [
         enabled TINYINT(1) NOT NULL DEFAULT 1,
         added_version VARCHAR(20) NOT NULL,
         last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )",
+    'ai_settings' => "CREATE TABLE `ai_settings` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY,
+        `api_provider` VARCHAR(50) NOT NULL DEFAULT 'openai',
+        `api_key` VARCHAR(255) NOT NULL,
+        `model` VARCHAR(50) NOT NULL DEFAULT 'gpt-3.5-turbo',
+        `max_tokens` INT NOT NULL DEFAULT 500,
+        `temperature` FLOAT NOT NULL DEFAULT 0.7,
+        `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )"
 ];
 
