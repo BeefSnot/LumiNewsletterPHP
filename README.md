@@ -1,6 +1,6 @@
 # 📧 LumiNewsletter - Professional Email Marketing Solution
 
-![LumiNewsletter Logo](https://github.com/BeefSnot/LumiNewsletterPHP/raw/main/assets/images/lumihost.png)
+![LumiNewsletter Logo](https://github.com/BeefSnot/LumiNewsletterPHP/raw/main/assets/images/luminewsletter.png)
 
 ## Website (currently work in progress, but works!) (https://lumisolutions.tech/newsletterv1/index.php
 
