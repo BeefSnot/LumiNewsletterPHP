@@ -291,6 +291,20 @@ $requiredTables = [
         `max_tokens` INT NOT NULL DEFAULT 500,
         `temperature` FLOAT NOT NULL DEFAULT 0.7,
         `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )",
+    'template_layouts' => "CREATE TABLE IF NOT EXISTS template_layouts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        html_structure TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )",
+    'template_components' => "CREATE TABLE IF NOT EXISTS template_components (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        category VARCHAR(50) NOT NULL,
+        icon VARCHAR(50) NOT NULL,
+        html_content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )"
 ];
 

@@ -16,25 +16,68 @@ $template = null;
 
 // Get available layouts and components
 $layouts = [];
-$layoutsResult = $db->query("SELECT * FROM template_layouts ORDER BY name ASC");
-while ($layoutsResult && $row = $layoutsResult->fetch_assoc()) {
-    $layouts[] = $row;
+$layoutsResult = $db->query("SHOW TABLES LIKE 'template_layouts'");
+if ($layoutsResult && $layoutsResult->num_rows > 0) {
+    $layoutsResult = $db->query("SELECT * FROM template_layouts ORDER BY name ASC");
+    if ($layoutsResult) {
+        while ($row = $layoutsResult->fetch_assoc()) {
+            $layouts[] = $row;
+        }
+    }
+}
+
+// If no layouts exist, add default layout
+if (empty($layouts)) {
+    $layouts[] = [
+        'id' => 0,
+        'name' => 'Single Column',
+        'html_structure' => '<div class="email-container" style="width:100%; max-width:600px; margin:0 auto;">{content}</div>'
+    ];
 }
 
 $components = [];
-$componentsResult = $db->query("SELECT * FROM template_components ORDER BY category, name");
-while ($componentsResult && $row = $componentsResult->fetch_assoc()) {
-    $components[] = $row;
-}
+$componentsByCategory = [
+    'basic' => [
+        [
+            'id' => 1,
+            'name' => 'Text Block',
+            'icon' => 'fa-paragraph',
+            'html_content' => '<p style="margin:0 0 15px;font-size:16px;line-height:1.5;">Add your text here</p>'
+        ],
+        [
+            'id' => 2,
+            'name' => 'Heading',
+            'icon' => 'fa-heading',
+            'html_content' => '<h2 style="margin:0 0 15px;font-size:22px;line-height:1.4;">Add your heading</h2>'
+        ],
+        [
+            'id' => 3,
+            'name' => 'Image',
+            'icon' => 'fa-image',
+            'html_content' => '<img src="https://via.placeholder.com/600x200" alt="Image description" style="width:100%;max-width:100%;height:auto;display:block;">'
+        ],
+        [
+            'id' => 4,
+            'name' => 'Button',
+            'icon' => 'fa-square',
+            'html_content' => '<a href="#" style="display:inline-block;padding:12px 20px;background-color:#007bff;color:#ffffff;text-decoration:none;font-weight:bold;border-radius:4px;">Click Here</a>'
+        ]
+    ]
+];
 
-// Group components by category
-$componentsByCategory = [];
-foreach ($components as $component) {
-    $category = $component['category'];
-    if (!isset($componentsByCategory[$category])) {
-        $componentsByCategory[$category] = [];
+$componentsResult = $db->query("SHOW TABLES LIKE 'template_components'");
+if ($componentsResult && $componentsResult->num_rows > 0) {
+    $componentsResult = $db->query("SELECT * FROM template_components ORDER BY category, name");
+    if ($componentsResult) {
+        $componentsByCategory = [];
+        while ($row = $componentsResult->fetch_assoc()) {
+            $category = $row['category'];
+            if (!isset($componentsByCategory[$category])) {
+                $componentsByCategory[$category] = [];
+            }
+            $componentsByCategory[$category][] = $row;
+        }
     }
-    $componentsByCategory[$category][] = $component;
 }
 
 // Handle form submissions
