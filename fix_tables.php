@@ -617,6 +617,13 @@ foreach ($requiredTables as $tableName => $createSQL) {
 }
 
 $queries = [
+    "CREATE TABLE IF NOT EXISTS content_blocks (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        type ENUM('static', 'dynamic', 'conditional') NOT NULL DEFAULT 'static',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )",
     "CREATE TABLE IF NOT EXISTS email_templates (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
@@ -639,7 +646,7 @@ $queries = [
 
 foreach ($queries as $query) {
     if (!$db->query($query)) {
-        $errors[] = $db->error;
+        $errors[] = "Error creating table: " . $db->error;
     }
 }
 

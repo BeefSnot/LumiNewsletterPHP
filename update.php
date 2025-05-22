@@ -955,6 +955,34 @@ if ($checkTable->num_rows > 0) {
     }
 }
 
+$checkEmailTemplates = $db->query("SHOW TABLES LIKE 'email_templates'");
+if ($checkEmailTemplates->num_rows === 0) {
+    $db->query("CREATE TABLE IF NOT EXISTS email_templates (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        content LONGTEXT NOT NULL,
+        created_by INT NOT NULL,
+        is_system BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )");
+    $dbUpdates[] = "Created email_templates table.";
+}
+
+$checkMediaLibrary = $db->query("SHOW TABLES LIKE 'media_library'");
+if ($checkMediaLibrary->num_rows === 0) {
+    $db->query("CREATE TABLE IF NOT EXISTS media_library (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        file_name VARCHAR(255) NOT NULL,
+        file_path VARCHAR(255) NOT NULL,
+        file_type VARCHAR(50),
+        uploaded_by INT NOT NULL,
+        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+    $dbUpdates[] = "Created media_library table.";
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

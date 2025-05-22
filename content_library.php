@@ -3,6 +3,10 @@ session_start();
 require_once 'includes/auth.php';
 require_once 'includes/db.php';
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Only admin users can access this page
 if (!isLoggedIn() || $_SESSION['role'] !== 'admin') {
     header('Location: login.php');
@@ -12,28 +16,34 @@ if (!isLoggedIn() || $_SESSION['role'] !== 'admin') {
 $messages = [];
 $errors = [];
 
-// Fetch content blocks and templates
-$contentBlocks = [];
-$emailTemplates = [];
-
 // Fetch content blocks
-$contentBlocksResult = $db->query("SELECT * FROM content_blocks ORDER BY created_at DESC");
-if ($contentBlocksResult) {
-    while ($row = $contentBlocksResult->fetch_assoc()) {
-        $contentBlocks[] = $row;
+$contentBlocks = [];
+try {
+    $contentBlocksResult = $db->query("SELECT * FROM content_blocks ORDER BY created_at DESC");
+    if ($contentBlocksResult) {
+        while ($row = $contentBlocksResult->fetch_assoc()) {
+            $contentBlocks[] = $row;
+        }
+    } else {
+        throw new Exception("Failed to fetch content blocks: " . $db->error);
     }
-} else {
-    $errors[] = "Failed to fetch content blocks: " . $db->error;
+} catch (Exception $e) {
+    $errors[] = $e->getMessage();
 }
 
 // Fetch email templates
-$emailTemplatesResult = $db->query("SELECT * FROM email_templates ORDER BY created_at DESC");
-if ($emailTemplatesResult) {
-    while ($row = $emailTemplatesResult->fetch_assoc()) {
-        $emailTemplates[] = $row;
+$emailTemplates = [];
+try {
+    $emailTemplatesResult = $db->query("SELECT * FROM email_templates ORDER BY created_at DESC");
+    if ($emailTemplatesResult) {
+        while ($row = $emailTemplatesResult->fetch_assoc()) {
+            $emailTemplates[] = $row;
+        }
+    } else {
+        throw new Exception("Failed to fetch email templates: " . $db->error);
     }
-} else {
-    $errors[] = "Failed to fetch email templates: " . $db->error;
+} catch (Exception $e) {
+    $errors[] = $e->getMessage();
 }
 ?>
 

@@ -325,7 +325,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 FOREIGN KEY (share_id) REFERENCES social_shares(id) ON DELETE CASCADE
             )",
             // Add social sharing setting in settings table initialization
-            "INSERT INTO settings (name, value) VALUES ('social_sharing_enabled', '1')"
+            "INSERT INTO settings (name, value) VALUES ('social_sharing_enabled', '1')",
+            "CREATE TABLE IF NOT EXISTS email_templates (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                description TEXT,
+                content LONGTEXT NOT NULL,
+                created_by INT NOT NULL,
+                is_system BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )",
+            "CREATE TABLE IF NOT EXISTS media_library (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                file_name VARCHAR(255) NOT NULL,
+                file_path VARCHAR(255) NOT NULL,
+                file_type VARCHAR(50),
+                uploaded_by INT NOT NULL,
+                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )"
         ];
 
         foreach ($queries as $query) {
