@@ -124,15 +124,22 @@ $selectMode = isset($_GET['select']) && $_GET['select'] === '1';
 
 // Get all media files
 $media = [];
-$mediaResult = $db->query("
-    SELECT m.*, u.username as uploader_name 
-    FROM media_library m
-    LEFT JOIN users u ON m.uploaded_by = u.id
-    ORDER BY m.created_at DESC
-");
+try {
+    $mediaResult = $db->query("
+        SELECT m.*, u.username as uploader_name 
+        FROM media_library m
+        LEFT JOIN users u ON m.uploaded_by = u.id
+        ORDER BY m.created_at DESC
+    ");
+    if (!$mediaResult) {
+        throw new Exception("Failed to fetch media files: " . $db->error);
+    }
 
-while ($mediaResult && $row = $mediaResult->fetch_assoc()) {
-    $media[] = $row;
+    while ($row = $mediaResult->fetch_assoc()) {
+        $media[] = $row;
+    }
+} catch (Exception $e) {
+    die("Error: " . $e->getMessage());
 }
 ?>
 <!DOCTYPE html>

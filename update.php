@@ -978,9 +978,22 @@ if ($checkMediaLibrary->num_rows === 0) {
         file_path VARCHAR(255) NOT NULL,
         file_type VARCHAR(50),
         uploaded_by INT NOT NULL,
-        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        filename VARCHAR(255) NOT NULL,
+        filepath VARCHAR(255) NOT NULL,
+        filetype VARCHAR(50),
+        filesize INT NOT NULL,
+        dimensions VARCHAR(20) NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
     $dbUpdates[] = "Created media_library table.";
+} else {
+    // Add check for created_at column and add it if it doesn't exist
+    $checkCreatedAtColumn = $db->query("SHOW COLUMNS FROM media_library LIKE 'created_at'");
+    if ($checkCreatedAtColumn->num_rows === 0) {
+        $db->query("ALTER TABLE media_library ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+        $dbUpdates[] = "Added 'created_at' column to media_library table.";
+    }
 }
 
 ?>

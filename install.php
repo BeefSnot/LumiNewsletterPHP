@@ -342,7 +342,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
                 file_path VARCHAR(255) NOT NULL,
                 file_type VARCHAR(50),
                 uploaded_by INT NOT NULL,
-                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                filename VARCHAR(255) NOT NULL,
+                filepath VARCHAR(255) NOT NULL,
+                filetype VARCHAR(50),
+                filesize INT NOT NULL,
+                dimensions VARCHAR(20) NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )"
         ];
 
@@ -487,7 +493,13 @@ if ($current_step == 2 && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 file_path VARCHAR(255) NOT NULL,
                 file_type VARCHAR(50),
                 uploaded_by INT NOT NULL,
-                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                filename VARCHAR(255) NOT NULL,
+                filepath VARCHAR(255) NOT NULL,
+                filetype VARCHAR(50),
+                filesize INT NOT NULL,
+                dimensions VARCHAR(20) NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )"
         ];
 

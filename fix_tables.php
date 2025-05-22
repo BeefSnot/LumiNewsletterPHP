@@ -650,6 +650,17 @@ foreach ($queries as $query) {
     }
 }
 
+if (tableExists($db, 'media_library')) {
+    if (!columnExists($db, 'media_library', 'created_at')) {
+        $result = $db->query("ALTER TABLE media_library ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+        if ($result) {
+            $messages[] = "Added 'created_at' column to media_library table.";
+        } else {
+            $errors[] = "Failed to add 'created_at' column to media_library table: " . $db->error;
+        }
+    }
+}
+
 if (empty($errors)) {
     echo "All missing tables have been repaired successfully.";
 } else {
